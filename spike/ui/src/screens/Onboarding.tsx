@@ -15,7 +15,7 @@ export function OnboardRegion({ variant = 'location' }: { variant?: 'location' |
       <div className="relative px-6 pb-8">
         <p className="text-[13px] font-semibold tracking-wide text-moss-soft uppercase">Standkreis Dex</p>
         <h1 className="mt-1 text-[32px] leading-[1.1] font-bold">Alles, was vor deiner Haustür lebt.</h1>
-        <p className="mt-2 text-[16px] text-white/80">Lern es kennen. Find es draußen. Ohne Konto, ohne Punkte.</p>
+        <p className="mt-2 text-[16px] text-white/80">Lern es kennen. Find es draußen. Ohne Konto, ohne Rangliste.</p>
         <div className="mt-8">
           <p className="text-[13px] text-white/70">Wo gehst du spazieren?</p>
           {variant === 'location' ? (

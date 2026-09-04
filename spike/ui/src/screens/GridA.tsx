@@ -32,9 +32,6 @@ function Cell({ s, filling = false }: { s: Species; filling?: boolean }) {
         {(st === 'seen' || st === 'both') && photo && (
           <>
             <img src={photo.url} alt="" className="h-full w-full object-cover" loading="lazy" />
-            <span className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/55 to-transparent px-1.5 pt-3 pb-0.5 text-[8px] leading-tight text-white/85">
-              {s.state.userPhoto ? 'dein Foto' : `${photo.author.split(/[,(]/)[0].trim()} · ${photo.license}`}
-            </span>
           </>
         )}
         {filling && photo && <img src={photo.url} alt="" className="absolute inset-0 h-full w-full object-cover" />}
@@ -59,7 +56,7 @@ export default function GridA({ fill, hideBar = false }: { fill?: string; hideBa
       <div className="grid grid-cols-3 gap-x-3 gap-y-3 px-4">
         {order.map((s) => <Cell key={s.id} s={s} filling={s.id === fill} />)}
       </div>
-      <p className="px-4 pt-4 text-[11px] text-ink-faint">Graue Bilder: Wikimedia Commons und iNaturalist, Lizenz und Autor auf jeder Artseite. Farbig wird, was du findest.</p>
+      <p className="px-4 pt-4 text-[11px] text-ink-faint">Bilder: Wikimedia Commons und iNaturalist, Autor und Lizenz auf jeder Artseite. Farbig wird, was du entdeckst.</p>
       {!hideBar && <BottomBar />}
     </Screen>
   )

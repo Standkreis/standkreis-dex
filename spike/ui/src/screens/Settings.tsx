@@ -108,7 +108,7 @@ export function Settings() {
           <Row label="Open Source" value="GitHub" />
           <Row label="Version" value="0.1 · Spike" />
         </Group>
-        <p className="pb-2 text-center text-[12px] leading-snug text-ink-faint">Kein Konto, keine Punkte, keine Werbung. Kostenlos, für immer.</p>
+        <p className="pb-2 text-center text-[12px] leading-snug text-ink-faint">Kein Konto, keine Rangliste, keine Werbung. Kostenlos, für immer.</p>
       </div>
       <BottomBar active="you" />
     </Screen>

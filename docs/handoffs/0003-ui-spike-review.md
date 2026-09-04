@@ -4,7 +4,7 @@
 
 | 🗓️ Written | 👤 Owner | ⬆️ Parent | ⏱️ Budget |
 | --- | --- | --- | --- |
-| 2026-09-04 | Sven Reiser | [Handoff 0002](0002-ui-exploration-spike.md) · [Findings](0002-ui-exploration-findings.md) | 1 session, no new mocks · §🧪 run 2026-09-04 |
+| 2026-09-04 | Sven Reiser | [Handoff 0002](0002-ui-exploration-spike.md) · [Findings](0002-ui-exploration-findings.md) | 1 session, no new mocks · ✅ done 2026-09-04 |
 
 ---
 
@@ -83,30 +83,30 @@ Each "wrong if" from handoff 0002, plus the rules the spike added. Tick, or writ
 
 These are the review's real work. Each needs one of: confirm and record, or revert.
 
-| Decision | What the spike did | Needs |
-| --- | --- | --- |
-| Record Q8 "no XP, levels" | XP and levels on Du and Tagebuch, private, no leaderboard, once-a-month cap on repeats | 🙋 owner reaffirmed twice. Record addendum **Q8c** with the evidence split: competitive volume rewards vs private progression. Spec §⚖️ line on "no number goes up" rewritten |
-| Record Q8 "weekly with a freeze" | Freeze removed: nothing to protect without a streak | Record Q8 one-line amendment; spec §❓ drops "what freeze means" |
-| Spec §⚖️ "attribution on every image" | One caption per view: grid footer, photo caption, Quellen line per species page | Spec §⚖️ rewritten to "per image view", share-alike note for copied intros |
-| Handoff 0002 §6 "wrong if Missions tab" | Quests tab in slot two, now | Spec §🚶 says what the tab shows in slice one: three quests or a "kommt bald" line |
-| Spec "two counters" | "45 möglich" as denominator on header and profile | Doubts 2 and 41: keep as denominator, or drop. Decide, then the header counts the filter's set and Du counts the year |
-| Spec English, global | Mock is German | Doubt 5: German stays the mock language; the real app's i18n is a scaffold question |
+| Decision | What the spike did | Needs | ✅ Result (owner, 2026-09-04) |
+| --- | --- | --- | --- |
+| Record Q8 "no XP, levels" | XP and levels on Du and Tagebuch, private, no leaderboard, once-a-month cap on repeats | 🙋 owner reaffirmed twice. Record addendum **Q8c** with the evidence split: competitive volume rewards vs private progression. Spec §⚖️ line on "no number goes up" rewritten | Confirmed. Q8c written; spec §🚫 and §⚖️ rewritten; "ohne Punkte" → "ohne Rangliste" on onboarding, settings and quests |
+| Record Q8 "weekly with a freeze" | Freeze removed: nothing to protect without a streak | Record Q8 one-line amendment; spec §❓ drops "what freeze means" | Confirmed. Amendment written, spec §❓ updated |
+| Spec §⚖️ "attribution on every image" | One caption per view: grid footer, photo caption, Quellen line per species page | Spec §⚖️ rewritten to "per image view", share-alike note for copied intros | Confirmed. Rule rewritten, and the per-cell captions on found tiles dropped from the grid |
+| Handoff 0002 §6 "wrong if Missions tab" | Quests tab in slot two, now | Spec §🚶 says what the tab shows in slice one: three quests or a "kommt bald" line | "kommt bald". Q10 not widened; spec navigation says so |
+| Spec "two counters" | "45 möglich" as denominator on header and profile | Doubts 2 and 41: keep as denominator, or drop. Decide, then the header counts the filter's set and Du counts the year | Keep as denominator, per active filter (region, groups, month); Du per year |
+| Spec English, global | Mock is German | Doubt 5: German stays the mock language; the real app's i18n is a scaffold question | German and English in the app, i18n keys from the scaffold |
 
 ## ❓ Doubts the review must close
 
 Forty-six are on file. Most are ETL or later-slice notes. These block the spec rewrite:
 
-| Doubt | Question | Blocks |
-| --- | --- | --- |
-| 2, 41 | Is "möglich" a third counter, and is it September or the year | Header copy, spec §🧬 |
-| 13 | Landkreis in the UI, grid cell in the spec | Onboarding, every "Mainz-Bingen" |
-| 17, 29 | Exact point stored, shown as Gemeinde, never on a list | Spec §⚖️ wording |
-| 23, 25 | What makes "studiert" true when it is one tap | Species page action, quests, XP tariff |
-| 35 | XP without a record entry | Record Q8c |
-| 39 | Name and photo on an anonymous-first product | Du, Einstellungen › Profil |
-| 42 | Attribution per view | Spec §⚖️ |
-| 45 | Fill moment reshot grey → colour | §5 shot is stale |
-| 46 | "Wiederentdeckt" chip on every repeat | Tagebuch row |
+| Doubt | Question | Blocks | ✅ Answer (owner, 2026-09-04) |
+| --- | --- | --- | --- |
+| 2, 41 | Is "möglich" a third counter, and is it September or the year | Header copy, spec §🧬 | Denominator, not a score. Header and drawer count the active filter incl. month; Du counts the year |
+| 13 | Landkreis in the UI, grid cell in the spec | Onboarding, every "Mainz-Bingen" | Landkreis is the label, plausibility is the union of its cells |
+| 17, 29 | Exact point stored, shown as Gemeinde, never on a list | Spec §⚖️ wording | Ladder written into spec §⚖️: device exact · list Gemeinde · single sighting exact · map 10 km · share coarse |
+| 23, 25 | What makes "studiert" true when it is one tap | Species page action, quests, XP tariff | XP for studied only after the two-question recap; until then it earns nothing |
+| 35 | XP without a record entry | Record Q8c | Written under the record's §📎 |
+| 39 | Name and photo on an anonymous-first product | Du, Einstellungen › Profil | Optional, local only, never synced before a passkey, never shared |
+| 42 | Attribution per view | Spec §⚖️ | Rewritten; per-cell captions dropped from the grid |
+| 45 | Fill moment reshot grey → colour | §5 shot is stale | Reshot, closed |
+| 46 | "Wiederentdeckt" chip on every repeat | Tagebuch row | No chip on repeats |
 
 Everything else stays open in the findings and moves to the ETL or slice-two grills untouched.
 

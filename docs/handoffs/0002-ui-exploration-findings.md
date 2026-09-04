@@ -414,3 +414,23 @@ Routes: `#/grid/a`, `?bar=learn`, `?bar=five`. Same grid, three bars.
 | # | Doubt | Proposal |
 | --- | --- | --- |
 | 18 | **What is under "Du" in slice one?** No profile, no account | Counters, region and groups (the onboarding again), export JSON, delete everything, the passkey upgrade once offered. That is the acceptance criteria list, so it is enough for a tab and it is where the legal texts live |
+
+## ✅ Answered in review 0003 (owner, 2026-09-04)
+
+The doubts that blocked the spec rewrite, one line each. Everything not listed stays open and moves to the ETL or slice-two grills.
+
+| Doubt | Answer |
+| --- | --- |
+| 1, 42 | Attribution **per image view**. One sources line under the grid, caption on every readable image, Quellen line per species page, full author and licence on long-press. The per-cell captions on found tiles are dropped |
+| 2, 41 | "möglich" stays as the denominator, not a score. It counts the **active filter's set**: region, groups and Zeitraum, so 22 in September and 44 with "Ganzes Jahr". Du counts the year. Onboarding names the month |
+| 4 | Confirmed: month is a first-class filter, defaulting to now |
+| 5 | Mock stays German; the app ships German and English with i18n keys from the scaffold |
+| 13 | The Landkreis is the label the user picks and sees; plausibility is computed over the union of its cells. Cell size is the ETL grill's |
+| 17, 29 | The ladder: exact on the device, Gemeinde on every list, exact only on the single sighting, 10 km cell on the species map, coarse on share. Spec §⚖️ carries it |
+| 23, 25 | Studied earns XP only after the two-question recap. Until the recap exists, studied is one tap and earns nothing |
+| 35 | Record addendum Q8c written: XP private and capped, with the five rules as tests. The three "keine Punkte" lines became "keine Rangliste" |
+| 39 | Name and photo optional, local only, never in a sync payload before a passkey exists, never on a share card |
+| 45 | Closed: fill sheet reshot grey → colour |
+| 46 | No chip on repeats. Chips mark state changes only (Neu entdeckt, Studiert) |
+| Freeze | Removed, record Q8 amended |
+| Quests tab | Stays in slot two; slice one shows a single "kommt bald" line. Q10 is not widened |

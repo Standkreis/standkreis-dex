@@ -86,7 +86,7 @@ export function Quests() {
       </header>
       <div className="space-y-3 px-4">
         {walk ? <WalkPlan /> : QUESTS.map((q) => <QuestCard key={q.id} q={q} />)}
-        <p className="pt-1 text-[12px] leading-snug text-ink-faint">Quests werden montags aus deinem Dex erzeugt: was jetzt draußen ist, was womit zusammenhängt, was du studiert und entdeckt hast. Keine Punkte, keine Serie, kein Ort.</p>
+        <p className="pt-1 text-[12px] leading-snug text-ink-faint">Quests werden montags aus deinem Dex erzeugt: was jetzt draußen ist, was womit zusammenhängt, was du studiert und entdeckt hast. Keine Rangliste, keine Serie, kein Ort.</p>
         <section className="pt-3">
           <h2 className="mb-2 text-[15px] font-bold text-ink-soft">Letzte Woche</h2>
           <ul className="divide-y divide-ink/5 rounded-2xl bg-card px-3 shadow-sm ring-1 ring-ink/5">
