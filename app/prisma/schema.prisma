@@ -1,0 +1,204 @@
+// Spec 0001 §🧬: sightings are the atom, the dex is a view. Superset of spike/ui/src/types.ts (handoff 0004 S5).
+// "Seen 14 times, first in March" is derived from Sighting, never stored. Studied + seen per taxon are derived too.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ── Identity ──────────────────────────────────────────────────────────────────
+
+/// Anonymous first (record Q3). Minted on first request, bound to a cookie. A passkey or email attaches later.
+model Identity {
+  id          String     @id @default(uuid())
+  createdAt   DateTime   @default(now())
+  /// Passkey or email, optional. Null while anonymous.
+  credential  String?    @unique
+  /// Name and photo are optional, local only, never on a share card (spec §⚖️).
+  displayName String?
+  filter      Filter?
+  sightings   Sighting[]
+  studies     Study[]
+  assets      Asset[]
+}
+
+/// The global filter: region, groups, month. One per identity; set during onboarding.
+model Filter {
+  id         String   @id @default(uuid())
+  identity   Identity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  identityId String   @unique
+  /// GeoJSON geometry of the chosen region (union of the Landkreis' cells). Ordinary column, no PostGIS.
+  region     Json?
+  /// Human label, e.g. "Mainz-Bingen".
+  regionName String?
+  groups     Group[]
+  /// Zeitraum: true = ganzes Jahr, false = the current month.
+  wholeYear  Boolean  @default(false)
+  updatedAt  DateTime @updatedAt
+}
+
+// ── Species data (written by the ETL, M4) ─────────────────────────────────────
+
+enum Group {
+  bird
+  mammal
+  insect
+  plant
+  fungus
+  amphibian
+  reptile
+}
+
+/// One row per GBIF backbone taxon the app has touched.
+model Taxon {
+  id          String  @id @default(uuid())
+  gbifKey     Int     @unique
+  wikidataId  String? @unique
+  sciName     String
+  /// Common names per language, via Wikidata: { "de": "Amsel", "en": "Common Blackbird" }
+  commonNames Json    @default("{}")
+  rank        String
+  group       Group
+  /// IUCN category code (LC, NT, VU, EN, CR …), null when unknown.
+  iucn        String?
+  tags        String[] @default([])
+  /// Wikipedia intro: { text, source, licence }. CC BY-SA until rewritten from facts.
+  intro       Json?
+  /// Steckbrief facts: size, lifespan, reproduction, habitat, migration, sound, lookalikes. Each with its source.
+  facts       Json?
+  updatedAt   DateTime @updatedAt
+
+  assets        Asset[]
+  sightings     Sighting[]
+  studies       Study[]
+  plausibility  Plausibility[]
+  interactionsFrom Interaction[] @relation("source")
+  interactionsTo   Interaction[] @relation("target")
+}
+
+/// Occurrence density per grid cell and month. The threshold over obsCount is the curation.
+model Plausibility {
+  id       String @id @default(uuid())
+  taxon    Taxon  @relation(fields: [taxonId], references: [id], onDelete: Cascade)
+  taxonId  String
+  /// Grid cell key.
+  cell     String
+  /// 1–12, or 0 = any month.
+  month    Int
+  obsCount Int
+  /// gbif | inat
+  source   String
+
+  @@unique([taxonId, cell, month, source])
+  @@index([cell, month])
+}
+
+enum InteractionKind {
+  eats
+  eatenBy
+  pollinates
+  hostOf
+  parasiteOf
+  visitsFlowersOf
+}
+
+/// GloBI: the ecology section and, later, the quest generator.
+model Interaction {
+  id       String          @id @default(uuid())
+  source   Taxon           @relation("source", fields: [sourceId], references: [id], onDelete: Cascade)
+  sourceId String
+  target   Taxon           @relation("target", fields: [targetId], references: [id], onDelete: Cascade)
+  targetId String
+  kind     InteractionKind
+  /// Where the record came from, e.g. "GloBI".
+  origin   String
+
+  @@unique([sourceId, targetId, kind])
+}
+
+enum AssetKind {
+  image
+  sound
+}
+
+/// Every image and sound carries its licence and attribution (spec §🗄️ §⚖️). Reference assets belong to a taxon,
+/// user photos to a sighting.
+model Asset {
+  id         String    @id @default(uuid())
+  kind       AssetKind @default(image)
+  url        String
+  /// Rendered under every image view.
+  author     String
+  licence    String
+  licenceUrl String?
+  /// The page the asset was taken from (Commons file page, iNat observation, Xeno-canto recording).
+  sourceUrl  String
+  /// commons | inat | xeno-canto | user
+  origin     String
+  caption    String?
+  createdAt  DateTime  @default(now())
+
+  taxon      Taxon?    @relation(fields: [taxonId], references: [id], onDelete: Cascade)
+  taxonId    String?
+  sighting   Sighting? @relation(fields: [sightingId], references: [id], onDelete: Cascade)
+  sightingId String?
+  owner      Identity? @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId    String?
+
+  @@index([taxonId])
+}
+
+// ── The atom and the other axis ───────────────────────────────────────────────
+
+enum Evidence {
+  claimed
+  photographed
+  idAssisted
+}
+
+enum Wildness {
+  wild
+  captive
+  cultivated
+}
+
+/// Every encounter is a record; a species is discovered on its first wild sighting.
+model Sighting {
+  id         String   @id @default(uuid())
+  identity   Identity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  identityId String
+  taxon      Taxon    @relation(fields: [taxonId], references: [id])
+  taxonId    String
+  at         DateTime
+  /// Exact, stored on the device and here; coarsened on every list and on share (spec §⚖️).
+  lat        Float?
+  lng        Float?
+  /// Gemeinde label shown on lists.
+  place      String?
+  note       String?
+  evidence   Evidence @default(claimed)
+  /// Captive and cultivated sightings never fill the dex.
+  wildness   Wildness @default(wild)
+  createdAt  DateTime @default(now())
+  photos     Asset[]
+
+  @@index([identityId, at])
+  @@index([identityId, taxonId])
+}
+
+/// Marked studied. XP for it is paid only after the recap (record Q8c).
+model Study {
+  id          String   @id @default(uuid())
+  identity    Identity @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  identityId  String
+  taxon       Taxon    @relation(fields: [taxonId], references: [id])
+  taxonId     String
+  at          DateTime @default(now())
+  recapPassed Boolean  @default(false)
+
+  @@unique([identityId, taxonId])
+}

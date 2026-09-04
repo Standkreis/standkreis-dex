@@ -1,0 +1,14 @@
+name: standkreis-dex
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: dex
+      POSTGRES_PASSWORD: dex
+      POSTGRES_DB: dex
+    ports:
+      - "5433:5432"
+    volumes:
+      - dex-pg:/var/lib/postgresql/data
+volumes:
+  dex-pg:

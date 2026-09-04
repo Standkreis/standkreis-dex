@@ -1,0 +1,22 @@
+{
+  "app": {
+    "name": "Dex",
+    "description": "See what could be living around you right now, learn about it before you meet it, and fill the silhouette when you do."
+  },
+  "nav": {
+    "dex": "Dex",
+    "quests": "Quests",
+    "log": "Log",
+    "journal": "Journal",
+    "you": "You"
+  },
+  "common": {
+    "comingSoon": "coming soon",
+    "close": "Close"
+  },
+  "dex": { "title": "Your Dex" },
+  "quests": { "title": "Quests" },
+  "journal": { "title": "Journal" },
+  "you": { "title": "You" },
+  "log": { "title": "Log a sighting" }
+}

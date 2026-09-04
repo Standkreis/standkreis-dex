@@ -1,0 +1,42 @@
+/* The 15 colour tokens, ported verbatim from spike/ui/src/index.css.
+   Light is the default: the walk happens in sunlight. Dark follows the system; there is no toggle. */
+@theme {
+  --color-paper: #f5f2ea;
+  --color-card: #ffffff;          /* raised surfaces: search bar, bottom bar, cards */
+  --color-tile: #e7e2d6;
+  --color-ink: #1e2a23;
+  --color-ink-soft: #5b675f;
+  --color-ink-faint: #9aa39d;
+  --color-night: #1e2a23;         /* always dark: onboarding splash */
+  --color-moss: #16a34a;          /* primary, saturated: surfaces, badges, buttons */
+  --color-moss-deep: #15803d;     /* text on paper, AA contrast */
+  --color-moss-soft: #dcf5e3;
+  --color-amber: #b8701a;
+  --color-amber-soft: #f4e4c8;
+  --color-sky: #2563eb;           /* XP and level only: the third axis, personal progression */
+  --color-sky-deep: #1d4ed8;
+  --color-sky-soft: #dbeafe;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+:root { color-scheme: light; }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --color-paper: #121b16;
+    --color-card: #1b2621;
+    --color-tile: #243129;
+    --color-ink: #e9eee8;
+    --color-ink-soft: #a3aea6;
+    --color-ink-faint: #6d786f;
+    --color-moss: #22c55e;
+    --color-moss-deep: #4ade80;
+    --color-moss-soft: #17402a;
+    --color-amber: #e09a3a;
+    --color-amber-soft: #3b2a12;
+    --color-sky: #3b82f6;
+    --color-sky-deep: #60a5fa;
+    --color-sky-soft: #1a2e4d;
+  }
+}
