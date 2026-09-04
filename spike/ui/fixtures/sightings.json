@@ -1,0 +1,17 @@
+[
+  { "id": "j14", "kind": "find", "at": "2026-09-04T17:40", "species": "rubus-fruticosus", "place": "Ingelheim · Rheinufer", "photo": false, "note": "Erste reife Früchte an der Hecke", "evidence": "claimed", "wild": true },
+  { "id": "j13", "kind": "find", "at": "2026-09-04T17:25", "species": "turdus-merula", "place": "Ingelheim · Rheinufer", "photo": false, "note": "", "evidence": "claimed", "wild": true },
+  { "id": "j12", "kind": "find", "at": "2026-09-04T08:05", "species": "erithacus-rubecula", "place": "Bingen · Garten", "photo": false, "note": "singt schon wieder, Herbstgesang", "evidence": "claimed", "wild": true },
+  { "id": "j11", "kind": "find", "at": "2026-09-03T08:10", "species": "parus-major", "place": "Bingen · Garten", "photo": false, "note": "am Futterhaus", "evidence": "claimed", "wild": true },
+  { "id": "j10", "kind": "study", "at": "2026-09-03T21:30", "species": "quercus-robur" },
+  { "id": "j09", "kind": "find", "at": "2026-09-02T15:30", "species": "amanita-muscaria", "place": "Binger Wald", "photo": false, "note": "unter Fichten, drei Stück", "evidence": "claimed", "wild": true },
+  { "id": "j08", "kind": "find", "at": "2026-09-02T15:05", "species": "vanessa-atalanta", "place": "Binger Wald", "photo": true, "note": "auf dem Weg, ließ mich nah ran", "evidence": "photographed", "wild": true },
+  { "id": "j15", "kind": "find", "at": "2026-09-03T07:55", "species": "erithacus-rubecula", "place": "Bingen · Garten", "photo": false, "note": "", "evidence": "claimed", "wild": true },
+  { "id": "j07", "kind": "find", "at": "2026-09-02T07:50", "species": "erithacus-rubecula", "place": "Bingen · Garten", "photo": false, "note": "", "evidence": "claimed", "wild": true },
+  { "id": "j06", "kind": "find", "at": "2026-09-01T18:20", "species": "turdus-merula", "place": "Ingelheim · Park", "photo": true, "note": "♀ auf dem Zaun", "evidence": "photographed", "wild": true },
+  { "id": "j05", "kind": "find", "at": "2026-09-01T18:00", "species": "sciurus-vulgaris", "place": "Ingelheim · Park", "photo": false, "note": "", "evidence": "claimed", "wild": true },
+  { "id": "j04", "kind": "find", "at": "2026-09-01T17:45", "species": "urtica-dioica", "place": "Ingelheim · Park", "photo": false, "note": "", "evidence": "claimed", "wild": true },
+  { "id": "j03", "kind": "study", "at": "2026-09-01T21:10", "species": "milvus-milvus" },
+  { "id": "j02", "kind": "study", "at": "2026-08-31T20:40", "species": "vespa-crabro" },
+  { "id": "j01", "kind": "study", "at": "2026-08-30T19:15", "species": "buteo-buteo" }
+]

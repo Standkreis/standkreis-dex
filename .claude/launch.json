@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "ui-spike",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "spike/ui", "run", "dev"],
+      "port": 5199
+    }
+  ]
+}
