@@ -4,7 +4,7 @@
 
 | 🗓️ Updated | 👤 Owner | ➡️ Next |
 | --- | --- | --- |
-| 2026-09-05 | Sven Reiser | M8 (offline), handoff 0009 to be written |
+| 2026-09-05 | Sven Reiser | M8 (offline), [handoff 0009](handoffs/0009-offline.md) |
 
 ## 📍 Milestones
 
@@ -19,7 +19,7 @@
 | M6 | 🔍 Log + fill | 1 | Chooser, backbone search, wild/captive save, fill sheet, Tagebuch by day, E13 for species outside the set, "Entdeckt" on the species page | M5 | ✅ 2026-09-05, [findings 0008](handoffs/0008-log-and-journal-findings.md) |
 | M7 | 🔐 Identity + data | 1 | Anonymous id, passkey/email sync, export JSON, delete, Du with counters and settings | M2 | ✅ 2026-09-05, [findings 0006](handoffs/0006-etl-and-identity-findings.md) |
 | M7b | ✉️ Email attach | 1 | Verify an address through **Resend** (EU region), magic link adopts the identity like a passkey does, second recovery path. Needs the production domain for DKIM and the passkey relying-party id | M7, domain | owner's call 2026-09-05: Resend |
-| M8 | 📴 Offline | 1 | Atlas for the active filter opens with no network, sightings queue and sync | M5, M7 | ➡️ next |
+| M8 | 📴 Offline | 1 | Atlas for the active filter opens with no network, sightings queue and sync | M5, M7 | ➡️ next, [handoff 0009](handoffs/0009-offline.md) |
 | M9 | 🚶 The first walk | 1 | The owner uses it on one walk and opens it again the next day | M6, M8 | |
 | M10 | 🔥 Quest + recap grill | 2 | Generator rules, repeat avoidance, the two-question recap, XP curve | M9 | |
 | M11 | 🧭 Quests + recap + XP | 2 | Three weekly quests, recap unlocks studied XP, Du with level, "kommt bald" replaced | M10, M4 data | |
