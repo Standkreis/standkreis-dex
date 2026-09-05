@@ -12,89 +12,161 @@ datasource db {
 
 // ── Identity ──────────────────────────────────────────────────────────────────
 
-/// Anonymous first (record Q3). Minted on first request, bound to a cookie. A passkey or email attaches later.
+/// Anonymous first (record Q3). Minted on first request, bound to a cookie. Passkeys attach later (handoff 0006).
+/// Deletion is a hard cascade: no deletedAt.
 model Identity {
   id          String     @id @default(uuid())
   createdAt   DateTime   @default(now())
-  /// Passkey or email, optional. Null while anonymous.
-  credential  String?    @unique
+  /// Reserved for a magic-link attach; unused in M7 (no mail provider).
+  email       String?    @unique
   /// Name and photo are optional, local only, never on a share card (spec §⚖️).
   displayName String?
+  passkeys    Passkey[]
   filter      Filter?
   sightings   Sighting[]
   studies     Study[]
   assets      Asset[]
 }
 
-/// The global filter: region, groups, month. One per identity; set during onboarding.
+/// One WebAuthn credential per device. Anonymous = zero rows; "Auf N Geräten" = N rows.
+model Passkey {
+  id           String    @id @default(uuid())
+  identity     Identity  @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  identityId   String
+  /// Base64url credential id as the authenticator reports it.
+  credentialId String    @unique
+  publicKey    Bytes
+  counter      Int       @default(0)
+  transports   String[]  @default([])
+  deviceName   String?
+  createdAt    DateTime  @default(now())
+  lastUsedAt   DateTime?
+
+  @@index([identityId])
+}
+
+/// The global filter: region, tiles, the "nur jetzt" chip. One per identity; set during onboarding.
+/// The month is a sort, never membership (record 0002 E2): no Zeitraum here.
 model Filter {
   id         String   @id @default(uuid())
   identity   Identity @relation(fields: [identityId], references: [id], onDelete: Cascade)
   identityId String   @unique
-  /// GeoJSON geometry of the chosen region (union of the Landkreis' cells). Ordinary column, no PostGIS.
-  region     Json?
-  /// Human label, e.g. "Mainz-Bingen".
-  regionName String?
-  groups     Group[]
-  /// Zeitraum: true = ganzes Jahr, false = the current month.
-  wholeYear  Boolean  @default(false)
+  region     Region?  @relation(fields: [regionId], references: [id])
+  regionId   String?
+  tiles      Tile[]
+  /// Chip "nur jetzt": share ≥ 25 % of peak this month. Off by default.
+  nowOnly    Boolean  @default(false)
   updatedAt  DateTime @updatedAt
 }
 
 // ── Species data (written by the ETL, M4) ─────────────────────────────────────
 
-enum Group {
+/// Eight tiles from GBIF ranks (record 0002 E5, E12). 🐟 is stored for every region and hidden when the set has none.
+enum Tile {
   bird
   mammal
+  amphibian
+  reptile
+  fish
   insect
   plant
   fungus
-  amphibian
-  reptile
 }
 
-/// One row per GBIF backbone taxon the app has touched.
+enum RegionStatus {
+  queued
+  ready
+  failed
+}
+
+/// One GADM level-2 polygon (Landkreis, city, county). No grid, no geometry column (record 0002 E1).
+model Region {
+  id          String       @id @default(uuid())
+  /// GBIF's gadmGid, e.g. "DEU.11.19_1".
+  gadmGid     String       @unique
+  name        String
+  /// country › state, e.g. "Deutschland › Rheinland-Pfalz".
+  higher      String
+  /// All observations per month, 12 entries; the denominator of every month share.
+  monthTotals Int[]        @default([])
+  status      RegionStatus @default(queued)
+  /// The last failed facet's message; null when ready.
+  error       String?
+  refreshedAt DateTime?
+  createdAt   DateTime     @default(now())
+
+  plausibility Plausibility[]
+  lookalikes   Lookalike[]
+  filters      Filter[]
+}
+
+/// One row per GBIF backbone taxon the app has touched: set members and species logged outside every set (E13).
 model Taxon {
-  id          String  @id @default(uuid())
-  gbifKey     Int     @unique
-  wikidataId  String? @unique
+  id          String    @id @default(uuid())
+  gbifKey     Int       @unique
+  wikidataId  String?   @unique
   sciName     String
-  /// Common names per language, via Wikidata: { "de": "Amsel", "en": "Common Blackbird" }
-  commonNames Json    @default("{}")
+  /// Common names per language: { "de": "Amsel", "en": "Common Blackbird" }. German from the dewiki title (E6).
+  commonNames Json      @default("{}")
   rank        String
-  group       Group
+  tile        Tile
+  /// GBIF ranks the tile was derived from; genus drives look-alikes (E10).
+  class       String?
+  order       String?
+  genus       String?
   /// IUCN category code (LC, NT, VU, EN, CR …), null when unknown.
   iucn        String?
-  tags        String[] @default([])
-  /// Wikipedia intro: { text, source, licence }. CC BY-SA until rewritten from facts.
+  tags        String[]  @default([])
+  /// Wikipedia intro: { text, lang, source, licence }. de → en → null. CC BY-SA until rewritten from facts (E8).
   intro       Json?
-  /// Steckbrief facts: size, lifespan, reproduction, habitat, migration, sound, lookalikes. Each with its source.
+  /// Steckbrief: size, lifespan, reproduction, migration, sound. Each with its source. No habitat (E8).
   facts       Json?
-  updatedAt   DateTime @updatedAt
+  /// How the Wikidata item was found: P846 | name | none.
+  namePath    String?
+  /// Set when the content job has run for this taxon; never expires, purge only.
+  contentAt   DateTime?
+  updatedAt   DateTime  @updatedAt
 
-  assets        Asset[]
-  sightings     Sighting[]
-  studies       Study[]
-  plausibility  Plausibility[]
-  interactionsFrom Interaction[] @relation("source")
-  interactionsTo   Interaction[] @relation("target")
+  assets           Asset[]
+  sightings        Sighting[]
+  studies          Study[]
+  plausibility     Plausibility[]
+  lookalikes       Lookalike[]    @relation("lookalikeOf")
+  lookalikeSibling Lookalike[]    @relation("lookalikeSibling")
+  interactionsFrom Interaction[]  @relation("source")
+  interactionsTo   Interaction[]  @relation("target")
 }
 
-/// Occurrence density per grid cell and month. The threshold over obsCount is the curation.
+/// Membership in a region's set, whole year, cut per tile (record 0002 E2, E3). GBIF alone.
 model Plausibility {
-  id       String @id @default(uuid())
-  taxon    Taxon  @relation(fields: [taxonId], references: [id], onDelete: Cascade)
-  taxonId  String
-  /// Grid cell key.
-  cell     String
-  /// 1–12, or 0 = any month.
-  month    Int
-  obsCount Int
-  /// gbif | inat
-  source   String
+  id         String @id @default(uuid())
+  taxon      Taxon  @relation(fields: [taxonId], references: [id], onDelete: Cascade)
+  taxonId    String
+  region     Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  regionId   String
+  /// Observations over the whole window (last ten years).
+  obs        Int
+  /// Share of the region's observations per month, 12 entries, per mille.
+  monthShare Int[]
+  /// The largest month share; nowRatio = monthShare[m] ÷ peak is derived.
+  peak       Int
+  /// "Ganzes Jahr" · "Mär–Okt" · "Feb · Okt–Dez".
+  words      String
 
-  @@unique([taxonId, cell, month, source])
-  @@index([cell, month])
+  @@unique([taxonId, regionId])
+  @@index([regionId])
+}
+
+/// Same genus within the region's set (record 0002 E10). Both directions are stored.
+model Lookalike {
+  taxon     Taxon  @relation("lookalikeOf", fields: [taxonId], references: [id], onDelete: Cascade)
+  taxonId   String
+  region    Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  regionId  String
+  sibling   Taxon  @relation("lookalikeSibling", fields: [siblingId], references: [id], onDelete: Cascade)
+  siblingId String
+
+  @@id([taxonId, regionId, siblingId])
 }
 
 enum InteractionKind {
@@ -106,7 +178,7 @@ enum InteractionKind {
   visitsFlowersOf
 }
 
-/// GloBI: the ecology section and, later, the quest generator.
+/// GloBI, pruned to six kinds; preysOn folds into eats at import (record 0002 E9). The ecology section and, later, the quest generator.
 model Interaction {
   id       String          @id @default(uuid())
   source   Taxon           @relation("source", fields: [sourceId], references: [id], onDelete: Cascade)
