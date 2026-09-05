@@ -105,7 +105,8 @@ M4 filled the tables and M7 made the identity durable. Nothing on screen uses ei
 
 - **Sort options.** The drawer mock shows "Jetzt draußen zuerst". Proposal: Jetzt wahrscheinlich · Name · Zuletzt entdeckt, nothing else in slice one.
 - **Splash photo.** One Commons photo with caption, chosen once. Proposal: a Mainz-Bingen species with a CC BY photo from the seed, picked by the owner from three candidates the agent shows.
-- **In-process region job.** Fine for one owner on one laptop; not fine on a host that sleeps. Accepted for M5, M8 replaces it.
+- **In-process region job.** Fine for one owner on one laptop; not fine on a host that sleeps. Accepted for M5, M8 replaces it. **Owner, 2026-09-05: no new regions until the full loop is closed.** Mainz-Bingen and Kyoto only; unknown regions show as not yet available; C2 deferred.
+- **Splash photo (owner, 2026-09-05):** Grünspecht, Andrea Poggi, CC BY 4.0. Tile counts read "{n} Arten" without "hier".
 
 ## 🚫 Not in this handoff
 
