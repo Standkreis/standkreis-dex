@@ -6,7 +6,7 @@ import { Link, usePathname } from '@/i18n/navigation'
 import { Icon, type IconName } from './Marks'
 import { LogSheet } from './LogSheet'
 
-// Spec §🎨 6: Atlas · Quests · ＋ · Tagebuch · Du. Four destinations and the centred action.
+// Spec §🎨 6: Atlas · Quests · ＋ · Tagebuch · Du. Four destinations and the centred action, which opens the chooser (spec §🎨 4).
 // The bar is a card-coloured slab with rounded top corners; the ＋ sits with its centre on the top edge, in a paper-coloured cradle.
 const tabs = [
   { id: 'dex', href: '/', icon: 'grid' },

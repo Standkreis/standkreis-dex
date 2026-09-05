@@ -10,6 +10,7 @@ import { useTRPC } from '@/trpc/client'
 import { allTiles, countersOf, CountersBar, useAtlasSet } from './AtlasCounters'
 import { search } from './AtlasSearch'
 import { FilterDrawer, SHOWS, SORTS, type Show, type Sort } from './FilterDrawer'
+import { FillSheet, Toast } from './Fill'
 import { Icon } from './Marks'
 import { OnboardingSilhouette } from './OnboardingSilhouette'
 
@@ -34,13 +35,24 @@ export function AtlasGrid({ title }: { title: string }) {
   const regions = useQuery(trpc.dex.regions.queryOptions(undefined, { enabled: region?.status === 'failed' }))
   const retry = useMutation(trpc.dex.requestRegion.mutationOptions({ onSuccess: () => qc.invalidateQueries({ queryKey: trpc.identity.me.queryKey() }) }))
 
-  const { ready, set, progress, tiles, loading } = useAtlasSet(region)
+  const { ready, set, progress: progressRaw, tiles, loading } = useAtlasSet(region)
+
+  // ── URL state: ?show ?sort ?now ?q, plus ?fill / ?again from the save screen ──
+  const params = useSearchParams()
+  const fillId = params.get('fill')
+  const againId = params.get('again')
+  // The fill moment (spec §🎨 5): the cell is drawn grey until the sweep, so the progress hides the taxon in phase "pre".
+  const fill = useQuery(trpc.sighting.fill.queryOptions({ id: fillId ?? againId ?? '' }, { enabled: !!(fillId ?? againId), staleTime: Infinity }))
+  // The phase is keyed by the sighting id, so a new ?fill starts at "pre" without a resetting effect.
+  const [fillDone, setFillDone] = useState<string | null>(null)
+  const fillPhase: 'pre' | 'done' = fillId && fillDone === fillId ? 'done' : 'pre'
+  const [tick, setTick] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
+  const hidden = fillId && fillPhase === 'pre' ? fill.data?.taxon.id : undefined
+  const progress = useMemo(() => (progressRaw && hidden ? { ...progressRaw, seen: progressRaw.seen.filter((id) => id !== hidden) } : progressRaw), [progressRaw, hidden])
   const studied = useMemo(() => new Set(progress?.studied ?? []), [progress])
   const seen = useMemo(() => new Set(progress?.seen ?? []), [progress])
   const counters = countersOf(set, progress, tiles)
-
-  // ── URL state: ?show ?sort ?now ?q ─────────────────────────────────────────
-  const params = useSearchParams()
   const show = (SHOWS as string[]).includes(params.get('show') ?? '') ? (params.get('show') as Show) : 'all'
   const sort = (SORTS as string[]).includes(params.get('sort') ?? '') ? (params.get('sort') as Sort) : 'now'
   const nowOnly = params.get('now') === '1'
@@ -52,6 +64,8 @@ export function AtlasGrid({ title }: { title: string }) {
     // A plain replaceState with no Next state object: the router notices it and useSearchParams follows (Next ≥ 14.1).
     window.history.replaceState(null, '', `${window.location.pathname}${qs ? `?${qs}` : ''}`)
   }, [])
+
+  const name = useCallback((s: { names: Record<string, string>; sciName: string }) => s.names[locale] ?? s.names.de ?? s.names.en ?? s.sciName, [locale])
 
   // ── Tiles: the identity's Filter, written at once, read back through identity.progress ──
   const setFilter = useMutation(trpc.identity.setFilter.mutationOptions({ onSettled: () => qc.invalidateQueries({ queryKey: trpc.identity.progress.queryKey() }) }))
@@ -68,8 +82,33 @@ export function AtlasGrid({ title }: { title: string }) {
     writeTiles(allTiles.filter((y) => next.has(y)))
   }
 
+  // ── The fill: wait for the fresh progress, switch the tile on if it was off (doubt 14), scroll, sweep after 350 ms ──
+  const fillTaxon = fillId && fill.data && progressRaw?.seen.includes(fill.data.taxon.id) ? fill.data.taxon : null
+  const fillTileOff = !!fillTaxon && tilesShown.some((x) => x.tile === fillTaxon.tile) && !tilesOn.has(fillTaxon.tile as Tile)
+  useEffect(() => {
+    if (fillTileOff && fillTaxon) writeTiles(allTiles.filter((y) => tilesOn.has(y) || y === fillTaxon.tile))
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- writeTiles is rebuilt every render; the tile switch runs once per fill
+  }, [fillTileOff])
+  useEffect(() => {
+    if (!fillTaxon || fillTileOff || fillPhase !== 'pre') return
+    const el = document.querySelector(`[data-taxon="${fillTaxon.id}"]`)
+    el?.scrollIntoView({ block: 'center' })
+    const h = setTimeout(() => {
+      setFillDone(fillId)
+      setTick(true)
+      navigator.vibrate?.(30)
+    }, el ? 350 : 0)
+    return () => clearTimeout(h)
+  }, [fillTaxon, fillTileOff, fillPhase, fillId])
+  useEffect(() => { if (tick) { const h = setTimeout(() => setTick(false), 1600); return () => clearTimeout(h) } }, [tick])
+  // A repeat (doubt 12): the quiet toast, derived from ?again; the param is dropped when the toast goes.
+  const tf = useTranslations('fill')
+  const tl = useTranslations('log')
+  const againToast = againId && fill.data ? tf('again', { name: name(fill.data.taxon) }) : null
+  const shownToast = toast ?? againToast
+  const toastDone = useCallback(() => { setToast(null); if (againId) setParams({ again: null }) }, [againId, setParams])
+
   // ── The visible species: tiles → chip → state → sort → search ──────────────
-  const name = useCallback((s: Species) => s.names[locale] ?? s.names.de ?? s.names.en ?? s.sciName, [locale])
   const visible = useMemo(() => {
     if (!set || !progress) return []
     let list = set.species.filter((s) => tilesOn.has(s.tile))
@@ -122,7 +161,8 @@ export function AtlasGrid({ title }: { title: string }) {
             <p className="shrink-0 text-[15px]" data-testid="counters">
               <span className="font-bold text-amber">{t('studied', { n: counters.studied })}</span>
               <span className="text-ink-soft"> · </span>
-              <span className="font-bold text-moss-deep">{t('seen', { n: counters.seen })}</span>
+              <span className={`inline-block font-bold text-moss-deep ${tick ? 'animate-[fill-tick_500ms_ease-out] rounded-md bg-moss-soft px-1' : ''}`} data-testid="seen-count">{t('seen', { n: counters.seen })}</span>
+              {tick && <span className="ml-1 inline-block rounded-full bg-moss px-1.5 text-[12px] font-bold text-white" data-testid="plus-one">{tf('plusOne')}</span>}
               <span className="text-ink-soft"> · {t('possible', { n: counters.possible })}</span>
             </p>
           </div>
@@ -138,7 +178,7 @@ export function AtlasGrid({ title }: { title: string }) {
             <p className="mt-6 text-center text-[15px] text-ink-soft" data-testid="empty">{query.trim() ? t('noMatch', { q: query.trim() }) : t('empty')}</p>
           ) : (
             <ul className="mt-4 grid grid-cols-3 gap-2" data-testid="grid">
-              {visible.map((s) => <Cell key={s.taxonId} s={s} name={name(s)} isSeen={seen.has(s.taxonId)} isStudied={studied.has(s.taxonId)} badge={t('studiedBadge')} />)}
+              {visible.map((s) => <Cell key={s.taxonId} s={s} name={name(s)} isSeen={seen.has(s.taxonId)} isStudied={studied.has(s.taxonId)} badge={t('studiedBadge')} fill={fill.data?.taxon.id === s.taxonId && fillId ? fillPhase : null} />)}
             </ul>
           )}
           <p className="mt-4 text-[12px] text-ink-faint">{t('sources')}</p>
@@ -154,6 +194,10 @@ export function AtlasGrid({ title }: { title: string }) {
               onToggleTile={toggleTile} onShow={(s) => setParams({ show: s === 'all' ? null : s })} onSort={(s) => setParams({ sort: s === 'now' ? null : s })}
               onNowOnly={(on) => setParams({ now: on ? '1' : null })} onReset={reset} />
           )}
+          {fillId && fillPhase === 'done' && fill.data && (
+            <FillSheet s={fill.data} onClose={() => setParams({ fill: null })} onPhoto={() => setToast(tl('photoSoon'))} />
+          )}
+          {shownToast && <Toast key={shownToast} text={shownToast} onDone={toastDone} />}
         </>
       )}
       {loading && <p className="mt-3 text-[15px] text-ink-soft">{tc('working')}</p>}
@@ -173,14 +217,15 @@ function FilterButton({ count, label, onClick, className, style, testId }: { cou
 
 // One cell, three states (findings 0002 revision 3): not yet = greyscale 45 %, studied = greyscale 70 % with an amber
 // inset ring and the book, discovered = colour with the check. Species without an image show the group silhouette.
-function Cell({ s, name, isSeen, isStudied, badge }: { s: Species; name: string; isSeen: boolean; isStudied: boolean; badge: string }) {
+// `fill` = the cell of the fill moment: "pre" is drawn grey with the transition armed, "done" sweeps to colour over 400 ms under a green ring.
+function Cell({ s, name, isSeen, isStudied, badge, fill }: { s: Species; name: string; isSeen: boolean; isStudied: boolean; badge: string; fill: 'pre' | 'done' | null }) {
   return (
-    <li className="min-w-0">
+    <li className="min-w-0" data-taxon={s.taxonId} data-fill={fill ?? undefined}>
       <Link href={`/species/${s.gbifKey}`} className="block">
-        <div className={`relative aspect-square overflow-hidden rounded-2xl bg-tile ${isStudied && !isSeen ? 'ring-2 ring-amber ring-inset' : ''}`}>
+        <div className={`relative aspect-square overflow-hidden rounded-2xl bg-tile ${isStudied && !isSeen ? 'ring-2 ring-amber ring-inset' : ''} ${fill === 'done' ? 'ring-[3px] ring-moss' : ''}`}>
           {s.lead ? (
             // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser
-            <img src={s.lead.url} alt="" loading="lazy" className={`h-full w-full object-cover ${isSeen ? '' : isStudied ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />
+            <img src={s.lead.url} alt="" loading="lazy" className={`h-full w-full object-cover ${fill ? 'transition-[filter,opacity] duration-[400ms] ease-out' : ''} ${isSeen ? '' : isStudied ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />
           ) : (
             <OnboardingSilhouette tile={s.tile} className="h-full w-full p-6 text-ink-faint opacity-60" />
           )}

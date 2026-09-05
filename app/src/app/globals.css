@@ -3,3 +3,7 @@
 
 html, body { height: 100%; }
 body { background: var(--color-paper); color: var(--color-ink); -webkit-font-smoothing: antialiased; }
+
+/* The fill moment (spec §🎨 5): the sheet and the toast slide up; the counter ticks once. */
+@keyframes fill-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
+@keyframes fill-tick { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }

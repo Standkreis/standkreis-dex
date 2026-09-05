@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { InteractionKind } from '@/generated/prisma/enums'
-import { get, q } from '../../../etl/fetch'
+import { get, q, UA } from '../../../etl/fetch'
 import { gbifSpecies } from '../../../etl/gbif'
 import { isNow, nowRatio, perMille, tileOf } from '../../../etl/rules'
 import { publicProcedure, router } from '../trpc'
@@ -8,7 +8,18 @@ import { publicProcedure, router } from '../trpc'
 const thisMonth = () => new Date().getMonth() + 1
 // A card on the species page (look-alike, ecology chip) carries its first image, greyscaled by dex state (handoff 0007 Track B).
 const taxonCard = { id: true, gbifKey: true, sciName: true, commonNames: true, tile: true, contentAt: true, assets: { where: { kind: 'image' }, orderBy: { createdAt: 'asc' }, take: 1, select: { url: true } } } as const
-const ensureSelect = { id: true, gbifKey: true, sciName: true, commonNames: true, tile: true, contentAt: true } as const
+const ensureSelect = { id: true, gbifKey: true, sciName: true, commonNames: true, tile: true, contentAt: true, assets: { where: { kind: 'image', sightingId: null }, orderBy: { createdAt: 'asc' }, take: 1, select: { url: true } } } as const
+const BACKBONE = 'd7dddbf4-2cf0-4f39-9b2a-bb099caae36c'
+type SearchHit = { key: number; nubKey?: number; canonicalName?: string; rank?: string; vernacularNames?: { vernacularName: string; language?: string }[] }
+/** One GBIF `species/search` call, uncached: a typed query is new every time. Empty on any failure. */
+const gbifSearch = async (params: Record<string, string | number>) => {
+  try {
+    const r = await fetch(`https://api.gbif.org/v1/species/search?${q({ ...params })}`, { headers: { 'User-Agent': UA }, signal: AbortSignal.timeout(6000) })
+    return r.ok ? ((await r.json()) as { results: SearchHit[] }).results : []
+  } catch {
+    return []
+  }
+}
 type Card = { id: string; gbifKey: number; sciName: string; commonNames: unknown; tile: string; assets: { url: string }[] }
 const card = (t: Card) => ({ id: t.id, gbifKey: t.gbifKey, sciName: t.sciName, names: t.commonNames as Record<string, string>, tile: t.tile, lead: t.assets[0]?.url ?? null })
 
@@ -90,7 +101,7 @@ export const taxonRouter = router({
    */
   ensure: publicProcedure.input(z.object({ gbifKey: z.number().int() })).mutation(async ({ ctx, input }) => {
     const existing = await ctx.db.taxon.findUnique({ where: { gbifKey: input.gbifKey }, select: ensureSelect })
-    if (existing) return { ...existing, created: false }
+    if (existing) return { ...existing, lead: existing.assets[0]?.url ?? null, created: false }
     const s = await gbifSpecies(input.gbifKey)
     if (!s) throw new Error(`GBIF has no taxon ${input.gbifKey}`)
     const tile = tileOf(s)
@@ -99,6 +110,50 @@ export const taxonRouter = router({
       data: { gbifKey: s.key, sciName: s.canonicalName ?? s.scientificName ?? String(s.key), rank: (s.rank ?? 'SPECIES').toLowerCase(), tile, class: s.class ?? null, order: s.order ?? null, genus: s.genus ?? null },
       select: ensureSelect,
     })
-    return { ...created, created: true }
+    return { ...created, lead: null, created: true }
+  }),
+
+  /**
+   * The backbone for the log's typed search (handoff 0008 Track A). Two GBIF calls: vernacular names over every checklist
+   * dataset folded to the backbone key (`nubKey`), because the backbone's own vernaculars are thin ("Eichenprozessionsspinner"
+   * is not among them), plus scientific names in the backbone itself (rank SPECIES, status ACCEPTED). Each key is then
+   * read through the cached `species/{key}` for its ranks; keys that fit no tile drop. Ten rows, vernacular hits first.
+   */
+  search: publicProcedure.input(z.object({ q: z.string().trim().min(2).max(80), locale: z.enum(['de', 'en']) })).query(async ({ input }) => {
+    const query = input.q
+    const [vern, sci] = await Promise.all([
+      gbifSearch({ q: query, qField: 'VERNACULAR', limit: 40 }),
+      gbifSearch({ q: query, qField: 'SCIENTIFIC', datasetKey: BACKBONE, rank: 'SPECIES', status: 'ACCEPTED', limit: 10 }),
+    ])
+    // Fold the vernacular hits by backbone key; the more checklists agree, the higher the row.
+    const folded = new Map<number, { hits: number; names: Record<string, Set<string>> }>()
+    for (const h of vern) {
+      const key = h.nubKey ?? (h.key && sci.some((s) => s.key === h.key) ? h.key : undefined)
+      if (!key) continue
+      const f = folded.get(key) ?? { hits: 0, names: { de: new Set(), en: new Set() } }
+      f.hits++
+      for (const v of h.vernacularNames ?? []) { const lang = v.language === 'deu' ? 'de' : v.language === 'eng' ? 'en' : null; if (lang) f.names[lang].add(v.vernacularName) }
+      folded.set(key, f)
+    }
+    const order = [...[...folded.entries()].sort((a, b) => b[1].hits - a[1].hits).map(([k]) => k), ...sci.map((s) => s.key)]
+    const keys = [...new Set(order)].slice(0, 14)
+    const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+    const pick = (set: Set<string> | undefined) => { const all = [...(set ?? [])]; return all.find((n) => fold(n).includes(fold(query))) ?? all[0] ?? null }
+    const rows = await Promise.all(
+      keys.map(async (key) => {
+        const s = await gbifSpecies(key)
+        if (!s || (s.rank && s.rank !== 'SPECIES')) return null
+        const tile = tileOf(s)
+        if (!tile) return null
+        const f = folded.get(key)
+        const names: Record<string, string> = {}
+        const de = pick(f?.names.de), en = pick(f?.names.en)
+        if (de) names.de = de
+        if (en) names.en = en
+        for (const v of sci.find((x) => x.key === key)?.vernacularNames ?? []) { if (v.language === 'deu' && !names.de) names.de = v.vernacularName; if (v.language === 'eng' && !names.en) names.en = v.vernacularName }
+        return { gbifKey: key, sciName: s.canonicalName ?? s.scientificName ?? String(key), names, tile }
+      }),
+    )
+    return rows.filter((r): r is NonNullable<typeof r> => !!r).slice(0, 10)
   }),
 })
