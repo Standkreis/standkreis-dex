@@ -11,6 +11,7 @@ import { Icon, SeenMark, StudiedMark } from './Marks'
 import { EcologyChip, LookalikeCard, tileIcon, type Card, type DexState } from './SpeciesCard'
 import { SpeciesMap } from './SpeciesMap'
 import { SpeciesSlider } from './SpeciesSlider'
+import { enqueue, flush, type Lead } from './Queue'
 
 const FACT_KEYS = ['size', 'lifespan', 'reproduction', 'migration', 'status', 'sound'] as const
 const FACT_ICONS: Record<(typeof FACT_KEYS)[number], string> = { size: '📏', lifespan: '⏳', reproduction: '🥚', migration: '🧭', status: '🏷️', sound: '🎵' }
@@ -26,6 +27,7 @@ const MONTHS_EN: Record<string, string> = { Mär: 'Mar', Mai: 'May', Okt: 'Oct',
  */
 export function SpeciesPage() {
   const t = useTranslations('species')
+  const to = useTranslations('offline')
   const tc = useTranslations('common')
   const tl = useTranslations('log')
   const locale = useLocale()
@@ -42,18 +44,28 @@ export function SpeciesPage() {
   const progress = useQuery(trpc.identity.progress.queryOptions())
   const centre = useQuery(trpc.taxon.mapCentre.queryOptions({ regionId: region?.id ?? '' }, { enabled: !!region, staleTime: Infinity }))
   const invalidate = () => qc.invalidateQueries({ queryKey: trpc.identity.progress.queryKey() })
-  const mark = useMutation(trpc.study.mark.mutationOptions({ onSuccess: invalidate }))
+  const [marking, setMarking] = useState(false)
+  // Study marks go through the outbox (handoff 0009 B): offline the button flips at once, the flush lands the row.
+  const mark = async (taxon: { id: string; gbifKey: number; sciName: string; names: Record<string, string>; tile: string; lead: Lead }) => {
+    setMarking(true)
+    try {
+      await enqueue({ id: crypto.randomUUID(), kind: 'study', payload: { taxonId: taxon.id, taxon } })
+      qc.setQueryData(trpc.identity.progress.queryKey(), (old) => (old && !old.studied.includes(taxon.id) ? { ...old, studied: [...old.studied, taxon.id] } : old))
+      void flush()
+    } finally { setMarking(false) }
+  }
   const unmark = useMutation(trpc.study.unmark.mutationOptions({ onSuccess: invalidate }))
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 
   if (!Number.isInteger(gbifKey) || (page.isSuccess && !page.data)) return <Empty text={t('notFound')} link={t('toAtlas')} />
+  if (page.isError && !page.data) return <Empty text={to('speciesWaits')} link={t('toAtlas')} />
   if (!page.data) return <Empty text={tc('working')} />
   const s = page.data
   const studied = new Set(progress.data?.studied ?? [])
   const seen = new Set(progress.data?.seen ?? [])
   const stateOf = (id: string): DexState => (seen.has(id) ? 'seen' : studied.has(id) ? 'studied' : 'none')
   const isStudied = studied.has(s.id), isSeen = seen.has(s.id)
-  const busy = mark.isPending || unmark.isPending
+  const busy = marking || unmark.isPending
   // "✓ entdeckt · 5. Sep": the latest wild sighting from `identity.progress.seenAt` (findings 0007 doubt B6).
   const seenAt = progress.data?.seenAt[s.id]
   const seenLabel = isSeen && seenAt ? `${t('state.seen')} · ${format.dateTime(new Date(seenAt), { day: 'numeric', month: 'short' })}` : t('state.seen')
@@ -210,7 +222,7 @@ export function SpeciesPage() {
             <span aria-hidden>👁</span> {isSeen ? tl('logAgain') : tl('logFirst')}
           </button>
           <button type="button" disabled={busy || !progress.data} aria-pressed={isStudied} data-testid="study"
-            onClick={() => (isStudied ? unmark.mutate({ taxonId: s.id }) : mark.mutate({ taxonId: s.id }))}
+            onClick={() => (isStudied ? unmark.mutate({ taxonId: s.id }) : void mark({ id: s.id, gbifKey: s.gbifKey, sciName: s.sciName, names: s.names, tile: s.tile, lead: s.assets[0] ? { url: s.assets[0].url, author: s.assets[0].author, licence: s.assets[0].licence, licenceUrl: s.assets[0].licenceUrl, sourceUrl: s.assets[0].sourceUrl, origin: s.assets[0].origin } : null }))}
             className={`flex h-13 flex-1 items-center justify-center gap-2 rounded-full text-[17px] font-bold shadow-md transition-colors disabled:opacity-60 ${isStudied ? 'bg-amber-soft text-amber' : 'bg-amber text-white'}`}>
             <Icon name="book" size={20} /> {isStudied ? t('study.marked') : t('study.mark')}
           </button>

@@ -81,7 +81,7 @@ export function Journal({ title }: { title: string }) {
             </button>
           )}
           {days.isLoading && <p className="mt-3 text-[15px] text-ink-soft">{tc('working')}</p>}
-          {days.isError && all.length === 0 && <p className="mt-3 text-[15px] text-amber">{tc('error')}</p>}
+          {days.isError && !days.data && all.length === 0 && <p className="mt-3 text-[15px] text-amber">{tc('error')}</p>}
           {all.length > 0 && <p className="mt-5 text-[12px] text-ink-faint">{t('footer')}</p>}
         </>
       )}
