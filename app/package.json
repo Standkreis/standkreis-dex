@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:lan": "next dev -H 0.0.0.0",
+    "dev:lan:https": "next dev -H 0.0.0.0 --experimental-https --experimental-https-key certificates/lan-key.pem --experimental-https-cert certificates/lan.pem",
     "build": "next build",
     "build:export": "STATIC_EXPORT=1 next build",
     "start": "next start",

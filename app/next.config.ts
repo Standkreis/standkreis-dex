@@ -10,6 +10,8 @@ const nextConfig: NextConfig = {
   trailingSlash: isExport, // /de/ → de/index.html, so any plain file server serves it
   pageExtensions: isExport ? ['tsx'] : ['tsx', 'ts'],
   reactStrictMode: true,
+  // The phone on the same Wi-Fi (handoff 0009 §❓): dev assets may be requested from these hosts.
+  allowedDevOrigins: ['svens-macbook-pro-2.local', '192.168.178.93', '*.local'],
   devIndicators: { position: 'top-right' }, // keep the dev badge off the bottom bar
 }
 

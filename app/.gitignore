@@ -44,3 +44,4 @@ next-env.d.ts
 
 # user photos (handoff 0008): on disk until an object store is chosen (M8)
 /data/photos/
+/certificates/
