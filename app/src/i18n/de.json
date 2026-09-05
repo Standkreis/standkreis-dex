@@ -17,7 +17,16 @@
     "working": "Einen Moment …"
   },
   "dex": {
-    "title": "Dein Atlas"
+    "title": "Dein Atlas",
+    "nowOnly": "nur jetzt",
+    "noRegion": "Noch keine Region. Kommt mit dem Onboarding (M5).",
+    "preparing": "wird vorbereitet",
+    "studied": "{n} studiert",
+    "seen": "{n} entdeckt",
+    "possible": "{n} möglich",
+    "shown": "{n} jetzt",
+    "studiedBadge": "studiert",
+    "sources": "Bilder: iNaturalist und Wikimedia Commons, Lizenz je Bild · Daten: GBIF"
   },
   "quests": {
     "title": "Quests"
