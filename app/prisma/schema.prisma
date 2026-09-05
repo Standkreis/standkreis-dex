@@ -146,9 +146,9 @@ model Plausibility {
   regionId   String
   /// Observations over the whole window (last ten years).
   obs        Int
-  /// Share of the region's observations per month, 12 entries, per mille.
+  /// Share of the region's observations per month, 12 entries, per 100,000 (per mille rounds species under ~50 records to 0; routers return per mille).
   monthShare Int[]
-  /// The largest month share; nowRatio = monthShare[m] ÷ peak is derived.
+  /// The largest month share, same unit; nowRatio = monthShare[m] ÷ peak is derived.
   peak       Int
   /// "Ganzes Jahr" · "Mär–Okt" · "Feb · Okt–Dez".
   words      String
