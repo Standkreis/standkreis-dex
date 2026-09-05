@@ -13,7 +13,7 @@ const seed = process.env.npm_lifecycle_event?.startsWith('build') ? join(process
 const buildId = process.env.BUILD_ID ?? (seed && existsSync(seed) ? readFileSync(seed, 'utf8').trim() : Date.now().toString(36))
 
 const nextConfig: NextConfig = {
-  output: isExport ? 'export' : undefined,
+  output: isExport ? 'export' : 'standalone', // standalone: the Docker image copies .next/standalone (handoff 0010)
   trailingSlash: isExport, // /de/ → de/index.html, so any plain file server serves it
   pageExtensions: isExport ? ['tsx'] : ['tsx', 'ts'],
   reactStrictMode: true,

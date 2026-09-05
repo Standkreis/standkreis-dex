@@ -13,6 +13,7 @@
     "build:export": "STATIC_EXPORT=1 next build",
     "postbuild:export": "node scripts/m8a/sw-manifest.mjs",
     "start": "next start",
+    "start:standalone": "cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && node .next/standalone/server.js",
     "postinstall": "prisma generate",
     "db:up": "docker compose up -d",
     "db:migrate": "prisma migrate dev",
