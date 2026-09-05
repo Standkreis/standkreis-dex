@@ -1,7 +1,8 @@
 // The ETL CLI (handoff 0006 Track A). npm run etl -- <command> [args]
 //   region <name | gadmGid>   GADM → 13 GBIF facets → cut per tile → Region, Taxon, Plausibility, Lookalike rows
 //   refresh [--days 30]       re-run the region job for regions older than 30 days
-//   content [--purge <key>]   fill Taxon content (names, intro, facts, assets, interactions) once per taxon
+//   content [--region <name>] [--purge <key>] [--limit n]
+//                             fill Taxon content (names, intro, facts, assets, interactions) once per taxon
 import { db } from './db'
 import { requests } from './fetch'
 import { TILES } from './rules'
@@ -33,12 +34,14 @@ async function main() {
     }
     case 'content': {
       const { runContent } = await import('./content')
-      await runContent({ purge: flag('purge') ? Number(flag('purge')) : undefined, limit: flag('limit') ? Number(flag('limit')) : undefined })
-      console.log(`requests ${JSON.stringify(requests())}`)
+      const r = await runContent({ region: flag('region'), purge: flag('purge') ? Number(flag('purge')) : undefined, limit: flag('limit') ? Number(flag('limit')) : undefined })
+      console.log(`\ncontent: ${r.done} filled, ${r.failed} failed of ${r.taxa} · ${(r.seconds / 60).toFixed(1)} min`)
+      console.log(`ladder ${JSON.stringify(r.ladder)} · intro ${JSON.stringify(r.intro)} · wikidata ${JSON.stringify(r.wikidata)} · edges ${r.edges} · new target rows ${r.targetsCreated}`)
+      console.log(`requests ${JSON.stringify(r.requests)}`)
       break
     }
     default:
-      console.log('usage: npm run etl -- region <name | gadmGid> | refresh [--days 30] | content [--purge <gbifKey>] [--limit n]')
+      console.log('usage: npm run etl -- region <name | gadmGid> [--month m] | refresh [--days 30] | content [--region <name>] [--purge <gbifKey>] [--limit n]')
       process.exitCode = 1
   }
 }

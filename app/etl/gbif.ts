@@ -48,3 +48,7 @@ export type Species = {
 
 /** The backbone record for a key; null when GBIF has none. */
 export const gbifSpecies = (key: number | string) => get<Species>(`${API}/species/${key}`)
+
+export type Match = Species & { usageKey?: number; matchType?: string; status?: string; acceptedUsageKey?: number }
+/** Backbone match by name for GloBI targets (strict, exact matches only are used); null when GBIF has nothing. */
+export const gbifMatch = (name: string) => get<Match>(`${API}/species/match?${q({ name, strict: true })}`)

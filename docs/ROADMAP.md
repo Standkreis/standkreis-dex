@@ -14,8 +14,8 @@
 | M1 | 🎨 UI spike + review | pre | Spec §🎨 chosen, [review 0003](handoffs/0003-ui-spike-review.md) closed | M0 | ✅ 2026-09-04 |
 | M2 | 🏗️ Scaffold | 1 | Next.js PWA, tokens, tRPC, Prisma, i18n de/en, spike deleted ([findings 0004](handoffs/0004-scaffold-findings.md)) | M1 | ✅ 2026-09-04 |
 | M3 | 🔥 ETL grill | 1 | Region unit, cut, month rule, image ladder, rank rule decided on real data ([record 0002](records/0002-etl-the-plausible-set.md), [findings 0005](handoffs/0005-etl-grill-findings.md)) | M1 | ✅ 2026-09-05 |
-| M4 | 🗄️ ETL + plausible set | 1 | Spec §🗃️ runs: taxa, plausibility per region with twelve month shares, assets with licence, text, GloBI edges, look-alikes in Postgres. Mainz-Bingen's grid feels like Saturday to the owner | M3, M2 schema updated to the new ERD | ➡️ next, [handoff 0006](handoffs/0006-etl-and-identity.md) |
-| M5 | 🏠 Atlas grid + species page | 1 | Grid with filter drawer and "nur jetzt" chip, species page from four sources, honest empty states, mark studied | M2, M4 | |
+| M4 | 🗄️ ETL + plausible set | 1 | Spec §🗃️ runs: taxa, plausibility per region with twelve month shares, assets with licence, text, GloBI edges, look-alikes in Postgres. Mainz-Bingen's grid feels like Saturday to the owner | M3, M2 schema updated to the new ERD | ✅ 2026-09-05, [findings 0006](handoffs/0006-etl-and-identity-findings.md) |
+| M5 | 🏠 Atlas grid + species page | 1 | Grid with filter drawer and "nur jetzt" chip, species page from four sources, honest empty states, mark studied | M2, M4 | ➡️ next, on `dex.set` and `taxon.page` |
 | M6 | 🔍 Log + fill | 1 | Chooser, backbone search, wild/captive save, fill sheet, Tagebuch by day, E13 for species outside the set | M5 | |
 | M7 | 🔐 Identity + data | 1 | Anonymous id, passkey/email sync, export JSON, delete, Du with counters and settings | M2 | ➡️ parallel to M4, [handoff 0006](handoffs/0006-etl-and-identity.md) |
 | M8 | 📴 Offline | 1 | Atlas for the active filter opens with no network, sightings queue and sync | M5, M7 | |

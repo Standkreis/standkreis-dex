@@ -3,5 +3,4 @@ dist/
 .DS_Store
 *.log
 .env*
-scripts/etl-probe/.cache/
 app/etl/.cache/

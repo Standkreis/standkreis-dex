@@ -54,6 +54,24 @@ export const dexRouter = router({
       }
     }),
 
-  /** Regions the ETL knows, for the onboarding picker and the filter drawer. */
-  regions: publicProcedure.query(({ ctx }) => ctx.db.region.findMany({ orderBy: { name: 'asc' }, select: { id: true, gadmGid: true, name: true, higher: true, status: true, refreshedAt: true } })),
+  /**
+   * Regions the ETL knows, for the onboarding picker and the filter drawer, with the honesty line of record 0002 E12:
+   * `content` = set members the content job has run for, `introEn` = intros only in English, `noGermanName` = set
+   * members without a German name. Shares are of `setSize`; the UI shows "N % nur auf Englisch" when it matters.
+   */
+  regions: publicProcedure.query(async ({ ctx }) => {
+    const regions = await ctx.db.region.findMany({ orderBy: { name: 'asc' }, select: { id: true, gadmGid: true, name: true, higher: true, status: true, refreshedAt: true } })
+    return Promise.all(
+      regions.map(async (r) => {
+        const inSet = { plausibility: { some: { regionId: r.id } } }
+        const [setSize, content, introEn, noGermanName] = await Promise.all([
+          ctx.db.taxon.count({ where: inSet }),
+          ctx.db.taxon.count({ where: { ...inSet, contentAt: { not: null } } }),
+          ctx.db.taxon.count({ where: { ...inSet, intro: { path: ['lang'], equals: 'en' } } }),
+          ctx.db.taxon.count({ where: { ...inSet, contentAt: { not: null }, NOT: { commonNames: { path: ['de'], string_contains: '' } } } }),
+        ])
+        return { ...r, setSize, content, introEn, noGermanName, introEnShare: setSize ? +(introEn / setSize).toFixed(3) : 0 }
+      }),
+    )
+  }),
 })
