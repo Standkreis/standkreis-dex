@@ -7,6 +7,7 @@ import {
 } from '@simplewebauthn/server'
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simplewebauthn/server'
 import { z } from 'zod'
+import { Tile } from '@/generated/prisma/enums'
 import { IDENTITY_COOKIE, publicProcedure, router, type Context } from '../trpc'
 import { expectedOrigin, issueChallenge, rpID, rpName, takeChallenge } from '../webauthn'
 
@@ -75,20 +76,39 @@ export const identityRouter = router({
   }),
 
   // The two axes over the set (spec §🧬): studied and wild-seen taxon ids, plus the filter's tiles (empty = all).
-  // Du intersects them with `dex.set`; M5's grid joins the same lists per cell.
+  // Du intersects them with `dex.set`; M5's grid joins the same lists per cell. `seenAt` carries the latest wild
+  // sighting per taxon for the grid's "Zuletzt entdeckt" sort.
   progress: publicProcedure.query(async ({ ctx }) => {
     const [studies, sightings, filter] = await Promise.all([
       ctx.db.study.findMany({ where: { identityId: ctx.identity.id }, select: { taxonId: true } }),
-      ctx.db.sighting.findMany({ where: { identityId: ctx.identity.id, wildness: 'wild' }, select: { taxonId: true }, distinct: ['taxonId'] }),
+      ctx.db.sighting.groupBy({ by: ['taxonId'], where: { identityId: ctx.identity.id, wildness: 'wild' }, _max: { at: true } }),
       ctx.db.filter.findUnique({ where: { identityId: ctx.identity.id }, select: { tiles: true } }),
     ])
-    return { studied: studies.map((s) => s.taxonId), seen: sightings.map((s) => s.taxonId), tiles: filter?.tiles ?? [] }
+    return {
+      studied: studies.map((s) => s.taxonId),
+      seen: sightings.map((s) => s.taxonId),
+      seenAt: Object.fromEntries(sightings.map((s) => [s.taxonId, s._max.at?.toISOString() ?? ''])) as Record<string, string>,
+      tiles: filter?.tiles ?? [],
+    }
   }),
 
   // Name and photo are yours (spec §⚖️): local to the identity, never in a payload before a passkey exists.
   setName: publicProcedure.input(z.object({ displayName: z.string().trim().max(40) })).mutation(({ ctx, input }) =>
     ctx.db.identity.update({ where: { id: ctx.identity.id }, data: { displayName: input.displayName || null }, select: { displayName: true } }),
   ),
+
+  // The global filter (spec §🏗️): region and tiles from onboarding, the "nur jetzt" chip from the drawer. The only write
+  // the grid makes; everything reads it back through `me` and `progress`. Empty tiles = all (see `progress`).
+  setFilter: publicProcedure
+    .input(z.object({ regionId: z.string().uuid(), tiles: z.array(z.enum(Object.values(Tile) as [Tile, ...Tile[]])), nowOnly: z.boolean().default(false) }))
+    .mutation(({ ctx, input }) =>
+      ctx.db.filter.upsert({
+        where: { identityId: ctx.identity.id },
+        create: { identityId: ctx.identity.id, regionId: input.regionId, tiles: input.tiles, nowOnly: input.nowOnly },
+        update: { regionId: input.regionId, tiles: input.tiles, nowOnly: input.nowOnly },
+        select: { regionId: true, tiles: true, nowOnly: true },
+      }),
+    ),
 
   // ── Passkeys ────────────────────────────────────────────────────────────────
   registerOptions: publicProcedure.mutation(async ({ ctx }) => {
