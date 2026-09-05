@@ -1,6 +1,8 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { UA } from '../../../etl/fetch'
+import { deletePhoto } from '../photos'
+import { shouldOfferPasskey } from '../webauthn'
 import { publicProcedure, router, type Context } from '../trpc'
 
 // The sighting is the atom (record Q1, spec §🧬). This router creates one and reads one back for the fill moment
@@ -89,6 +91,59 @@ export const sightingRouter = router({
       return { id: row.id, at: row.at, place: row.place, wildness: row.wildness, evidence: row.evidence, first }
     }),
 
+  /** Bind an uploaded, still unattached photo (POST /api/photo) to one of the identity's sightings: the fill sheet's "Foto". */
+  attachPhoto: publicProcedure.input(z.object({ sightingId: z.string().uuid(), photoId: z.string().uuid() })).mutation(async ({ ctx, input }) => {
+    const id = ctx.identity.id
+    const [s, photo] = await Promise.all([
+      ctx.db.sighting.findFirst({ where: { id: input.sightingId, identityId: id }, select: { id: true } }),
+      ctx.db.asset.findFirst({ where: { id: input.photoId, ownerId: id, sightingId: null }, select: { id: true } }),
+    ])
+    if (!s || !photo) throw new TRPCError({ code: 'NOT_FOUND', message: s ? 'unknown photo' : 'unknown sighting' })
+    await ctx.db.$transaction([
+      ctx.db.asset.update({ where: { id: photo.id }, data: { sightingId: s.id } }),
+      ctx.db.sighting.update({ where: { id: s.id }, data: { evidence: 'photographed' } }),
+    ])
+    return { id: s.id, photoId: photo.id }
+  }),
+
+  /** Remove one of the identity's photos, attached or not: the file and the row; the sighting falls back to `claimed`. */
+  removePhoto: publicProcedure.input(z.object({ photoId: z.string().uuid() })).mutation(async ({ ctx, input }) => {
+    const photo = await ctx.db.asset.findFirst({ where: { id: input.photoId, ownerId: ctx.identity.id, origin: 'user' }, select: { id: true } })
+    if (!photo) throw new TRPCError({ code: 'NOT_FOUND', message: 'unknown photo' })
+    await deletePhoto(photo.id)
+    return { id: photo.id }
+  }),
+
+  /**
+   * The identity's latest wild photo per taxon (spec §🎨 2: own photo first, else the reference image). `dex.set` stays a
+   * pure read; the grid overlays this map on the cells.
+   */
+  photos: publicProcedure.query(async ({ ctx }) => {
+    const rows = await ctx.db.asset.findMany({
+      where: { origin: 'user', kind: 'image', ownerId: ctx.identity.id, sighting: { wildness: 'wild' } },
+      select: { url: true, sighting: { select: { taxonId: true, at: true } } },
+      orderBy: [{ sighting: { at: 'desc' } }, { createdAt: 'desc' }],
+    })
+    const out: Record<string, string> = {}
+    for (const r of rows) if (r.sighting && !(r.sighting.taxonId in out)) out[r.sighting.taxonId] = r.url
+    return out
+  }),
+
+  /**
+   * Species the identity has seen wild that are not in the region's set (record 0002 E13): the grid shows them at the
+   * bottom with the tile icon until the content kick lands a lead image. The set itself never changes.
+   */
+  outside: publicProcedure.input(z.object({ regionId: z.string().uuid() })).query(async ({ ctx, input }) => {
+    const seen = await ctx.db.sighting.findMany({ where: { identityId: ctx.identity.id, wildness: 'wild' }, select: { taxonId: true }, distinct: ['taxonId'] })
+    if (!seen.length) return []
+    const taxa = await ctx.db.taxon.findMany({
+      where: { id: { in: seen.map((s) => s.taxonId) }, plausibility: { none: { regionId: input.regionId } } },
+      select: { id: true, gbifKey: true, sciName: true, commonNames: true, tile: true, contentAt: true, assets: { where: { kind: 'image', sightingId: null }, orderBy: { createdAt: 'asc' }, take: 1, select: { url: true, author: true, licence: true, licenceUrl: true, sourceUrl: true, origin: true } } },
+      orderBy: { sciName: 'asc' },
+    })
+    return taxa.map((t) => ({ taxonId: t.id, gbifKey: t.gbifKey, sciName: t.sciName, names: t.commonNames as Record<string, string>, tile: t.tile, lead: t.assets[0] ?? null, hasContent: t.contentAt !== null }))
+  }),
+
   /**
    * What the fill sheet and the toast show (spec §🎨 5): the species card with the reference image and its attribution,
    * the own photo when one is attached, date and Gemeinde, and `first` by the shared rule. Only the identity's own rows.
@@ -99,9 +154,10 @@ export const sightingRouter = router({
       include: { taxon: { select: taxonSelect }, photos: { where: { kind: 'image' }, orderBy: { createdAt: 'asc' }, take: 1, select: { id: true, url: true } } },
     })
     if (!s) return null
-    const first = await isFirst(ctx.db, s)
+    const [first, offerPasskey] = await Promise.all([isFirst(ctx.db, s), shouldOfferPasskey(ctx.db, ctx.identity.id)])
     return {
       id: s.id,
+      offerPasskey,
       at: s.at,
       place: s.place,
       wildness: s.wildness,

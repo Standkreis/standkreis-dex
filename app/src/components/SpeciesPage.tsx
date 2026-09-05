@@ -1,11 +1,12 @@
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import { Suspense, useCallback, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useParams } from 'next/navigation'
-import { useLocale, useTranslations } from 'next-intl'
-import { Link } from '@/i18n/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
+import { useFormatter, useLocale, useTranslations } from 'next-intl'
+import { Link, useRouter } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
+import { Toast } from './Fill'
 import { Icon, SeenMark, StudiedMark } from './Marks'
 import { EcologyChip, LookalikeCard, tileIcon, type Card, type DexState } from './SpeciesCard'
 import { SpeciesMap } from './SpeciesMap'
@@ -26,9 +27,12 @@ const MONTHS_EN: Record<string, string> = { Mär: 'Mar', Mai: 'May', Okt: 'Oct',
 export function SpeciesPage() {
   const t = useTranslations('species')
   const tc = useTranslations('common')
+  const tl = useTranslations('log')
   const locale = useLocale()
+  const format = useFormatter()
   const trpc = useTRPC()
   const qc = useQueryClient()
+  const router = useRouter()
   const params = useParams<{ gbifKey: string }>()
   const gbifKey = Number(params.gbifKey)
 
@@ -50,6 +54,9 @@ export function SpeciesPage() {
   const stateOf = (id: string): DexState => (seen.has(id) ? 'seen' : studied.has(id) ? 'studied' : 'none')
   const isStudied = studied.has(s.id), isSeen = seen.has(s.id)
   const busy = mark.isPending || unmark.isPending
+  // "✓ entdeckt · 5. Sep": the latest wild sighting from `identity.progress.seenAt` (findings 0007 doubt B6).
+  const seenAt = progress.data?.seenAt[s.id]
+  const seenLabel = isSeen && seenAt ? `${t('state.seen')} · ${format.dateTime(new Date(seenAt), { day: 'numeric', month: 'short' })}` : t('state.seen')
 
   // Three names: the reader's language, Latin, the other language. A missing vernacular leaves the Latin name as the title.
   const title = s.names[locale] ?? s.sciName
@@ -97,7 +104,7 @@ export function SpeciesPage() {
           </span>
           <span className={`flex items-center gap-2 ${isSeen ? 'font-semibold text-moss-deep' : 'text-ink-faint'}`}>
             {isSeen ? <SeenMark size={22} title={t('state.seen')} /> : <Grey><span className="h-2 w-2 rounded-full border border-current" /></Grey>}
-            {isSeen ? t('state.seen') : t('state.notSeen')}
+            {isSeen ? seenLabel : t('state.notSeen')}
           </span>
         </p>
 
@@ -194,18 +201,35 @@ export function SpeciesPage() {
         </p>
       </div>
 
-      {/* The sticky bar (spec §🎨 3) holds "Studiert" alone until the save screen exists (M6). The tab bar (a later sibling of main) is hidden on this page, as in the mock. */}
+      {/* The sticky bar (spec §🎨 3): "Entdeckt" opens the save screen with the species preset (handoff 0008 Track A); "Studiert" toggles. The tab bar (a later sibling of main) is hidden on this page, as in the mock. */}
       <div className="fixed inset-x-0 z-10" style={{ bottom: 'env(safe-area-inset-bottom)' }}>
-        <div className="mx-auto max-w-[520px] bg-gradient-to-t from-paper via-paper/95 to-paper/0 px-4 pt-6 pb-2">
+        <div className="mx-auto flex max-w-[520px] gap-3 bg-gradient-to-t from-paper via-paper/95 to-paper/0 px-4 pt-6 pb-2">
+          <button type="button" disabled={!progress.data} data-testid="log"
+            onClick={() => router.push(`/log?taxon=${s.gbifKey}&from=species`)}
+            className="flex h-13 flex-[1.3] items-center justify-center gap-2 rounded-full bg-moss text-[17px] font-bold text-white shadow-md disabled:opacity-60">
+            <span aria-hidden>👁</span> {isSeen ? tl('logAgain') : tl('logFirst')}
+          </button>
           <button type="button" disabled={busy || !progress.data} aria-pressed={isStudied} data-testid="study"
             onClick={() => (isStudied ? unmark.mutate({ taxonId: s.id }) : mark.mutate({ taxonId: s.id }))}
-            className={`flex h-13 w-full items-center justify-center gap-2 rounded-full text-[17px] font-bold shadow-md transition-colors disabled:opacity-60 ${isStudied ? 'bg-amber-soft text-amber' : 'bg-amber text-white'}`}>
+            className={`flex h-13 flex-1 items-center justify-center gap-2 rounded-full text-[17px] font-bold shadow-md transition-colors disabled:opacity-60 ${isStudied ? 'bg-amber-soft text-amber' : 'bg-amber text-white'}`}>
             <Icon name="book" size={20} /> {isStudied ? t('study.marked') : t('study.mark')}
           </button>
         </div>
       </div>
+      <Suspense><AgainToast name={title} /></Suspense>
     </main>
   )
+}
+
+/** The quiet toast after a repeat sighting logged from this page (`?again=<id>`, doubt 12); the param goes with the toast. */
+function AgainToast({ name }: { name: string }) {
+  const tf = useTranslations('fill')
+  const params = useSearchParams()
+  const again = params.get('again')
+  const kept = params.get('kept') === '1'
+  const done = useCallback(() => window.history.replaceState(null, '', window.location.pathname), [])
+  if (!again) return null
+  return <Toast key={again} text={tf(kept ? 'kept' : 'again', { name })} onDone={done} />
 }
 
 const Grey = ({ children }: { children: ReactNode }) => <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-tile text-ink-faint">{children}</span>

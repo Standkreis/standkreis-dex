@@ -1,28 +1,33 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
+import { PhotoInput, type PhotoState } from './LogPhoto'
 
-// The chooser (spec §🎨 4, record Q10): Foto · Galerie · Suchen, Suchen primary. Foto and Galerie take the picture
-// first and land on the same search; until the photo path exists (handoff 0008, second half) they say so in one line.
+// The chooser (spec §🎨 4, record Q10): Foto · Galerie · Suchen, Suchen primary. Foto and Galerie take the picture first
+// (resized and re-encoded on the device, uploaded unattached) and land on the same search with `?photo=<id>`.
 export function LogSheet({ onClose }: { onClose: () => void }) {
   const t = useTranslations('log')
+  const tc = useTranslations('common')
   const router = useRouter()
-  const [soon, setSoon] = useState(false)
-  const tile = 'flex flex-1 flex-col items-center gap-1 rounded-3xl py-5 shadow-[0_2px_12px_rgba(30,42,35,0.06)]'
+  const camera = useRef<HTMLInputElement>(null)
+  const gallery = useRef<HTMLInputElement>(null)
+  const [state, setState] = useState<PhotoState>('idle')
+  const tile = 'flex flex-1 flex-col items-center gap-1 rounded-3xl py-5 shadow-[0_2px_12px_rgba(30,42,35,0.06)] disabled:opacity-60'
+  const onPhoto = (p: { id: string }) => { onClose(); router.push(`/log?photo=${p.id}`) }
   return (
     <div className="fixed inset-0 z-30 flex items-end bg-ink/40" onClick={onClose} role="presentation" data-testid="chooser">
       <div role="dialog" aria-modal aria-labelledby="log-title" className="mx-auto w-full max-w-[520px] rounded-t-3xl bg-paper px-4 pt-3" style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }} onClick={(e) => e.stopPropagation()}>
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/20" />
         <h2 id="log-title" className="text-[13px] font-bold tracking-wide text-ink-soft uppercase">{t('title')}</h2>
         <div className="mt-3 flex gap-3">
-          <button type="button" onClick={() => setSoon(true)} className={`${tile} bg-card`} data-testid="choose-photo">
+          <button type="button" onClick={() => camera.current?.click()} disabled={state === 'busy'} className={`${tile} bg-card`} data-testid="choose-photo">
             <span className="text-[34px] leading-none" aria-hidden>📷</span>
             <span className="mt-2 text-[17px] font-bold">{t('photo')}</span>
             <span className="text-[13px] text-ink-soft">{t('photoSub')}</span>
           </button>
-          <button type="button" onClick={() => setSoon(true)} className={`${tile} bg-card`} data-testid="choose-gallery">
+          <button type="button" onClick={() => gallery.current?.click()} disabled={state === 'busy'} className={`${tile} bg-card`} data-testid="choose-gallery">
             <span className="text-[34px] leading-none" aria-hidden>🖼️</span>
             <span className="mt-2 text-[17px] font-bold">{t('gallery')}</span>
             <span className="text-[13px] text-ink-soft">{t('gallerySub')}</span>
@@ -33,7 +38,11 @@ export function LogSheet({ onClose }: { onClose: () => void }) {
             <span className="text-[13px] text-white/80">{t('searchSub')}</span>
           </button>
         </div>
-        <p className="mt-4 text-[13px] leading-snug text-ink-soft">{soon ? t('photoSoon') : t('photoNote')}</p>
+        <PhotoInput ref={camera} source="camera" onPhoto={onPhoto} onState={setState} testId="photo-input-camera" />
+        <PhotoInput ref={gallery} source="gallery" onPhoto={onPhoto} onState={setState} testId="photo-input-gallery" />
+        <p className={`mt-4 text-[13px] leading-snug ${state === 'error' ? 'text-amber' : 'text-ink-soft'}`} data-testid="chooser-note">
+          {state === 'busy' ? t('photoUploading') : state === 'error' ? tc('error') : t('photoNote')}
+        </p>
       </div>
     </div>
   )

@@ -1,12 +1,13 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { useAtlasSet } from './AtlasCounters'
 import { search } from './AtlasSearch'
+import { PhotoInput, photoSrc, type PhotoState } from './LogPhoto'
 import { Icon } from './Marks'
 import { Thumb, tileIcon, type DexState } from './SpeciesCard'
 
@@ -17,7 +18,7 @@ type Species = NonNullable<ReturnType<typeof useAtlasSet>['set']>['species'][num
  * order with the seen species removed, eight rows. Typing: set rows first with their state (AtlasSearch), then the GBIF
  * backbone through `taxon.search`, each marked as joining the atlas (record 0002 E13).
  */
-export function LogSearch() {
+export function LogSearch({ photoId }: { photoId: string | null }) {
   const t = useTranslations('log')
   const ts = useTranslations('species')
   const tc = useTranslations('common')
@@ -29,7 +30,10 @@ export function LogSearch() {
   const [q, setQ] = useState('')
   const [debounced, setDebounced] = useState('')
   useEffect(() => { const h = setTimeout(() => setDebounced(q.trim()), 350); return () => clearTimeout(h) }, [q])
-  const [soon, setSoon] = useState(false)
+  // The photo strip: a photo taken in the chooser rides along as ?photo; the strip can also add one here.
+  const picker = useRef<HTMLInputElement>(null)
+  const [photoState, setPhotoState] = useState<PhotoState>('idle')
+  const withPhoto = (path: string) => (photoId ? `${path}&photo=${photoId}` : path)
 
   const me = useQuery(trpc.identity.me.queryOptions())
   const region = me.data?.region ?? null
@@ -49,7 +53,7 @@ export function LogSearch() {
   const backboneRows = useMemo(() => (backbone.data ?? []).filter((r) => !setKeys.has(r.gbifKey)), [backbone.data, setKeys])
   const ensure = useMutation(trpc.taxon.ensure.mutationOptions())
 
-  const pick = (gbifKey: number) => router.push(`/log?taxon=${gbifKey}`)
+  const pick = (gbifKey: number) => router.push(withPhoto(`/log?taxon=${gbifKey}`))
   const pickBackbone = async (gbifKey: number) => { await ensure.mutateAsync({ gbifKey }); pick(gbifKey) }
   const stateOf = (s: Species): DexState => (seen.has(s.taxonId) ? 'seen' : studied.has(s.taxonId) ? 'studied' : 'none')
   const month = format.dateTime(new Date(), { month: 'long' })
@@ -68,11 +72,20 @@ export function LogSearch() {
         </div>
       </div>
 
-      {/* The photo strip: attach from here in the second half of M6; for now it says so. */}
-      <button type="button" onClick={() => setSoon(true)} className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-dashed border-ink-faint/60 px-4 py-3 text-left text-[15px] text-ink-soft" data-testid="log-photo-strip">
-        <span aria-hidden>📷</span>
-        {soon ? <span>{t('photoSoon')}</span> : <span>{t('noPhoto')} · <span className="font-semibold text-moss-deep underline">{t('addPhoto')}</span></span>}
-      </button>
+      {photoId ? (
+        <div className="mt-3 flex items-center gap-3 rounded-2xl bg-card px-3 py-2.5 text-[15px] shadow-[0_2px_12px_rgba(30,42,35,0.06)]" data-testid="log-photo-strip" data-photo={photoId}>
+          {/* eslint-disable-next-line @next/next/no-img-element -- the identity's own upload */}
+          <img src={photoSrc(`/api/photo/${photoId}`)} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+          <span className="min-w-0 flex-1"><span className="block font-semibold">{t('photoAttached')}</span><span className="block text-[13px] text-ink-soft">{t('photoAttachedSub')}</span></span>
+          <button type="button" onClick={() => router.replace('/log')} className="shrink-0 text-[15px] font-semibold text-ink-soft" data-testid="log-photo-drop">{t('removePhoto')}</button>
+        </div>
+      ) : (
+        <button type="button" onClick={() => picker.current?.click()} disabled={photoState === 'busy'} className="mt-3 flex w-full items-center gap-2 rounded-2xl border border-dashed border-ink-faint/60 px-4 py-3 text-left text-[15px] text-ink-soft disabled:opacity-60" data-testid="log-photo-strip">
+          <span aria-hidden>📷</span>
+          {photoState === 'busy' ? <span>{t('photoUploading')}</span> : photoState === 'error' ? <span className="text-amber">{tc('error')}</span> : <span>{t('noPhoto')} · <span className="font-semibold text-moss-deep underline">{t('addPhoto')}</span></span>}
+        </button>
+      )}
+      <PhotoInput ref={picker} source="gallery" onPhoto={(p) => router.replace(`/log?photo=${p.id}`)} onState={setPhotoState} testId="photo-input" />
 
       {!set && loading && <p className="mt-6 text-[15px] text-ink-soft">{tc('working')}</p>}
       {me.data && !region && <p className="mt-6 text-[15px] text-ink-soft">{t('noRegion')}</p>}

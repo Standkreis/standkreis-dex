@@ -90,7 +90,6 @@
     "gallery": "Galerie",
     "gallerySub": "auswählen",
     "photoNote": "Ein Foto wird gespeichert, nicht bestimmt. Die automatische Bestimmung kommt später.",
-    "photoSoon": "Foto kommt gleich.",
     "back": "Zurück",
     "searchPlaceholder": "Art suchen · deutsch oder lateinisch",
     "clear": "Leeren",
@@ -128,7 +127,13 @@
     "captiveHint": "Gehaltene Tiere und gepflanzte Pflanzen stehen im Tagebuch, zählen aber nicht als Entdeckung in der Natur.",
     "saving": "Wird gespeichert …",
     "unknown": "Diese Art kennen wir noch nicht.",
-    "noRegion": "Erst eine Region wählen."
+    "noRegion": "Erst eine Region wählen.",
+    "photoUploading": "Foto wird gespeichert …",
+    "photoAttached": "Foto angehängt",
+    "photoAttachedSub": "gespeichert, nicht bestimmt",
+    "removePhoto": "entfernen",
+    "logFirst": "Entdeckt",
+    "logAgain": "Wieder entdeckt"
   },
   "settings": {
     "title": "Einstellungen",
@@ -334,6 +339,13 @@
     "toSpecies": "Zur Art ›",
     "again": "Wiedergesehen · {name}",
     "plusOne": "+1",
-    "close": "Schließen"
+    "close": "Schließen",
+    "kept": "Gespeichert · {name} · gehalten"
+  },
+  "nudge": {
+    "title": "Auch auf dem Laptop?",
+    "body": "Ein Passkey nimmt deine Sichtungen mit auf andere Geräte. Kein Konto, keine E-Mail.",
+    "later": "Später",
+    "create": "Passkey anlegen"
   }
 }

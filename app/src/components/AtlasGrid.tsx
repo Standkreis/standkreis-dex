@@ -11,10 +11,14 @@ import { allTiles, countersOf, CountersBar, useAtlasSet } from './AtlasCounters'
 import { search } from './AtlasSearch'
 import { FilterDrawer, SHOWS, SORTS, type Show, type Sort } from './FilterDrawer'
 import { FillSheet, Toast } from './Fill'
+import { photoSrc } from './LogPhoto'
 import { Icon } from './Marks'
 import { OnboardingSilhouette } from './OnboardingSilhouette'
+import { nudgeSeen, PasskeyNudge } from './PasskeyNudge'
 
 type Species = NonNullable<ReturnType<typeof useAtlasSet>['set']>['species'][number]
+// One grid row: a set member, or a species seen wild outside the set (record 0002 E13) that sits at the bottom.
+type Row = Pick<Species, 'taxonId' | 'gbifKey' | 'sciName' | 'names' | 'tile'> & { lead: { url: string } | null; outside: boolean }
 
 // The Atlas grid of spec §🎨 2 on the real set (handoff 0007 Track A). Header: title, one bar amber-then-green with the
 // three counters; one search bar with the filter button and its badge; the 3-column grid; one sources line. Region and
@@ -36,6 +40,9 @@ export function AtlasGrid({ title }: { title: string }) {
   const retry = useMutation(trpc.dex.requestRegion.mutationOptions({ onSuccess: () => qc.invalidateQueries({ queryKey: trpc.identity.me.queryKey() }) }))
 
   const { ready, set, progress: progressRaw, tiles, loading } = useAtlasSet(region)
+  // Own photos per taxon (spec §🎨 2: own photo first) and the species seen outside the set, polled while their content kick runs.
+  const photos = useQuery(trpc.sighting.photos.queryOptions(undefined, { enabled: ready }))
+  const outside = useQuery(trpc.sighting.outside.queryOptions({ regionId: region?.id ?? '' }, { enabled: ready, refetchInterval: (q) => (q.state.data?.some((x) => !x.hasContent) ? 10_000 : false) }))
 
   // ── URL state: ?show ?sort ?now ?q, plus ?fill / ?again from the save screen ──
   const params = useSearchParams()
@@ -48,6 +55,8 @@ export function AtlasGrid({ title }: { title: string }) {
   const fillPhase: 'pre' | 'done' = fillId && fillDone === fillId ? 'done' : 'pre'
   const [tick, setTick] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [nudge, setNudge] = useState(false)
+  const [photoState, setPhotoState] = useState<'idle' | 'busy' | 'error'>('idle')
   const hidden = fillId && fillPhase === 'pre' ? fill.data?.taxon.id : undefined
   const progress = useMemo(() => (progressRaw && hidden ? { ...progressRaw, seen: progressRaw.seen.filter((id) => id !== hidden) } : progressRaw), [progressRaw, hidden])
   const studied = useMemo(() => new Set(progress?.studied ?? []), [progress])
@@ -93,23 +102,30 @@ export function AtlasGrid({ title }: { title: string }) {
     if (!fillTaxon || fillTileOff || fillPhase !== 'pre') return
     const el = document.querySelector(`[data-taxon="${fillTaxon.id}"]`)
     el?.scrollIntoView({ block: 'center' })
+    const inSet = !!set?.species.some((x) => x.taxonId === fillTaxon.id)
     const h = setTimeout(() => {
       setFillDone(fillId)
-      setTick(true)
+      if (inSet) setTick(true)
       navigator.vibrate?.(30)
     }, el ? 350 : 0)
     return () => clearTimeout(h)
-  }, [fillTaxon, fillTileOff, fillPhase, fillId])
+  }, [fillTaxon, fillTileOff, fillPhase, fillId, set])
   useEffect(() => { if (tick) { const h = setTimeout(() => setTick(false), 1600); return () => clearTimeout(h) } }, [tick])
   // A repeat (doubt 12): the quiet toast, derived from ?again; the param is dropped when the toast goes.
   const tf = useTranslations('fill')
-  const tl = useTranslations('log')
-  const againToast = againId && fill.data ? tf('again', { name: name(fill.data.taxon) }) : null
+  const againToast = againId && fill.data ? tf(fill.data.wildness === 'wild' ? 'again' : 'kept', { name: name(fill.data.taxon) }) : null
   const shownToast = toast ?? againToast
-  const toastDone = useCallback(() => { setToast(null); if (againId) setParams({ again: null }) }, [againId, setParams])
+  const toastDone = useCallback(() => { setToast(null); if (againId) setParams({ again: null, kept: null }) }, [againId, setParams])
+  // Closing the fill sheet: after the first wild sighting ever, the one passkey nudge (doubt 31), never repeated.
+  const closeFill = () => { setParams({ fill: null }); if (fill.data?.offerPasskey && !nudgeSeen()) setNudge(true) }
+  const attach = useMutation(trpc.sighting.attachPhoto.mutationOptions({
+    onMutate: () => setPhotoState('busy'),
+    onError: () => setPhotoState('error'),
+    onSuccess: async () => { await Promise.all([qc.invalidateQueries({ queryKey: trpc.sighting.fill.pathKey() }), qc.invalidateQueries({ queryKey: trpc.sighting.photos.queryKey() })]); setPhotoState('idle') },
+  }))
 
-  // ── The visible species: tiles → chip → state → sort → search ──────────────
-  const visible = useMemo(() => {
+  // ── The visible species: tiles → chip → state → sort → search; out-of-set finds after the set, never with "nur jetzt" ──
+  const visible = useMemo<Row[]>(() => {
     if (!set || !progress) return []
     let list = set.species.filter((s) => tilesOn.has(s.tile))
     if (nowOnly) list = list.filter((s) => s.now)
@@ -121,8 +137,9 @@ export function AtlasGrid({ title }: { title: string }) {
       const at = (s: Species) => progress.seenAt[s.taxonId] ?? ''
       list = [...list].sort((a, b) => (at(b) > at(a) ? 1 : at(b) < at(a) ? -1 : 0)) // the server's "jetzt" order breaks ties
     }
-    return search(list, query, name)
-  }, [set, progress, tilesOn, nowOnly, show, sort, query, studied, seen, name, locale])
+    const extras: Row[] = nowOnly || show === 'new' ? [] : (outside.data ?? []).filter((x) => tilesOn.has(x.tile) && (show !== 'studied' || studied.has(x.taxonId))).map((x) => ({ ...x, outside: true }))
+    return [...search(list, query, name).map((s) => ({ ...s, outside: false })), ...search(extras, query, name)]
+  }, [set, progress, outside.data, tilesOn, nowOnly, show, sort, query, studied, seen, name, locale])
 
   // The badge counts what narrows the grid: any tile off, a state other than Alle, the chip. Sort orders, it does not filter.
   const active = (tilesShown.length > tilesOn.size ? 1 : 0) + (show !== 'all' ? 1 : 0) + (nowOnly ? 1 : 0)
@@ -178,7 +195,7 @@ export function AtlasGrid({ title }: { title: string }) {
             <p className="mt-6 text-center text-[15px] text-ink-soft" data-testid="empty">{query.trim() ? t('noMatch', { q: query.trim() }) : t('empty')}</p>
           ) : (
             <ul className="mt-4 grid grid-cols-3 gap-2" data-testid="grid">
-              {visible.map((s) => <Cell key={s.taxonId} s={s} name={name(s)} isSeen={seen.has(s.taxonId)} isStudied={studied.has(s.taxonId)} badge={t('studiedBadge')} fill={fill.data?.taxon.id === s.taxonId && fillId ? fillPhase : null} />)}
+              {visible.map((s) => <Cell key={s.taxonId} s={s} name={name(s)} own={photos.data?.[s.taxonId] ?? null} isSeen={seen.has(s.taxonId)} isStudied={studied.has(s.taxonId)} badge={t('studiedBadge')} fill={fill.data?.taxon.id === s.taxonId && fillId ? fillPhase : null} />)}
             </ul>
           )}
           <p className="mt-4 text-[12px] text-ink-faint">{t('sources')}</p>
@@ -195,8 +212,9 @@ export function AtlasGrid({ title }: { title: string }) {
               onNowOnly={(on) => setParams({ now: on ? '1' : null })} onReset={reset} />
           )}
           {fillId && fillPhase === 'done' && fill.data && (
-            <FillSheet s={fill.data} onClose={() => setParams({ fill: null })} onPhoto={() => setToast(tl('photoSoon'))} />
+            <FillSheet s={fill.data} onClose={closeFill} photoState={photoState} onPhoto={(p) => attach.mutate({ sightingId: fill.data!.id, photoId: p.id })} />
           )}
+          {nudge && <PasskeyNudge onClose={() => setNudge(false)} />}
           {shownToast && <Toast key={shownToast} text={shownToast} onDone={toastDone} />}
         </>
       )}
@@ -217,15 +235,17 @@ function FilterButton({ count, label, onClick, className, style, testId }: { cou
 
 // One cell, three states (findings 0002 revision 3): not yet = greyscale 45 %, studied = greyscale 70 % with an amber
 // inset ring and the book, discovered = colour with the check. Species without an image show the group silhouette.
+// `own` = the identity's latest wild photo of the species, shown in colour instead of the reference image (spec §🎨 2).
 // `fill` = the cell of the fill moment: "pre" is drawn grey with the transition armed, "done" sweeps to colour over 400 ms under a green ring.
-function Cell({ s, name, isSeen, isStudied, badge, fill }: { s: Species; name: string; isSeen: boolean; isStudied: boolean; badge: string; fill: 'pre' | 'done' | null }) {
+function Cell({ s, name, own, isSeen, isStudied, badge, fill }: { s: Row; name: string; own: string | null; isSeen: boolean; isStudied: boolean; badge: string; fill: 'pre' | 'done' | null }) {
+  const src = own && isSeen ? photoSrc(own) : s.lead?.url ?? null
   return (
-    <li className="min-w-0" data-taxon={s.taxonId} data-fill={fill ?? undefined}>
+    <li className="min-w-0" data-taxon={s.taxonId} data-fill={fill ?? undefined} data-outside={s.outside || undefined} data-own={own ? 'true' : undefined}>
       <Link href={`/species/${s.gbifKey}`} className="block">
         <div className={`relative aspect-square overflow-hidden rounded-2xl bg-tile ${isStudied && !isSeen ? 'ring-2 ring-amber ring-inset' : ''} ${fill === 'done' ? 'ring-[3px] ring-moss' : ''}`}>
-          {s.lead ? (
+          {src ? (
             // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser
-            <img src={s.lead.url} alt="" loading="lazy" className={`h-full w-full object-cover ${fill ? 'transition-[filter,opacity] duration-[400ms] ease-out' : ''} ${isSeen ? '' : isStudied ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />
+            <img src={src} alt="" loading="lazy" className={`h-full w-full object-cover ${fill ? 'transition-[filter,opacity] duration-[400ms] ease-out' : ''} ${isSeen ? '' : isStudied ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />
           ) : (
             <OnboardingSilhouette tile={s.tile} className="h-full w-full p-6 text-ink-faint opacity-60" />
           )}

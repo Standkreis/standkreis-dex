@@ -12,7 +12,7 @@ import { tileOf } from './rules'
 import { anageFacts, commonsAsset, commonsInfo, inatDefault, inatNext, inatTaxon, wikipediaIntro, type AssetDraft, type Fact, type Intro } from './sources'
 import { wikidataFor, type WdMatch } from './wikidata'
 
-export type ContentOpts = { purge?: number; limit?: number; region?: string; log?: (s: string) => void }
+export type ContentOpts = { purge?: number; limit?: number; region?: string; keys?: number[]; log?: (s: string) => void }
 export type ContentResult = {
   taxa: number
   done: number
@@ -29,8 +29,8 @@ export type ContentResult = {
 type Target = { id: string; gbifKey: number; inSet: boolean }
 type Taxon = { id: string; gbifKey: number; sciName: string }
 
-/** The taxa the job works on: no content yet, and in a set or logged (E13). Never GloBI's out-of-set targets. */
-async function selectTaxa({ purge, limit, region }: ContentOpts): Promise<Taxon[]> {
+/** The taxa the job works on: no content yet, and in a set or logged (E13). Never GloBI's out-of-set targets. `keys` = just these (the log's in-process kick, handoff 0008). */
+async function selectTaxa({ purge, limit, region, keys }: ContentOpts): Promise<Taxon[]> {
   const select = { id: true, gbifKey: true, sciName: true }
   if (purge) {
     const t = await db.taxon.findUnique({ where: { gbifKey: purge }, select })
@@ -42,6 +42,7 @@ async function selectTaxa({ purge, limit, region }: ContentOpts): Promise<Taxon[
     ])
     return [t]
   }
+  if (keys) return db.taxon.findMany({ where: { contentAt: null, gbifKey: { in: keys } }, select, orderBy: { gbifKey: 'asc' } })
   const regionRow = region ? await db.region.findFirst({ where: { OR: [{ name: region }, { gadmGid: region }] }, select: { id: true } }) : null
   if (region && !regionRow) throw new Error(`no region "${region}"`)
   return db.taxon.findMany({

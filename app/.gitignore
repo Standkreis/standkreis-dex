@@ -41,3 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# user photos (handoff 0008): on disk until an object store is chosen (M8)
+/data/photos/

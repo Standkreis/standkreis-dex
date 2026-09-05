@@ -90,7 +90,6 @@
     "gallery": "Gallery",
     "gallerySub": "pick one",
     "photoNote": "A photo is stored, not identified. Automatic identification comes later.",
-    "photoSoon": "Photos are coming soon.",
     "back": "Back",
     "searchPlaceholder": "Search species · common or Latin name",
     "clear": "Clear",
@@ -128,7 +127,13 @@
     "captiveHint": "Kept animals and planted plants go into the journal but do not count as a discovery in the wild.",
     "saving": "Saving …",
     "unknown": "We do not know this species yet.",
-    "noRegion": "Pick a region first."
+    "noRegion": "Pick a region first.",
+    "photoUploading": "Saving the photo …",
+    "photoAttached": "Photo attached",
+    "photoAttachedSub": "stored, not identified",
+    "removePhoto": "remove",
+    "logFirst": "Discovered",
+    "logAgain": "Seen again"
   },
   "settings": {
     "title": "Settings",
@@ -334,6 +339,13 @@
     "toSpecies": "To the species ›",
     "again": "Seen again · {name}",
     "plusOne": "+1",
-    "close": "Close"
+    "close": "Close",
+    "kept": "Saved · {name} · kept"
+  },
+  "nudge": {
+    "title": "On your laptop too?",
+    "body": "A passkey takes your sightings along to other devices. No account, no email.",
+    "later": "Later",
+    "create": "Create a passkey"
   }
 }

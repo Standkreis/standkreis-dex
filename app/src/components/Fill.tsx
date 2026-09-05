@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
+import { PhotoInput, photoSrc, type Photo, type PhotoState } from './LogPhoto'
 import { tileIcon } from './SpeciesCard'
 
 type Fill = {
@@ -18,13 +19,18 @@ type Fill = {
  * reference-image attribution when no own photo fills the cell, "Foto" only when none is attached, "Zur Art ›".
  * No acknowledge button: a tap on the grid or a swipe down dismisses it. No confetti, no XP.
  */
-export function FillSheet({ s, onClose, onPhoto }: { s: Fill; onClose: () => void; onPhoto: () => void }) {
+export function FillSheet({ s, onClose, onPhoto, photoState }: { s: Fill; onClose: () => void; onPhoto: (p: Photo) => void; photoState: PhotoState }) {
   const t = useTranslations('fill')
   const ts = useTranslations('species')
+  const tc = useTranslations('common')
   const locale = useLocale()
   const format = useFormatter()
+  const picker = useRef<HTMLInputElement>(null)
+  const [picking, setPicking] = useState<PhotoState>('idle')
+  const busy = picking === 'busy' || photoState === 'busy'
+  const failed = picking === 'error' || photoState === 'error'
   const name = s.taxon.names[locale] ?? s.taxon.names.de ?? s.taxon.names.en ?? s.taxon.sciName
-  const image = s.photo?.url ?? s.taxon.lead?.url ?? null
+  const image = s.photo ? photoSrc(s.photo.url) : s.taxon.lead?.url ?? null
   const origin = s.taxon.lead ? (ts.has(`origin.${s.taxon.lead.origin}`) ? ts(`origin.${s.taxon.lead.origin}`) : s.taxon.lead.origin) : ''
   const startY = useRef<number | null>(null)
   return (
@@ -61,10 +67,11 @@ export function FillSheet({ s, onClose, onPhoto }: { s: Fill; onClose: () => voi
         )}
         <div className="mt-4 flex gap-3">
           {!s.photo && (
-            <button type="button" onClick={onPhoto} className="flex h-13 flex-1 items-center justify-center gap-2 rounded-full bg-tile text-[17px] font-bold" data-testid="fill-photo">
-              <span aria-hidden>📷</span> {t('photo')}
+            <button type="button" onClick={() => picker.current?.click()} disabled={busy} className={`flex h-13 flex-1 items-center justify-center gap-2 rounded-full bg-tile text-[17px] font-bold disabled:opacity-60 ${failed ? 'text-amber' : ''}`} data-testid="fill-photo">
+              <span aria-hidden>📷</span> {busy ? tc('working') : failed ? tc('error') : t('photo')}
             </button>
           )}
+          {!s.photo && <PhotoInput ref={picker} source="gallery" onPhoto={onPhoto} onState={setPicking} testId="photo-input" />}
           <Link href={`/species/${s.taxon.gbifKey}`} className="flex h-13 flex-[1.4] items-center justify-center rounded-full bg-moss text-[17px] font-bold text-white shadow-md" data-testid="fill-species">
             {t('toSpecies')}
           </Link>

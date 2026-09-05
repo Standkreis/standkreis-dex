@@ -1,6 +1,7 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { IDENTITY_COOKIE, publicProcedure, router } from '../trpc'
+import { deletePhotoFilesOfIdentity } from '../photos'
 import { signToken, verifyToken } from '../webauthn'
 
 const DELETE_TTL = 300
@@ -51,6 +52,7 @@ export const dataRouter = router({
     }
     const payload = verifyToken<DeleteToken>(input.token)
     if (!payload || payload.purpose !== 'delete' || payload.identityId !== id) throw new TRPCError({ code: 'BAD_REQUEST', message: 'token invalid or expired' })
+    await deletePhotoFilesOfIdentity(id) // the files first: the cascade below drops the Asset rows the file names come from
     await ctx.db.identity.delete({ where: { id } }) // cascade: passkeys, filter, sightings (and their photos), studies, assets owned
     ctx.setCookie(IDENTITY_COOKIE, '', { maxAge: 0 })
     return { step: 'done' as const }

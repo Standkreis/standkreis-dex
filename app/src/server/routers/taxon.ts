@@ -33,6 +33,22 @@ async function regionCentre(gadmGid: string): Promise<{ lat: number; lng: number
   return { lat: (Math.min(...lats) + Math.max(...lats)) / 2, lng: (Math.min(...lngs) + Math.max(...lngs)) / 2 }
 }
 
+// In-process content kicks for out-of-set species (handoff 0008 Track A), cached on globalThis like the region jobs so a
+// dev reload or a double tap never runs the same key twice at once.
+const kicks: Map<number, Promise<void>> = ((globalThis as unknown as { __dexContentKicks?: Map<number, Promise<void>> }).__dexContentKicks ??= new Map())
+function kickContent(gbifKey: number) {
+  if (kicks.has(gbifKey)) return
+  const log = (s: string) => console.log(`[content ${gbifKey}] ${s}`)
+  const job = (async () => {
+    const { runContent } = await import('../../../etl/content')
+    const r = await runContent({ keys: [gbifKey], log })
+    log(`done: ${r.done} filled, ${r.failed} failed in ${r.seconds.toFixed(1)} s`)
+  })()
+    .catch((e) => log(`failed: ${e instanceof Error ? e.message : String(e)}`))
+    .finally(() => kicks.delete(gbifKey))
+  kicks.set(gbifKey, job)
+}
+
 // The species page (spec §🎨 3). Pure read; the dex state row (studiert · entdeckt) is the client's join (M5/M6).
 export const taxonRouter = router({
   /**
@@ -97,11 +113,15 @@ export const taxonRouter = router({
 
   /**
    * A backbone species outside every set (record 0002 E13), used by the log flow: creates the Taxon row from GBIF
-   * species/{key} when missing. Content (names, intro, images) comes with the next `etl content` run; `contentAt` stays null.
+   * species/{key} when missing, then starts the content job for that one key in-process, not awaited (the same rule as
+   * M5's region job; M8 brings a queue). A row without content (a GloBI target, an earlier failure) gets the kick too.
    */
   ensure: publicProcedure.input(z.object({ gbifKey: z.number().int() })).mutation(async ({ ctx, input }) => {
     const existing = await ctx.db.taxon.findUnique({ where: { gbifKey: input.gbifKey }, select: ensureSelect })
-    if (existing) return { ...existing, lead: existing.assets[0]?.url ?? null, created: false }
+    if (existing) {
+      if (!existing.contentAt) kickContent(input.gbifKey)
+      return { ...existing, lead: existing.assets[0]?.url ?? null, created: false }
+    }
     const s = await gbifSpecies(input.gbifKey)
     if (!s) throw new Error(`GBIF has no taxon ${input.gbifKey}`)
     const tile = tileOf(s)
@@ -110,24 +130,28 @@ export const taxonRouter = router({
       data: { gbifKey: s.key, sciName: s.canonicalName ?? s.scientificName ?? String(s.key), rank: (s.rank ?? 'SPECIES').toLowerCase(), tile, class: s.class ?? null, order: s.order ?? null, genus: s.genus ?? null },
       select: ensureSelect,
     })
+    kickContent(s.key)
     return { ...created, lead: null, created: true }
   }),
 
   /**
-   * The backbone for the log's typed search (handoff 0008 Track A). Two GBIF calls: vernacular names over every checklist
+   * The backbone for the log's typed search (handoff 0008 Track A). Three GBIF calls: vernacular names over every checklist
    * dataset folded to the backbone key (`nubKey`), because the backbone's own vernaculars are thin ("Eichenprozessionsspinner"
-   * is not among them), plus scientific names in the backbone itself (rank SPECIES, status ACCEPTED). Each key is then
-   * read through the cached `species/{key}` for its ranks; keys that fit no tile drop. Ten rows, vernacular hits first.
+   * is not among them); the same query over every field, because `qField=VERNACULAR` is whole-word and misses the hyphenated
+   * "Eichen-Prozessionsspinner" that the plain search matches; plus scientific names in the backbone itself (rank SPECIES,
+   * status ACCEPTED). Each key is then read through the cached `species/{key}` for its ranks; keys that fit no tile drop.
+   * Ten rows, the keys most checklists agree on first.
    */
   search: publicProcedure.input(z.object({ q: z.string().trim().min(2).max(80), locale: z.enum(['de', 'en']) })).query(async ({ input }) => {
     const query = input.q
-    const [vern, sci] = await Promise.all([
+    const [vern, any, sci] = await Promise.all([
       gbifSearch({ q: query, qField: 'VERNACULAR', limit: 40 }),
+      gbifSearch({ q: query, limit: 40 }),
       gbifSearch({ q: query, qField: 'SCIENTIFIC', datasetKey: BACKBONE, rank: 'SPECIES', status: 'ACCEPTED', limit: 10 }),
     ])
-    // Fold the vernacular hits by backbone key; the more checklists agree, the higher the row.
+    // Fold the vernacular and any-field hits by backbone key; the more checklists agree, the higher the row.
     const folded = new Map<number, { hits: number; names: Record<string, Set<string>> }>()
-    for (const h of vern) {
+    for (const h of [...vern, ...any]) {
       const key = h.nubKey ?? (h.key && sci.some((s) => s.key === h.key) ? h.key : undefined)
       if (!key) continue
       const f = folded.get(key) ?? { hits: 0, names: { de: new Set(), en: new Set() } }

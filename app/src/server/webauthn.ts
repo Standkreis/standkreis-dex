@@ -66,9 +66,10 @@ export function takeChallenge(ctx: Pick<Context, 'cookies' | 'setCookie' | 'iden
   return payload.challenge
 }
 
-// ── The nudge hook (doubt 31) ─────────────────────────────────────────────────
-/// M6 calls this after the first sighting. Until the wording is settled it never offers.
-export function shouldOfferPasskey(_identity: { id: string; createdAt: Date }): boolean {
-  void _identity
-  return false
+// ── The nudge hook (doubt 31, handoff 0008 Track A) ───────────────────────────
+/// Offer a passkey once: no passkey yet and exactly one wild sighting, i.e. right after the first find. The client keeps
+/// a localStorage flag so a dismissed nudge never returns, even while the count stays at one.
+export async function shouldOfferPasskey(db: Context['db'], identityId: string): Promise<boolean> {
+  const [passkeys, wild] = await Promise.all([db.passkey.count({ where: { identityId } }), db.sighting.count({ where: { identityId, wildness: 'wild' } })])
+  return passkeys === 0 && wild === 1
 }

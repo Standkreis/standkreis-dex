@@ -6,6 +6,7 @@ import { useFormatter, useLocale, useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { useAtlasSet } from './AtlasCounters'
+import { PhotoInput, photoSrc, type PhotoState } from './LogPhoto'
 import { Thumb, type Card, type DexState } from './SpeciesCard'
 
 type Loc = { status: 'idle' | 'asking' | 'granted' | 'denied' } & Partial<{ lat: number; lng: number }>
@@ -19,7 +20,7 @@ const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString()
  * the wild/captive answer. The location is asked here, explained before the browser prompt (spec §🎨 1's pattern);
  * refusal leaves lat/lng null. No confirm step: the fill is the confirmation.
  */
-export function LogSave({ gbifKey }: { gbifKey: number }) {
+export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; photoId: string | null; fromSpecies: boolean }) {
   const t = useTranslations('log')
   const ts = useTranslations('species')
   const tc = useTranslations('common')
@@ -47,7 +48,11 @@ export function LogSave({ gbifKey }: { gbifKey: number }) {
 
   const [at, setAt] = useState(() => new Date())
   const [note, setNote] = useState('')
-  const [soon, setSoon] = useState(false)
+  // The photo slot: the id rides in the URL (from the chooser or the search strip), so back and reload keep it.
+  const picker = useRef<HTMLInputElement>(null)
+  const [photoState, setPhotoState] = useState<PhotoState>('idle')
+  const here = (photo: string | null) => `/log?taxon=${gbifKey}${photo ? `&photo=${photo}` : ''}${fromSpecies ? '&from=species' : ''}`
+  const removePhoto = useMutation(trpc.sighting.removePhoto.mutationOptions({ onSettled: () => router.replace(here(null)) }))
 
   // Location: if the browser already granted it, take it silently; if it is still a question, explain first and ask on a tap.
   const [loc, setLoc] = useState<Loc>({ status: 'idle' })
@@ -69,8 +74,14 @@ export function LogSave({ gbifKey }: { gbifKey: number }) {
   const create = useMutation(
     trpc.sighting.create.mutationOptions({
       onSuccess: async (r) => {
-        await qc.invalidateQueries({ queryKey: trpc.identity.progress.queryKey(), refetchType: 'all' })
-        router.replace(r.first ? `/?fill=${r.id}` : `/?again=${r.id}`)
+        await Promise.all([
+          qc.invalidateQueries({ queryKey: trpc.identity.progress.queryKey(), refetchType: 'all' }),
+          qc.invalidateQueries({ queryKey: trpc.sighting.photos.queryKey() }),
+          qc.invalidateQueries({ queryKey: trpc.sighting.outside.pathKey() }),
+        ])
+        // First wild sighting → the grid fills the cell (one fill implementation, handoff §❓); a repeat from the species page goes back there with the toast.
+        const again = `again=${r.id}${r.wildness === 'wild' ? '' : '&kept=1'}` // a kept sighting gets its own toast line, never "Wiedergesehen"
+        router.replace(r.first ? `/?fill=${r.id}` : fromSpecies ? `/species/${gbifKey}?${again}` : `/?${again}`)
       },
     }),
   )
@@ -78,7 +89,7 @@ export function LogSave({ gbifKey }: { gbifKey: number }) {
     if (!card) return
     // "Gehalten" is captive for animals and fungi, cultivated for plants (schema Wildness; spec §⚖️ wild only).
     const wildness = kind === 'wild' ? 'wild' : card.tile === 'plant' ? 'cultivated' : 'captive'
-    create.mutate({ taxonId: card.id, at, lat: loc.lat, lng: loc.lng, note: note.trim() || undefined, wildness })
+    create.mutate({ taxonId: card.id, at, lat: loc.lat, lng: loc.lng, note: note.trim() || undefined, wildness, photoId: photoId ?? undefined })
   }
   const busy = create.isPending || create.isSuccess
 
@@ -89,7 +100,7 @@ export function LogSave({ gbifKey }: { gbifKey: number }) {
   return (
     <main className="mx-auto flex min-h-dvh max-w-[520px] flex-col px-4 pt-3 [&~nav]:hidden" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }} data-testid="log-save">
       <div className="flex items-center gap-3">
-        <button type="button" onClick={() => router.push('/log')} aria-label={t('back')} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-card text-[20px] shadow-[0_2px_12px_rgba(30,42,35,0.06)]">‹</button>
+        <button type="button" onClick={() => (fromSpecies ? router.push(`/species/${gbifKey}`) : router.push(photoId ? `/log?photo=${photoId}` : '/log'))} aria-label={t('back')} className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-card text-[20px] shadow-[0_2px_12px_rgba(30,42,35,0.06)]">‹</button>
         <h1 className="text-[22px] font-bold tracking-tight">{t('saveTitle')}</h1>
       </div>
 
@@ -103,7 +114,7 @@ export function LogSave({ gbifKey }: { gbifKey: number }) {
               <div className="truncate text-[22px] leading-tight font-bold">{name}</div>
               <div className="mt-0.5 text-[15px] text-ink-soft">{name !== card.sciName && <><i>{card.sciName}</i> · </>}{ts(`tile.${card.tile}`)}{!inSet && set && <> · {t('rare')}</>}</div>
             </div>
-            <button type="button" onClick={() => router.push('/log')} className="shrink-0 text-[15px] font-semibold text-moss-deep">{t('change')}</button>
+            <button type="button" onClick={() => router.push(photoId ? `/log?photo=${photoId}` : '/log')} className="shrink-0 text-[15px] font-semibold text-moss-deep">{t('change')}</button>
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-3">
@@ -131,14 +142,27 @@ export function LogSave({ gbifKey }: { gbifKey: number }) {
             </div>
           </div>
 
-          <button type="button" onClick={() => setSoon(true)} className={`mt-3 flex w-full items-center gap-4 px-4 py-4 text-left ${cardCls}`} data-testid="save-photo">
-            <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-dashed border-ink-faint/60 text-[24px]" aria-hidden>📷</span>
-            <span className="min-w-0 flex-1">
-              <span className="block text-[17px] font-bold">{t('noPhotoTitle')}</span>
-              <span className="block text-[15px] leading-snug text-ink-soft">{soon ? t('photoSoon') : t('noPhotoSub')}</span>
-            </span>
-            {!soon && <span className="shrink-0 text-[15px] font-semibold text-moss-deep">{t('addPhoto')}</span>}
-          </button>
+          {photoId ? (
+            <div className={`mt-3 flex items-center gap-4 px-4 py-4 ${cardCls}`} data-testid="save-photo" data-photo={photoId}>
+              {/* eslint-disable-next-line @next/next/no-img-element -- the identity's own upload */}
+              <img src={photoSrc(`/api/photo/${photoId}`)} alt="" className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+              <span className="min-w-0 flex-1">
+                <span className="block text-[17px] font-bold">{t('photoAttached')}</span>
+                <span className="block text-[15px] leading-snug text-ink-soft">{t('photoAttachedSub')}</span>
+              </span>
+              <button type="button" onClick={() => removePhoto.mutate({ photoId })} disabled={removePhoto.isPending} className="shrink-0 text-[15px] font-semibold text-ink-soft disabled:opacity-60" data-testid="save-photo-remove">{t('removePhoto')}</button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => picker.current?.click()} disabled={photoState === 'busy'} className={`mt-3 flex w-full items-center gap-4 px-4 py-4 text-left disabled:opacity-60 ${cardCls}`} data-testid="save-photo">
+              <span className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl border border-dashed border-ink-faint/60 text-[24px]" aria-hidden>📷</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-[17px] font-bold">{t('noPhotoTitle')}</span>
+                <span className={`block text-[15px] leading-snug ${photoState === 'error' ? 'text-amber' : 'text-ink-soft'}`}>{photoState === 'busy' ? t('photoUploading') : photoState === 'error' ? tc('error') : t('noPhotoSub')}</span>
+              </span>
+              {photoState !== 'busy' && <span className="shrink-0 text-[15px] font-semibold text-moss-deep">{t('addPhoto')}</span>}
+            </button>
+          )}
+          <PhotoInput ref={picker} source="gallery" onPhoto={(p) => router.replace(here(p.id))} onState={setPhotoState} testId="photo-input" />
 
           <input value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('notePlaceholder')} maxLength={500} data-testid="save-note"
             className={`mt-3 h-13 w-full px-4 text-[17px] outline-none placeholder:text-ink-faint ${cardCls}`} />
