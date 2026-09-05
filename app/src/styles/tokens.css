@@ -1,5 +1,6 @@
 /* The 15 colour tokens, ported verbatim from spike/ui/src/index.css.
-   Light is the default: the walk happens in sunlight. Dark follows the system; there is no toggle. */
+   Light is the default: the walk happens in sunlight. Dark follows the system unless Einstellungen › Darstellung
+   forces one (owner's call, 2026-09-05, overruling doubt 34): ThemeScript sets data-theme on <html>. */
 @theme {
   --color-paper: #f5f2ea;
   --color-card: #ffffff;          /* raised surfaces: search bar, bottom bar, cards */
@@ -21,8 +22,26 @@
 
 :root { color-scheme: light; }
 
+:root[data-theme="dark"] {
+    color-scheme: dark;
+    --color-paper: #121b16;
+    --color-card: #1b2621;
+    --color-tile: #243129;
+    --color-ink: #e9eee8;
+    --color-ink-soft: #a3aea6;
+    --color-ink-faint: #6d786f;
+    --color-moss: #22c55e;
+    --color-moss-deep: #4ade80;
+    --color-moss-soft: #17402a;
+    --color-amber: #e09a3a;
+    --color-amber-soft: #3b2a12;
+    --color-sky: #3b82f6;
+    --color-sky-deep: #60a5fa;
+    --color-sky-soft: #1a2e4d;
+  }
+
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
     --color-paper: #121b16;
     --color-card: #1b2621;

@@ -7,6 +7,8 @@ import { Shell } from '@/components/Shell'
 import { ServiceWorker } from '@/components/ServiceWorker'
 import { IdentityBoot } from '@/components/IdentityBoot'
 import { TRPCReactProvider } from '@/trpc/client'
+import Script from 'next/script'
+import { ThemeBoot, themeScript } from '@/components/Appearance'
 import '../globals.css'
 
 export const dynamicParams = false
@@ -41,13 +43,18 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
   if (!hasLocale(routing.locales, locale)) notFound()
   setRequestLocale(locale)
   return (
-    <html lang={locale}>
+    <html lang={locale} suppressHydrationWarning>
+      <head>
+        {/* Darstellung: applies a stored light/dark choice before paint; the default follows the system. */}
+        <Script id="dex-theme" strategy="beforeInteractive">{themeScript}</Script>
+      </head>
       <body className="font-sans">
         <NextIntlClientProvider>
           <TRPCReactProvider>
             {children}
             <Shell />
             <IdentityBoot />
+            <ThemeBoot />
             <ServiceWorker />
           </TRPCReactProvider>
         </NextIntlClientProvider>

@@ -78,6 +78,14 @@
       "deleteCancel": "Keep",
       "deleted": "Everything deleted. You start fresh."
     },
+    "display": {
+      "title": "Appearance",
+      "theme": "Theme",
+      "themeSystem": "System",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "language": "Language"
+    },
     "about": {
       "title": "About",
       "sources": "Sources",

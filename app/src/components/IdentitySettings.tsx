@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { authenticate, guessDeviceName, register } from './IdentityPasskey'
 import { IdentityDeleteSheet } from './IdentityDelete'
+import { AppearanceRows } from './Appearance'
 
 const card = 'rounded-3xl bg-card shadow-[0_2px_12px_rgba(30,42,35,0.06)]'
 const Group = ({ title, children }: { title: string; children: ReactNode }) => (
@@ -30,7 +31,7 @@ const Row = ({ title, hint, value, onClick, testId }: { title: string; hint?: st
   return onClick ? <button type="button" onClick={onClick} data-testid={testId} className={cls}>{inner}</button> : <div className={cls}>{inner}</div>
 }
 
-// Einstellungen (findings 0002 §9 minus Dein Kreis, Darstellung and iNaturalist, handoff 0006). Boring and findable.
+// Einstellungen (findings 0002 §9 minus Dein Kreis and iNaturalist, handoff 0006; Darstellung back in by the owner, 2026-09-05). Boring and findable.
 export function IdentitySettings({ version }: { version: string }) {
   const t = useTranslations('settings')
   const tc = useTranslations('common')
@@ -139,6 +140,10 @@ export function IdentitySettings({ version }: { version: string }) {
       <Group title={t('data.title')}>
         <Row title={t('data.export')} hint={t('data.exportHint')} onClick={exportData} testId="export" />
         <Row title={t('data.delete')} hint={t('data.deleteHint')} onClick={() => setDeleting(true)} testId="delete" />
+      </Group>
+
+      <Group title={t('display.title')}>
+        <AppearanceRows />
       </Group>
 
       <Group title={t('about.title')}>

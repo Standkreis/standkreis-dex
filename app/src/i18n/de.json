@@ -78,6 +78,14 @@
       "deleteCancel": "Behalten",
       "deleted": "Alles gelöscht. Du fängst neu an."
     },
+    "display": {
+      "title": "Darstellung",
+      "theme": "Design",
+      "themeSystem": "System",
+      "themeLight": "Hell",
+      "themeDark": "Dunkel",
+      "language": "Sprache"
+    },
     "about": {
       "title": "Über",
       "sources": "Quellen",

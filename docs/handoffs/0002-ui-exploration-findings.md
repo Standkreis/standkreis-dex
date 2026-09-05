@@ -325,7 +325,7 @@ Route: `#/settings`, `?synced`, `?theme=`. First mocked as the "Du" tab; the own
 | 31 | **Where does the passkey nudge live?** Spec says "offered after first sighting"; the mock only has the card here | One sheet after the first sighting, dismissable, never repeated. After that this card is the only place. No banner on the Dex |
 | 32 | **"An iNaturalist senden · Später"** is a promise in the UI. Rows for unbuilt things are how settings rot | Hide until built. Kept in the mock only so the spec's "export to iNat later" is visible to the owner |
 | 33 | **"Alles löschen" wipes the sync copy too.** One tap, two devices, no way back | Two-step confirm that names the devices, the export row directly above as the escape. Never a "delete only here": that recreates Seek's split-brain |
-| 34 | **The Design toggle is a fake setting** in the spike (`?theme=`). Real app: store a choice, or follow the system only? | Follow the system, no toggle, until someone asks |
+| 34 | **The Design toggle is a fake setting** in the spike (`?theme=`). Real app: store a choice, or follow the system only? | Follow the system, no toggle, until someone asks. **Someone asked (the owner, 2026-09-05):** System · Hell · Dunkel in Einstellungen › Darstellung, default System, plus a Sprache row ([findings 0006](0006-etl-and-identity-findings.md)) |
 
 ## 10 · 🙋 Du as a profile (mocked 2026-09-04 on owner request)
 
