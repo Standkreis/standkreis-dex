@@ -4,7 +4,8 @@
 
 | 🗓️ Date | 👤 Owner | ✅ Checks |
 | --- | --- | --- |
-| 2026-09-05 | Sven Reiser | C1–C7 pass (Track A) · Track B: see its section · C11 C12 on `main` after both merges |
+| 2026-09-05 | Sven Reiser | C1–C7 pass (Track A) · C8 C9 C10 pass (Track B) · C11 C12 on `main` after both merges |
+
 
 ## 🔍 Track A · log, save, photo, fill
 
@@ -63,6 +64,44 @@ Fresh identities per check (`log.mjs fresh`), Mainz-Bingen, 390 × 844, de/light
 | Kept toast | `a-captive-toast` |
 | Out of the set: fill, cell at the bottom, page after the kick | `a-outside-fill`, `a-outside-cell`, `a-outside-page-de-light`, `a-outside-cell-after-de-light` |
 
+## 📓 Track B · the Tagebuch and the single sighting
+
+Branch `m6-journal`. Shots in [`0008-shots/b-*`](0008-shots/), seed `app/scripts/m6b/seed.mts`, driver `app/scripts/m6b/shots.mjs` (headless Chrome over CDP, no dependency, as findings 0007).
+
+### 📐 Decisions the spec did not make
+
+| Topic | Decision | Why, and what was rejected |
+| --- | --- | --- |
+| Pill order | **Alle · Studiert · Entdeckt** | The handoff table lists Alle · Entdeckt · Studiert; the owner's order rule (findings 0002 §🔁, "amber before green everywhere, Tagebuch pills included") and the mock say studiert first. One rule beats one table row; a swap is one array in `Journal.tsx` (`KINDS`). See doubt B1 |
+| Pill label | "Entdeckt", not the mock's "Entdeckungen" | Handoff wording; en "Discovered" like the grid |
+| Day grouping | The client sends its IANA zone (`tz`); the server groups by that local day and pages by it | A sighting at 23:30 must sit on the day it happened, not on the server's UTC day |
+| Paging | `journal.days({cursor?, kind, tz})`, **`cursor` is the handoff's `before`**: tRPC's infinite query needs that name. 30 days per page; up to 600 rows fetched, the last fetched day dropped when the cap hits, so a day is never split | A cursor by day, not by row |
+| Day header | "Heute · Sa 5. Sep" · "Gestern · Fr 4. Sep" · "Mi 2. Sep" · with the year when it is not this year. Weekday and month abbreviations are locale keys (`journal.weekdays`, `journal.months`, `journal.dayFormat`) | `Intl` gives "Sa., 5. Sept." with dots; the mock's form needs hand formatting. The handoff's "Fr 5. Sep" was a slip: 2026-09-05 is a Saturday |
+| Places on the header | Distinct `place` values in order of appearance, joined by ", ", truncated | Studies carry no place; a day with only studies has no right side |
+| Study row meta | Time only ("21:30") | The handoff: "Studiert · zuhause" has no place. No invented "zuhause" |
+| Chip on the sighting page | "Neu entdeckt" when `first`, else "gehalten"/"kultiviert" when not wild, else none | The same vocabulary as the row |
+| Mini tile image | The row's own photo when the sighting has one, else the reference image; state (grey 45 % · grey 70 % + amber ring · colour) from `identity.progress` on the client | Spec §🎨 2 "own photo first"; the row is the sighting, so its photo, not the taxon's latest |
+| "Entdeckt" pill and captive rows | The pill shows every sighting row, captive ones included, marked "gehalten" | It filters by kind (sighting vs study), not by dex state; a captive row is still a Sichtung |
+| Sighting map | `SightingMap.tsx`: nine OSM tiles at **zoom 16** in the SpeciesMap layout, one moss dot, label "Genauer Ort · nur du siehst ihn", credit line | Spec §⚖️ exact only here; 16 shows streets without a library. No GBIF overlay |
+| Where without a point | The Gemeinde line alone, or "Kein Ort gespeichert." | Location refused on save (Track A C1) still gives a readable page |
+| Edit | Note (textarea, 500), when (`datetime-local`, max now), wildness (two segments; a third only when the row is already `cultivated`). Speichern appears when dirty, Verwerfen resets | One screen, no edit mode; the save screen offers two wildness answers, so the edit does too |
+| Löschen | One line "Diese Sichtung löschen? Das lässt sich nicht rückgängig machen." with "Ja, löschen" · "Behalten"; then back to `/journal`; `journal` and `identity.progress` invalidated | Handoff: one confirm line |
+| `journal.remove` and files | Cascades the photo rows; the file on disk stays | The photo store is Track A's (`data.ts` cleanup, `sighting.ts`); see doubt B3 |
+| Own-photo caption | An asset with `origin: user` captions as "Dein Foto" only | "Foto: Du · eigenes Foto · Dein Foto" said the same thing three times |
+| Export route | `sighting/[id]` emits one placeholder shell `sighting/_/` under `STATIC_EXPORT=1`; server builds render every id on demand | Sightings belong to one identity, so the export cannot enumerate them; a static host rewrites `/sighting/*` to the shell (doubt B2) |
+| Tab bar | Hidden on the sighting page with the species page's sibling selector | Same detail-page rule; Shell is Track A's file (findings 0007 doubt B9 stands) |
+| Footer | One faint line under the cards: "Orte: genau gespeichert, hier als Gemeinde, geteilt nur grob." | The mock's footer, spec §⚖️ ladder |
+| Fixture "own photo" | The seed writes a user asset row pointing at the taxon's reference file | `/api/photo` is Track A's; the row shape is what Track A will write |
+
+### ✅ Checks
+
+| # | Result | Evidence |
+| --- | --- | --- |
+| C8 | ✅ | Seed: identity `00000000-0000-4000-8000-00000000006b`, 10 sightings + 1 study over today, yesterday, three days ago. `b-journal-de-light.png`: "Heute · Sa 5. Sep" (Ingelheim am Rhein, Bingen am Rhein) → Schlehdorn **Neu entdeckt**, Amsel (no chip), Rotkehlchen (no chip); "Gestern · Fr 4. Sep" → Stieleiche **Studiert** (grey + amber ring, "21:30"), Kohlmeise **Neu entdeckt** with 📷, Rotkehlchen; "Mi 2. Sep" → Fliegenpilz, Admiral 📷, **Rotmilan grey with "gehalten"**, Rotkehlchen and Amsel Neu entdeckt. Rotkehlchen ×3: chip once, on Sep 2. Pills: Studiert → one day, Stieleiche only; Entdeckt → 10 sighting rows, no study; URL `?kind=` |
+| C9 | ✅ | Schlehdorn (only wild row): note edited to "Erste reife Schlehen, noch herb" → DB row and reload show it. Löschen → confirm line (`b-sighting-de-light-confirm.png`) → row gone, `/journal` shows Amsel, Rotkehlchen for today; `identity.progress.seen` **6 → 5**; grid "1 studiert · 5 entdeckt", the Schlehdorn cell **grey** (shot during the session); the old URL renders "Diese Sichtung gibt es nicht mehr." |
+| C10 | ✅ | `b-journal-{de,en}-{light,dark}.png`, `b-journal-de-light-360.png`, `b-journal-empty-de-light.png` ("Noch keine Sichtung. Tipp auf ＋, wenn du etwas siehst.", no pills); `b-sighting-{de,en}-{light,dark}.png` (full), `b-sighting-de-light-360.png`. Parity test green, 21 + 27 keys per language. No XP anywhere |
+| C12 (B side) | ✅ | `npm run check` green on `m6-journal`: typecheck, lint, 26 tests, `STATIC_EXPORT=1 next build` → 2,411 pages, `out/de/journal/`, `out/de/sighting/_/`, no `out/api` |
+
 ### 🤔 Doubts
 
 | # | Doubt | Where it lands |
@@ -79,5 +118,12 @@ Fresh identities per check (`log.mjs fresh`), Mainz-Bingen, 390 × 844, de/light
 | A10 | The chooser's Foto tile relies on `<input capture="environment">`: Safari and Chrome on phones open the camera, a desktop opens the picker. Headless tests set the file on the persistent input | Accepted |
 | A11 | The content kick runs the whole content job for one key: Wikidata batch, Commons batch, GloBI edges. 10 s in C4. Two taps on two rows run two kicks in parallel; the job serialises its writes so no deadlock, but no queue either | M8 |
 | A12 | `pg` in the driver script parses `timestamp` columns as local time; the evidence prints `at::text` (UTC as stored) to avoid a −2 h confusion | Script only |
+| B1 | Pill order follows the order rule, not the handoff table. If the owner meant Entdeckt first, flip `KINDS` | Owner, merge review |
+| B2 | On a static host `/sighting/<id>/` has no file: the export ships `sighting/_/` and needs a rewrite rule; the server build needs none | M8 / deploy, with findings 0007 B2 |
+| B3 | `journal.remove` deletes the photo row, not the file. Track A owns the file store; after the merge `remove` should call the same cleanup `data.delete` uses | Merge: one line in `journal.ts` once Track A's helper exists |
+| B4 | `journal.get` returns the exact point to its owner only (`identityId` in the where); there is no share path yet, so nothing coarsens | M13 share cards |
+| B5 | The seed's "own photo" is a reference file under a user asset row. Until Track A's `/api/photo` is merged the mini tile cannot show a real user photo | Track A merge |
+| B6 | 600-row cap per page: a single day with more than 600 rows would be dropped as "incomplete" forever | Theoretical; note for M14 |
+| B7 | The test identity stays in the dev DB (`seed.mts cleanup` removes it) | Owner: keep as demo or clean |
 
-**For Track B's merge:** `journal.remove` calls `deletePhotoFiles(ids)` from `@/server/photos` **before** `sighting.delete`; `journal.days` reads `photos[0].url` and renders it as is (same-origin).
+**For Track B's merge:** `journal.remove` calls `deletePhotoFiles(ids)` from `@/server/photos` **before** `sighting.delete`; `journal.days` reads `photos[0].url` and renders it as is (same-origin). Done at the merge: `journal.remove` calls `deletePhotoFiles` (B3 closed).
