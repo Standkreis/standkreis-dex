@@ -52,7 +52,7 @@ Branch `m5-grid`. Shots in [`0007-shots/a-*`](0007-shots/), driver scripts `app/
 
 | # | Doubt | Proposal |
 | --- | --- | --- |
-| A1 | **Badge and sort.** The owner's note counted a non-default sort as active; the build does not, so C4 reads 3 as written. If the owner wants 4, it is one term in `AtlasGrid.tsx` (`active`) | Keep 3; a sort is not a filter |
+| A1 | **Badge and sort.** The owner's note counted a non-default sort as active; the build does not, so C4 reads 3 as written. If the owner wants 4, it is one term in `AtlasGrid.tsx` (`active`) | Keep 3; a sort is not a filter. **Owner confirmed 2026-09-05** |
 | A2 | **929 tiles at 45 %.** The light grid is a pale wall (doubt 44 stands); the studied and found cells sit where the sort puts them, often below the fold | Decide on a phone in sunlight; a "Zuletzt entdeckt" default sort would surface progress but hide "jetzt" |
 | A3 | **The test identity.** `grid.mjs seed` writes `Study` and `Sighting` rows straight into the dev database for one identity, because `study.mark` is Track B's and the log flow is M6 | Delete after the merge or keep as the owner's demo identity |
 | A4 | **Region change loses nothing but asks twice.** Ändern walks all three screens | Fine for slice one; a one-screen picker when a third region exists |
