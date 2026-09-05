@@ -4,7 +4,7 @@
 
 | 🗓️ Date | 👤 Owner | ✅ Checks |
 | --- | --- | --- |
-| 2026-09-05 | Sven Reiser | C1–C7 pass (Track A) · C8 C9 C10 pass (Track B) · C11 C12 on `main` after both merges |
+| 2026-09-05 | Sven Reiser | C1–C7 pass (Track A) · C8 C9 C10 pass (Track B) · C11 C12 pass on `main` after both merges: export lists `/api/photo/<id>`, delete removes rows and the file (GET → 404), a second export is empty on a fresh identity; `npm run check` green, no `out/api` |
 
 
 ## 🔍 Track A · log, save, photo, fill
