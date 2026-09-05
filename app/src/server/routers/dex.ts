@@ -1,7 +1,28 @@
 import { z } from 'zod'
 import { Tile } from '@/generated/prisma/enums'
+import { get, q } from '../../../etl/fetch'
+import { resolveRegion } from '../../../etl/gbif'
 import { isNow, nowRatio, perMille } from '../../../etl/rules'
 import { publicProcedure, router } from '../trpc'
+
+const GBIF = 'https://api.gbif.org/v1'
+type GadmHit = { id: string; name: string; gadmLevel: number; type?: string[]; englishType?: string[]; higherRegions?: { id: string; name: string }[] }
+type GadmSearch = { results: GadmHit[] }
+type ReverseHit = { id: string; type: string; title: string; distance: number }
+
+const gadmSearch = (params: Record<string, string | number>) => get<GadmSearch>(`${GBIF}/geocode/gadm/search?${q({ ...params, limit: 10 })}`).then((j) => j?.results ?? [])
+const gadmById = (gid: string) => gadmSearch({ gadmGid: gid }).then((r) => r.find((h) => h.id === gid) ?? null)
+
+/** One level-2 unit as the onboarding shows it: name · type, parent. `type` is GADM's native word (Landkreis), `typeEn` the English one (District). */
+const toUnit = (h: GadmHit) => {
+  const higher = h.higherRegions ?? []
+  return { gadmGid: h.id, name: h.name, higher: higher.map((x) => x.name).join(' › '), parent: higher.at(-1)?.name ?? null, type: h.type?.[0] ?? null, typeEn: h.englishType?.[0] ?? null }
+}
+type Unit = ReturnType<typeof toUnit>
+
+// In-process region jobs (handoff 0007 Track A, accepted for M5; M8 brings a queue). Cached on globalThis so dev reloads
+// do not start the same region twice; a second identity asking for a running region waits on the same job.
+const jobs: Map<string, Promise<void>> = ((globalThis as unknown as { __dexRegionJobs?: Map<string, Promise<void>> }).__dexRegionJobs ??= new Map())
 
 const tile = z.enum(Object.values(Tile) as [Tile, ...Tile[]])
 const thisMonth = () => new Date().getMonth() + 1
@@ -59,6 +80,72 @@ export const dexRouter = router({
    * `content` = set members the content job has run for, `introEn` = intros only in English, `noGermanName` = set
    * members without a German name. Shares are of `setSize`; the UI shows "N % nur auf Englisch" when it matters.
    */
+  /**
+   * The onboarding's region lookup, both paths through GBIF (record 0002 E1): a place name via `geocode/gadm/search`,
+   * a point via `geocode/reverse`. Only level-2 units come back; a level-3 hit (Bingen am Rhein) is folded into its
+   * level-2 parent (Mainz-Bingen). Each unit carries the Region row's id and status when the ETL already knows it.
+   */
+  lookupRegion: publicProcedure
+    .input(
+      z
+        .object({ q: z.string().trim().min(2).max(80).optional(), lat: z.number().min(-90).max(90).optional(), lng: z.number().min(-180).max(180).optional() })
+        .refine((i) => i.q !== undefined || (i.lat !== undefined && i.lng !== undefined), 'q or lat+lng'),
+    )
+    .query(async ({ ctx, input }) => {
+      const units: Unit[] = []
+      const seen = new Set<string>()
+      const push = (u: Unit | null) => { if (u && !seen.has(u.gadmGid)) { seen.add(u.gadmGid); units.push(u) } }
+      if (input.q !== undefined) {
+        const hits = await gadmSearch({ q: input.q })
+        for (const h of hits) {
+          if (h.gadmLevel === 2) push(toUnit(h))
+          else if (h.gadmLevel === 3) {
+            const parent = h.higherRegions?.at(-1)
+            if (parent && !seen.has(parent.id)) push(await gadmById(parent.id).then((p) => (p ? toUnit(p) : null)))
+          }
+        }
+      } else {
+        const hits = (await get<ReverseHit[]>(`${GBIF}/geocode/reverse?${q({ lat: input.lat!, lng: input.lng! })}`)) ?? []
+        const nearest = hits.filter((h) => h.type === 'GADM2').sort((a, b) => a.distance - b.distance)[0]
+        if (nearest) push(await gadmById(nearest.id).then((p) => (p ? toUnit(p) : null)))
+      }
+      const known = units.length ? await ctx.db.region.findMany({ where: { gadmGid: { in: units.map((u) => u.gadmGid) } }, select: { id: true, gadmGid: true, status: true } }) : []
+      const byGid = new Map(known.map((r) => [r.gadmGid, { id: r.id, status: r.status }]))
+      return units.map((u) => ({ ...u, region: byGid.get(u.gadmGid) ?? null }))
+    }),
+
+  /**
+   * Make a region exist and be prepared: upserts the Region row `queued` and starts the region job and then the
+   * content job in this process, not awaited. Idempotent: a ready region returns at once, a running job is joined,
+   * a failed region is retried. The grid polls `identity.me` until `ready` (C2).
+   */
+  requestRegion: publicProcedure.input(z.object({ gadmGid: z.string().regex(/^[A-Z]{3}(\.\d+)+_\d+$/) })).mutation(async ({ ctx, input }) => {
+    const { gadmGid } = input
+    const pick = { id: true, name: true, status: true, error: true } as const
+    let region = await ctx.db.region.findUnique({ where: { gadmGid }, select: pick })
+    if (region?.status === 'ready') return region
+    if (!region) {
+      const g = await resolveRegion(gadmGid)
+      region = await ctx.db.region.upsert({ where: { gadmGid }, create: { gadmGid, name: g.name, higher: g.higher, status: 'queued' }, update: {}, select: pick })
+    }
+    if (!jobs.has(gadmGid)) {
+      if (region.status === 'failed') region = await ctx.db.region.update({ where: { gadmGid }, data: { status: 'queued', error: null }, select: pick })
+      const log = (s: string) => console.log(`[region ${gadmGid}] ${s}`)
+      const job = (async () => {
+        const { runRegion } = await import('../../../etl/region')
+        const { runContent } = await import('../../../etl/content')
+        const r = await runRegion(gadmGid, log)
+        log(`ready: set ${r.set} in ${r.seconds.toFixed(1)} s`)
+        const c = await runContent({ region: gadmGid, log })
+        log(`content: ${c.done} filled, ${c.failed} failed in ${(c.seconds / 60).toFixed(1)} min`)
+      })()
+        .catch((e) => log(`failed: ${e instanceof Error ? e.message : String(e)}`))
+        .finally(() => jobs.delete(gadmGid))
+      jobs.set(gadmGid, job)
+    }
+    return { ...region, status: 'queued' as const, error: null }
+  }),
+
   regions: publicProcedure.query(async ({ ctx }) => {
     const regions = await ctx.db.region.findMany({ orderBy: { name: 'asc' }, select: { id: true, gadmGid: true, name: true, higher: true, status: true, refreshedAt: true } })
     return Promise.all(

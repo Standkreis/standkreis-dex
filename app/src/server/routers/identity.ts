@@ -7,6 +7,7 @@ import {
 } from '@simplewebauthn/server'
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simplewebauthn/server'
 import { z } from 'zod'
+import { Tile } from '@/generated/prisma/enums'
 import { IDENTITY_COOKIE, publicProcedure, router, type Context } from '../trpc'
 import { expectedOrigin, issueChallenge, rpID, rpName, takeChallenge } from '../webauthn'
 
@@ -89,6 +90,19 @@ export const identityRouter = router({
   setName: publicProcedure.input(z.object({ displayName: z.string().trim().max(40) })).mutation(({ ctx, input }) =>
     ctx.db.identity.update({ where: { id: ctx.identity.id }, data: { displayName: input.displayName || null }, select: { displayName: true } }),
   ),
+
+  // The global filter (spec §🏗️): region and tiles from onboarding, the "nur jetzt" chip from the drawer. The only write
+  // the grid makes; everything reads it back through `me` and `progress`. Empty tiles = all (see `progress`).
+  setFilter: publicProcedure
+    .input(z.object({ regionId: z.string().uuid(), tiles: z.array(z.enum(Object.values(Tile) as [Tile, ...Tile[]])), nowOnly: z.boolean().default(false) }))
+    .mutation(({ ctx, input }) =>
+      ctx.db.filter.upsert({
+        where: { identityId: ctx.identity.id },
+        create: { identityId: ctx.identity.id, regionId: input.regionId, tiles: input.tiles, nowOnly: input.nowOnly },
+        update: { regionId: input.regionId, tiles: input.tiles, nowOnly: input.nowOnly },
+        select: { regionId: true, tiles: true, nowOnly: true },
+      }),
+    ),
 
   // ── Passkeys ────────────────────────────────────────────────────────────────
   registerOptions: publicProcedure.mutation(async ({ ctx }) => {

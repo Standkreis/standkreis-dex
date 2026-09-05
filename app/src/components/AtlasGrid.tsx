@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLocale, useTranslations } from 'next-intl'
 import { Tile } from '@/generated/prisma/enums'
+import { useRouter } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 
 const allTiles = Object.values(Tile) as Tile[]
@@ -16,10 +17,16 @@ export function AtlasGrid({ title }: { title: string }) {
   const tc = useTranslations('common')
   const locale = useLocale()
   const trpc = useTRPC()
+  const qc = useQueryClient()
+  const router = useRouter()
   const [nowOnly, setNowOnly] = useState(false)
-  const me = useQuery(trpc.identity.me.queryOptions())
+  // No region yet → onboarding. While the region job runs, poll every 5 s (handoff 0007); a failed job offers a retry.
+  const me = useQuery(trpc.identity.me.queryOptions(undefined, { refetchInterval: (q) => (q.state.data?.region?.status === 'queued' ? 5000 : false) }))
   const region = me.data?.region ?? null
   const ready = region?.status === 'ready'
+  useEffect(() => { if (me.data && !me.data.region) router.replace('/onboarding') }, [me.data, router])
+  const regions = useQuery(trpc.dex.regions.queryOptions(undefined, { enabled: region?.status === 'failed' }))
+  const retry = useMutation(trpc.dex.requestRegion.mutationOptions({ onSuccess: () => qc.invalidateQueries({ queryKey: trpc.identity.me.queryKey() }) }))
   const set = useQuery(trpc.dex.set.queryOptions({ regionId: region?.id ?? '', tiles: allTiles, nowOnly }, { enabled: ready }))
   const progress = useQuery(trpc.identity.progress.queryOptions(undefined, { enabled: ready }))
   const studied = new Set(progress.data?.studied ?? [])
@@ -38,8 +45,14 @@ export function AtlasGrid({ title }: { title: string }) {
           </button>
         )}
       </div>
-      {!region && <p className="mt-3 text-[15px] text-ink-soft">{t('noRegion')}</p>}
-      {region && !ready && <p className="mt-3 text-[15px] text-ink-soft">{region.name} · {t('preparing')}</p>}
+      {region?.status === 'queued' && <p className="mt-3 text-[15px] text-ink-soft" data-testid="preparing">{region.name} · {t('preparing')}</p>}
+      {region?.status === 'failed' && (
+        <p className="mt-3 text-[15px] text-ink-soft">
+          {t('failed', { region: region.name })}{' '}
+          <button type="button" className="font-semibold text-moss-deep" disabled={retry.isPending}
+            onClick={() => { const gid = regions.data?.find((r) => r.id === region.id)?.gadmGid; if (gid) retry.mutate({ gadmGid: gid }) }}>{t('retry')}</button>
+        </p>
+      )}
       {set.data && (
         <>
           <p className="mt-2 text-[15px]" data-testid="counters">
