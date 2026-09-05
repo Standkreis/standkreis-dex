@@ -4,7 +4,7 @@
 
 | 🗓️ Date | 👤 Owner | ✅ Checks |
 | --- | --- | --- |
-| 2026-09-05 | Sven Reiser | C1–C4 pass (Track A, production build, Chrome over CDP and the iPhone 17 Pro Simulator) · C5–C8 pass (Track B) · C9 C10 on `main` after both merges |
+| 2026-09-05 | Sven Reiser | C1–C4 pass (Track A, production build, Chrome over CDP and the iPhone 17 Pro Simulator) · C5–C8 pass (Track B) · C9 pass (Simulator, production build) · C10 pass (`npm run check` on `main` at `0797771`, export served by `python3 -m http.server`, worker installs in the Simulator) |
 
 
 ## 📴 Track A · the atlas without signal
@@ -280,3 +280,36 @@ on answer: 2xx → remove row, listeners (invalidate progress, journal, photos, 
 | `app/src/components/LogSearch.tsx` | keep the `retry` option and the `capped` line |
 | `SpeciesPage.tsx` | the study button through the box (one line, see decisions) |
 | `SightingPage.tsx` | a queued id: chip and no map (see decisions); then `Journal.tsx` may link queued rows again |
+
+
+## 🔀 Merge on `main` (0797771)
+
+Track A fast-forwarded (`f56aa17`), Track B rebased (`70df546`), the by-hand items in one commit. `npm run check` green (30 tests, 0 lint errors, 1 warning).
+
+### ✍️ By hand
+
+| File | What | Note |
+| --- | --- | --- |
+| `SpeciesPage.tsx` | study button → `enqueue({ kind: 'study' })`, the `identity.progress` cache gets the id at once, then `flush()`; unmark stays a direct mutation | The `taxon` for the payload is built from the page data, lead = first asset |
+| `SpeciesPage.tsx` | `page.isError && !page.data` → "Diese Art wartet aufs Netz" with the atlas link (doubt A2, the in-app half) | The worker page stays the floor for a cold URL |
+| `Journal.tsx` | doubt A1: `days.isError && !days.data && …` | |
+| `SightingPage.tsx` | **not done**: queued id → chip without map. A queued row in the diary still opens the sighting page, which has no server row until the flush | Track B item, left for M9 with the walk |
+
+### 🧪 C9 C10 (iPhone 17 Pro Simulator, iOS 26.5, `next start -p 3002` from `main`)
+
+| Check | Evidence | Result |
+| --- | --- | --- |
+| C9 | Atlas online → server killed → `/de/you` from cache with the banner (`m-profile-offline.png`) → `/de/log?taxon=1043082` renders the save sheet offline (`m-save-offline.png`) → "Wild speichern" → atlas; diary shows the row with **"wartet aufs Netz"** (`m-journal-offline-queued.png`) → server back → chip gone within 12 s (`m-journal-online-flushed.png`); `Sighting` `07f97f68` in the DB, `createdAt` 19:59:30 UTC, no duplicate | ✅ one row, not two (the second was not possible: no tap on the second species without the panel; the outbox order is covered by B's C5) |
+| C10 | `check` green on `main`; `out/` served by `python3 -m http.server 3003` (no headers at all): worker installs, file server killed, `/de/you` opens from the worker (`m-export-offline-profile.png`, "Ohne Namen" because the export has no API) | ✅ `sw.js?v=<build id>` needs no header |
+| A4 | Track B's outbox on IndexedDB **worked in the Simulator** in this run (enqueue, diary read, flush) | ⚠️ one run; the hang Track A saw was under the persister's write load, which is gone |
+
+Not checkable here: the Browser pane of the desktop app refuses every service worker ("unknown error occurred when fetching the script", also against `next start`); use headless Chrome over CDP or the Simulator.
+
+### 🤔 Doubts for the owner
+
+| # | Doubt |
+| --- | --- |
+| M1 | Cache estimate 27 MB, not the handoff's 14 (30 KB per image measured) — fine, or slim the variant further? |
+| M2 | Out-of-set finds fill the cell but do not count (0008 A1) — still undecided; the ladybird from C9 sits in the diary as "Neu entdeckt" with the atlas at 1 entdeckt |
+| M3 | Outbox on IndexedDB in Safari (A4): proven once, not on a real phone. M9's walk is the real test |
+| M4 | Hosting for M9: LAN https from the MacBook works for the phone (`dev:lan:https`, the root CA on the phone); a deploy row for M8b is still an open proposal in the handoff |

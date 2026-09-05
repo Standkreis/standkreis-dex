@@ -4,7 +4,7 @@
 
 | 🗓️ Updated | 👤 Owner | ➡️ Next |
 | --- | --- | --- |
-| 2026-09-05 | Sven Reiser | M8 (offline), [handoff 0009](handoffs/0009-offline.md) |
+| 2026-09-05 | Sven Reiser | M9 (the first walk) |
 
 ## 📍 Milestones
 
@@ -19,8 +19,8 @@
 | M6 | 🔍 Log + fill | 1 | Chooser, backbone search, wild/captive save, fill sheet, Tagebuch by day, E13 for species outside the set, "Entdeckt" on the species page | M5 | ✅ 2026-09-05, [findings 0008](handoffs/0008-log-and-journal-findings.md) |
 | M7 | 🔐 Identity + data | 1 | Anonymous id, passkey/email sync, export JSON, delete, Du with counters and settings | M2 | ✅ 2026-09-05, [findings 0006](handoffs/0006-etl-and-identity-findings.md) |
 | M7b | ✉️ Email attach | 1 | Verify an address through **Resend** (EU region), magic link adopts the identity like a passkey does, second recovery path. Needs the production domain for DKIM and the passkey relying-party id | M7, domain | owner's call 2026-09-05: Resend |
-| M8 | 📴 Offline | 1 | Atlas for the active filter opens with no network, sightings queue and sync | M5, M7 | ➡️ next, [handoff 0009](handoffs/0009-offline.md) |
-| M9 | 🚶 The first walk | 1 | The owner uses it on one walk and opens it again the next day | M6, M8 | |
+| M8 | 📴 Offline | 1 | Atlas for the active filter opens with no network, sightings queue and sync | M5, M7 | ✅ 2026-09-05 ([findings 0009](handoffs/0009-offline-findings.md)) |
+| M9 | 🚶 The first walk | 1 | The owner uses it on one walk and opens it again the next day | M6, M8 | ➡️ next |
 | M10 | 🔥 Quest + recap grill | 2 | Generator rules, repeat avoidance, the two-question recap, XP curve | M9 | |
 | M11 | 🧭 Quests + recap + XP | 2 | Three weekly quests, recap unlocks studied XP, Du with level, "kommt bald" replaced | M10, M4 data | |
 | M12 | 📷 Snap-and-send | 2–3 | Pl@ntNet key, BioCLIP 2 host, taxon ladder prefilling the search | M6 | |
@@ -68,4 +68,5 @@ flowchart LR
 | M1 | Studied earns XP only after the recap, so M11 owns the XP switch, not M5 |
 | M5 | Only Mainz-Bingen and Kyoto are selectable; `dex.requestRegion` exists but is unreachable from the UI until the loop closes (owner). The map shows GBIF density, the 10 km cell waits for M6's own sightings. AnAge fact values are English; OSM tiles need a proxy before launch |
 | M6 | The content kick for out-of-set species runs in-process from `taxon.ensure` and is lost on restart (rerun the ETL heals); photos live on disk under `app/data/photos/` behind a capability URL, so M8 owns the queue, a signed URL and the storage question; out-of-set finds fill their cell but do not count (owner decides) |
+| M8 | `Sighting.id` is minted on the phone and `sighting.create` is idempotent by id; queries persist in localStorage (IndexedDB wedged in the iOS Simulator), the outbox in IndexedDB; `dynamicParams = false` left the locale layout; the region job is still in-process, a restart sweep heals it, no job table; the offline image cache is ~27 MB per region, not 14; the export works from any file server |
 | M7 | `Filter` and `Study` rows exist but have no mutation: M5 adds `identity.setFilter`, `study.mark`; the region job runs in-process from `dex.requestRegion` until M8 brings a queue |
