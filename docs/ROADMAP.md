@@ -4,7 +4,7 @@
 
 | 🗓️ Updated | 👤 Owner | ➡️ Next |
 | --- | --- | --- |
-| 2026-09-05 | Sven Reiser | M4 (ETL) and M7 (identity) in one session, [handoff 0006](handoffs/0006-etl-and-identity.md) |
+| 2026-09-05 | Sven Reiser | M5 (grid, species page, onboarding), [handoff 0007](handoffs/0007-atlas-grid-and-species.md) |
 
 ## 📍 Milestones
 
@@ -15,9 +15,10 @@
 | M2 | 🏗️ Scaffold | 1 | Next.js PWA, tokens, tRPC, Prisma, i18n de/en, spike deleted ([findings 0004](handoffs/0004-scaffold-findings.md)) | M1 | ✅ 2026-09-04 |
 | M3 | 🔥 ETL grill | 1 | Region unit, cut, month rule, image ladder, rank rule decided on real data ([record 0002](records/0002-etl-the-plausible-set.md), [findings 0005](handoffs/0005-etl-grill-findings.md)) | M1 | ✅ 2026-09-05 |
 | M4 | 🗄️ ETL + plausible set | 1 | Spec §🗃️ runs: taxa, plausibility per region with twelve month shares, assets with licence, text, GloBI edges, look-alikes in Postgres. Mainz-Bingen's grid feels like Saturday to the owner | M3, M2 schema updated to the new ERD | ✅ 2026-09-05, [findings 0006](handoffs/0006-etl-and-identity-findings.md) |
-| M5 | 🏠 Atlas grid + species page | 1 | Grid with filter drawer and "nur jetzt" chip, species page from four sources, honest empty states, mark studied | M2, M4 | ➡️ next, on `dex.set` and `taxon.page` |
+| M5 | 🏠 Atlas grid + species page | 1 | Onboarding sets region and tiles, grid with search bar, filter drawer and "nur jetzt" chip, species page from four sources, honest empty states, mark studied | M2, M4 | ➡️ next, [handoff 0007](handoffs/0007-atlas-grid-and-species.md); seed `24e72b5` on main |
 | M6 | 🔍 Log + fill | 1 | Chooser, backbone search, wild/captive save, fill sheet, Tagebuch by day, E13 for species outside the set | M5 | |
 | M7 | 🔐 Identity + data | 1 | Anonymous id, passkey/email sync, export JSON, delete, Du with counters and settings | M2 | ✅ 2026-09-05, [findings 0006](handoffs/0006-etl-and-identity-findings.md) |
+| M7b | ✉️ Email attach | 1 | Verify an address through **Resend** (EU region), magic link adopts the identity like a passkey does, second recovery path. Needs the production domain for DKIM and the passkey relying-party id | M7, domain | owner's call 2026-09-05: Resend |
 | M8 | 📴 Offline | 1 | Atlas for the active filter opens with no network, sightings queue and sync | M5, M7 | |
 | M9 | 🚶 The first walk | 1 | The owner uses it on one walk and opens it again the next day | M6, M8 | |
 | M10 | 🔥 Quest + recap grill | 2 | Generator rules, repeat avoidance, the two-question recap, XP curve | M9 | |
@@ -40,6 +41,7 @@ flowchart LR
     M2 --> M5[🏠 M5 Grid + species]
     M4 --> M5
     M2 --> M7[🔐 M7 Identity]
+    M7 --> M7b[✉️ M7b Email attach]
     M5 --> M6[🔍 M6 Log + fill]
     M5 --> M8[📴 M8 Offline]
     M7 --> M8
@@ -64,3 +66,4 @@ flowchart LR
 | M3 | Month is a sort and a chip, not a filter on the denominator: M5's filter drawer loses "Zeitraum" |
 | M3 | Lebensraum leaves the Steckbrief; intro falls back de → en; species outside the set get content on first log (M6) |
 | M1 | Studied earns XP only after the recap, so M11 owns the XP switch, not M5 |
+| M7 | `Filter` and `Study` rows exist but have no mutation: M5 adds `identity.setFilter`, `study.mark`; the region job runs in-process from `dex.requestRegion` until M8 brings a queue |
