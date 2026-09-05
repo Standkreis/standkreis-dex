@@ -34,7 +34,10 @@ From here on as `dex`: `ssh dex@<ipv4>`.
 ## 📦 2 · The app
 
 ```bash
-git clone https://github.com/Standkreis/standkreis-dex.git ~/standkreis-dex
+# the repo is private: a read-only deploy key for this VM
+ssh-keygen -t ed25519 -N '' -f ~/.ssh/id_ed25519 -C dex-vm && cat ~/.ssh/id_ed25519.pub
+#   → GitHub → repo → Settings → Deploy keys → Add, paste, leave "write access" off
+git clone git@github.com:Standkreis/standkreis-dex.git ~/standkreis-dex
 cd ~/standkreis-dex
 cp deploy/.env.example deploy/.env
 nano deploy/.env        # DOMAIN, POSTGRES_PASSWORD, WEBAUTHN_SECRET (openssl rand -hex 32)
