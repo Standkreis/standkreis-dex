@@ -127,10 +127,10 @@ Resend and the magic link (M7b: add the domain at Resend, DKIM at united-domains
 
 | # | Do | Where |
 | --- | --- | --- |
-| 1 | Storage → Blob → create store `standkreis-photos` → copy `BLOB_READ_WRITE_TOKEN` into `app/.env.local` on the Mac (the file is git-ignored) | Vercel |
+| 1 | Storage → Blob → store `standkreis-dex-blob` exists ✅; copy `BLOB_READ_WRITE_TOKEN` into `app/.env.local` on the Mac (the file is git-ignored) | Vercel |
 | 2 | Storage → Neon: note the **unpooled** connection string for the ETL from the Mac | Vercel / Neon |
 | 3 | Settings → Environment Variables: `CRON_SECRET=$(openssl rand -hex 32)`, remove `PHOTO_DIR` after Track A merges (or leave it, harmless) | Vercel |
-| 4 | Settings → Domains: add `standkreis.de` and `www.standkreis.de`; set the `A` / `CNAME` records Vercel shows at united-domains | Vercel, united-domains |
+| 4 | ✅ Done: `atlas.standkreis.de` is live (CNAME at united-domains). Optional: remove the invalid apex `standkreis.de` from the project or redirect it | Vercel, united-domains |
 
 ## 👉 Start the session with
 
