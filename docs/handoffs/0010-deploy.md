@@ -58,7 +58,7 @@ M9 is the owner's first real walk. The phone needs an origin that is https, reac
 | Files owned | `app/src/app/api/health/route.ts` (new), `app/src/app/api/tiles/[z]/[x]/[y]/route.ts` (new), `app/src/components/SpeciesMap.tsx` (the URL only), `app/public/sw.js` (the tiles route only), `app/src/server/webauthn.ts`, `app/src/server/identity.ts` (cookie flags), `app/src/server/env.ts` (new), `app/etl/README.md` (one section), `app/.env.example` (new) | Track A never opens these |
 | Env | `server/env.ts`: read every variable once with `zod`, fail at start with the name of what is missing when `NODE_ENV=production` (`DATABASE_URL`, `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGIN`, `WEBAUTHN_SECRET`, `PHOTO_DIR`); `.env.example` documents each with the dev value | A production server signing tokens with the dev secret is the bug this milestone must make impossible |
 | Cookie | `dex_id` and the passkey session: `Secure` when the request is https (behind Caddy: `x-forwarded-proto`), `SameSite=Lax`, `HttpOnly`, 400 days | Safari caps a cookie at 7 days unless it is `Secure` and set by the server, which it is |
-| Passkey | `WEBAUTHN_RP_ID=standkreis.<tld>`, `WEBAUTHN_ORIGIN=https://standkreis.<tld>`; `localhost` stays the dev default | The RP id is the domain forever; a subdomain move later would orphan every passkey, so the app lives on the apex |
+| Passkey | `WEBAUTHN_RP_ID=standkreis.de`, `WEBAUTHN_ORIGIN=https://standkreis.de`; `localhost` stays the dev default | The RP id is the domain forever; a subdomain move later would orphan every passkey, so the app lives on the apex |
 | Health | `/api/health`: `SELECT 1`, `{ ok, buildId, sweepAt }` | Compose healthcheck and the uptime monitor read one line |
 | Tiles | `/api/tiles/{z}/{x}/{y}` proxies `tile.openstreetmap.org` with the app's User-Agent and `Cache-Control: public, max-age=604800`; `SpeciesMap.tsx` reads its own route; the worker treats `/api/tiles/` like an image (cache-first, `dex-images`) | Findings 0007 B3; OSM's policy wants a User-Agent and no bulk; a week of cache on nine tiles per region is nothing |
 | ETL to prod | `etl/README.md` §🚀: `ssh -L 5434:localhost:5432 <vm>` then `DATABASE_URL=postgresql://…@localhost:5434/dex npm run etl -- region "Mainz-Bingen"` and `content`; **or** `pg_dump` the dev DB's `Region Taxon Plausibility Lookalike Asset` tables and restore. Sightings and identities never travel | The ETL's `.cache/` on the laptop makes a prod fill a matter of minutes; the VM has no reason to hold GBIF keys |
@@ -91,7 +91,7 @@ flowchart LR
 | C3 | A | `backup.sh` against the running stack, then restore into a fresh stack | The sighting and its photo are back |
 | C4 | B | `NODE_ENV=production node server.js` without `WEBAUTHN_SECRET` | Exits within a second naming the variable; with all set, `/api/health` says `ok` |
 | C5 | B | `curl -I https://localhost/de/` through Caddy from C2 (or a `x-forwarded-proto: https` header against `next start`) | `Set-Cookie: dex_id=…; Secure; HttpOnly; SameSite=Lax`; the tile route returns a PNG with the cache header; the worker caches it offline |
-| C6 | owner | DNS points at the VM, `docker compose up -d` on the VM | `https://standkreis.<tld>/de/` on the phone, padlock, no warnings; `/api/health` `ok` |
+| C6 | owner | DNS points at the VM, `docker compose up -d` on the VM | `https://standkreis.de/de/` on the phone, padlock, no warnings; `/api/health` `ok` |
 | C7 | owner | "Zum Home-Bildschirm" on the phone, the region set filled by the ETL over the tunnel, "Für unterwegs laden" done | Airplane mode: atlas opens, a species opens, a sighting saves; airplane off: the row is on the server |
 | C8 | owner | A passkey created on the phone, Safari closed, the app opened a day later | Same identity, no passkey prompt; `backup.sh` ran overnight (`ls /var/backups/dex`) |
 
@@ -109,7 +109,7 @@ flowchart LR
 
 ## ❓ Open, for the owner during the session
 
-- **Apex or subdomain.** `standkreis.<tld>` is the passkey RP id for good. Proposal: the app on the apex now; a later landing page can live on `www.` and the app never moves.
+- **Apex or subdomain.** `standkreis.de` is the passkey RP id for good. Proposal: the app on the apex now; a later landing page can live on `www.` and the app never moves.
 - **VM size.** CX22 (2 vCPU, 4 GB, ~€3.8) builds the image in ~3 min and runs everything with room; CX32 doubles that for ~€6.5. Proposal: CX22, Falkenstein, IPv4 included.
 - **Auto-deploy on `main`.** Every merge would ship. Proposal: off until M9 has happened once by hand.
 - **Backup target.** `/var/backups` on the same disk is not a backup. Proposal: Hetzner Storage Box BX11 (~€3.8) via `rsync`, from day one.
@@ -122,7 +122,7 @@ Resend and the magic link (M7b, needs the DKIM records this milestone makes poss
 
 | # | Do | Where | Notes |
 | --- | --- | --- | --- |
-| 1 | Buy `standkreis.<tld>` | INWX or netcup (~€5–7/yr, flat) rather than united-domains (€5 first year, €19 after) | Turn on WHOIS privacy; DNS can stay at the registrar |
+| 1 | Buy `standkreis.de` | INWX or netcup (~€5–7/yr, flat) rather than united-domains (€5 first year, €19 after) | Turn on WHOIS privacy; DNS can stay at the registrar |
 | 2 | Hetzner Cloud account, project "standkreis", SSH key uploaded | console.hetzner.cloud | Use the Mac's `~/.ssh/id_ed25519.pub` |
 | 3 | Create the server: CX22, Falkenstein, Ubuntu 24.04, your key, IPv4 + IPv6 | Hetzner console | Note the IPv4 |
 | 4 | DNS: `A` `@` → IPv4, `AAAA` `@` → IPv6, TTL 300 | Registrar's DNS | Takes minutes to an hour |

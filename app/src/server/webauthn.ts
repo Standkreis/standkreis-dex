@@ -5,8 +5,8 @@ import type { Context } from './trpc'
 // ── Relying party ─────────────────────────────────────────────────────────────
 // Passkeys are bound to a domain (handoff 0006 §❓). Dev is `localhost` on any port; production reads both from env
 // (server/env.ts, required there; handoff 0010: the RP id is the apex domain for good).
-// WEBAUTHN_RP_ID   the bare domain, e.g. standkreis.example
-// WEBAUTHN_ORIGIN  the full origin(s), comma-separated, e.g. https://standkreis.example
+// WEBAUTHN_RP_ID   the bare domain, e.g. standkreis.de
+// WEBAUTHN_ORIGIN  the full origin(s), comma-separated, e.g. https://standkreis.de
 export const rpName = 'Dex'
 export const rpID = env.WEBAUTHN_RP_ID
 

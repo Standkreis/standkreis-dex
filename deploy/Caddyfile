@@ -1,4 +1,4 @@
-# DOMAIN=standkreis.<tld> → Let's Encrypt, issued and renewed by Caddy. DOMAIN=localhost → Caddy's internal CA (curl -k).
+# DOMAIN=standkreis.de → Let's Encrypt, issued and renewed by Caddy. DOMAIN=localhost → Caddy's internal CA (curl -k).
 {$DOMAIN} {
 	encode zstd gzip
 	reverse_proxy app:3000

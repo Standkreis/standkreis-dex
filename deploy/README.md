@@ -49,7 +49,7 @@ Caddy gets the certificate from Let's Encrypt on the first request; if DNS is no
 | Variable | In `.env` | Reaches |
 | --- | --- | --- |
 | `DB_BIND` | optional, default `127.0.0.1:5432` | the host side of the `db` port (the ETL tunnel) |
-| `DOMAIN` | the apex, `standkreis.<tld>` | Caddy's site, `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGIN=https://$DOMAIN` |
+| `DOMAIN` | the apex, `standkreis.de` | Caddy's site, `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGIN=https://$DOMAIN` |
 | `POSTGRES_PASSWORD` | anything long | `db` and the `DATABASE_URL` of `migrate` and `app` |
 | `WEBAUTHN_SECRET` | `openssl rand -hex 32` | `app` |
 | `BACKUP_TARGET` | optional, `user@host:path/` | `backup.sh` only |

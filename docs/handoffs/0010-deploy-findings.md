@@ -96,7 +96,7 @@ Branch `m8b-origin`, worktree `standkreis-dex-m8bb`. Proven against `npm run bui
 | `sweepAt` | `instrumentation.ts` stamps `globalThis.dexSweepAt` when the sweep resolves; `/api/health` reads it (`null` until then) | The route handler is its own bundle, a module variable in `instrumentation.ts` would not be shared. `sweep.ts` is not Track B's file, so the stamp stays in the hook that already had to change |
 | Health on a dead DB | `{ ok: false, error }` with **503** and `cache-control: no-store` | Compose's healthcheck and an uptime monitor key on the status |
 | Tile validation | `z` 0–19, `x` `y` digits only and `< 2^z`; else 400. Upstream not ok or unreachable (10 s timeout) → 502 | Bounded proxy; a bad URL never reaches OSM |
-| User-Agent | `standkreis-dex/<build id> (+<first WEBAUTHN_ORIGIN>)`, `https://standkreis.example` when unset | OSM asks for an identifying UA with a contact; the origin is the contact once the domain exists |
+| User-Agent | `standkreis-dex/<build id> (+<first WEBAUTHN_ORIGIN>)`, `https://standkreis.de` when unset | OSM asks for an identifying UA with a contact; the origin is the contact once the domain exists |
 | Tile URL on the client | `${NEXT_PUBLIC_API_URL ?? ''}/api/tiles/8/x/y` | Same rule as the photos: the static export has no route handlers |
 | Worker rule | `/api/tiles/` on the own origin joins `/api/photo/` in `isImage` → cache-first in `dex-images` | The image path already handles same-origin (`fetch(req)`, `res.ok` → put) |
 | `.env.example` | `app/.env.example`, plus `!.env.example` in `app/.gitignore` | `.env*` was ignored wholesale; without the exception the file would never have been committed |
@@ -144,7 +144,7 @@ Branch `m8b-origin`, worktree `standkreis-dex-m8bb`. Proven against `npm run bui
 
 ### 🔀 For the merge
 
-- Track A's `deploy/.env.example` should list the same five names as `app/.env.example` (`DATABASE_URL`, `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGIN`, `WEBAUTHN_SECRET`, `PHOTO_DIR`); production values: `WEBAUTHN_RP_ID=standkreis.<tld>`, `WEBAUTHN_ORIGIN=https://standkreis.<tld>`, `WEBAUTHN_SECRET` from `openssl rand -hex 32` (≥ 32 chars), `PHOTO_DIR=/data/photos`.
+- Track A's `deploy/.env.example` should list the same five names as `app/.env.example` (`DATABASE_URL`, `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGIN`, `WEBAUTHN_SECRET`, `PHOTO_DIR`); production values: `WEBAUTHN_RP_ID=standkreis.de`, `WEBAUTHN_ORIGIN=https://standkreis.de`, `WEBAUTHN_SECRET` from `openssl rand -hex 32` (≥ 32 chars), `PHOTO_DIR=/data/photos`.
 - The Compose healthcheck may read `/api/health` (200 `ok`, 503 when the DB is gone). The image's `next build` needs **no** env: the guard skips the build phase.
 - `instrumentation.ts` and `routers/identity.ts` are touched beyond the list (two lines and one line); nothing of Track A's.
 - After merging: `npm run check`, then B1 and B2 above if wanted.

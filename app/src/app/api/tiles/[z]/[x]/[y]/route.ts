@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 
 const MAX_ZOOM = 19
 const CACHE = 'public, max-age=604800'
-const contact = env.WEBAUTHN_ORIGIN?.split(',')[0]?.trim() || 'https://standkreis.example'
+const contact = env.WEBAUTHN_ORIGIN?.split(',')[0]?.trim() || 'https://standkreis.de'
 const userAgent = `standkreis-dex/${process.env.NEXT_PUBLIC_BUILD_ID ?? 'dev'} (+${contact})`
 
 const int = (s: string) => (/^\d{1,7}$/.test(s) ? Number(s) : NaN)
