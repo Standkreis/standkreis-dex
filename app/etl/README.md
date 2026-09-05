@@ -32,9 +32,7 @@ The VM runs no ETL: it has no GBIF keys, no `.cache/`, and the laptop's cache tu
 **Option 1 — the ETL over a tunnel** (the normal way, ~20 min for a region with content, less with a warm `.cache/`):
 
 ```sh
-ssh -N -L 5434:localhost:5432 <user>@<vm>           # terminal 1: 5434 on the laptop → the db container's 5432
-#   compose publishes no port, so add `ports: ["127.0.0.1:5432:5432"]` to the `db` service temporarily, or tunnel into
-#   the container's network address: ssh -N -L 5434:$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' deploy-db-1):5432 <vm>
+ssh -N -L 5434:127.0.0.1:5432 <user>@<vm>           # terminal 1: 5434 on the laptop → the VM's loopback 5432 (compose binds `db` to 127.0.0.1 only)
 export DATABASE_URL='postgresql://dex:<password from deploy/.env>@localhost:5434/dex'   # terminal 2, in app/
 npm run etl -- region "Mainz-Bingen"                # Region, Taxon, Plausibility, Lookalike
 npm run etl -- content                              # images, intros, facts, edges for the set

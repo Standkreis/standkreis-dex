@@ -41,7 +41,7 @@ nano deploy/.env        # DOMAIN, POSTGRES_PASSWORD, WEBAUTHN_SECRET (openssl ra
 docker compose -f deploy/compose.yml up -d --build   # ~3 min on a CX22 the first time
 docker compose -f deploy/compose.yml ps               # db healthy, migrate exited (0), app healthy, caddy up
 docker compose -f deploy/compose.yml logs migrate     # "2 migrations found … applied"
-curl -sS https://$DOMAIN/api/health                   # {"ok":true,…}  (once Track B is merged; until then /de/ answers 200)
+curl -sS https://$DOMAIN/api/health                   # {"ok":true,"buildId":…,"sweepAt":…}
 ```
 
 Caddy gets the certificate from Let's Encrypt on the first request; if DNS is not there yet, it retries on its own (`logs caddy`).

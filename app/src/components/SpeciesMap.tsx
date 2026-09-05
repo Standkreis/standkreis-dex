@@ -32,7 +32,7 @@ const tileXY = (lat: number, lng: number) => {
 export function SpeciesMap({ centre, taxonKey, region }: { centre: { lat: number; lng: number }; taxonKey: number; region: string }) {
   const t = useTranslations('species.occurrence')
   const to = useTranslations('offline')
-  // Offline (handoff 0009 Track A): tiles are never cached, so a tile that fails to load turns the card into one honest line.
+  // Offline (handoff 0009 Track A): tiles come through `/api/tiles/` and the worker caches the nine seen ones; a tile that fails to load turns the card into one honest line.
   const offline = useOffline()
   const [failed, setFailed] = useState(false)
   const waits = offline || failed

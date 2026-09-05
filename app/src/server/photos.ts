@@ -1,10 +1,11 @@
 import { mkdir, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { db } from './db'
+import { env } from './env'
 
 // User photos on disk (handoff 0008 Track A): `app/data/photos/<assetId>.jpg`, gitignored. A laptop answer; an object
 // store or the device (M15) decides later. The file name IS the Asset id, so a row and its file always find each other.
-export const PHOTO_DIR = process.env.PHOTO_DIR ?? join(process.cwd(), 'data', 'photos')
+export const PHOTO_DIR = env.PHOTO_DIR
 export const photoPath = (assetId: string) => join(PHOTO_DIR, `${assetId}.jpg`)
 /** The URL a photo Asset carries: same-origin, served by GET /api/photo/<id>. The static export prefixes NEXT_PUBLIC_API_URL on the client. */
 export const photoUrl = (assetId: string) => `/api/photo/${assetId}`
