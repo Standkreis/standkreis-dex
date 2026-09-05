@@ -4,7 +4,7 @@
 
 | 🗓️ Date | 👤 Owner | ✅ Checks |
 | --- | --- | --- |
-| 2026-09-05 | Sven Reiser | C2–C7 pass (Track A); C8–C12 are Track B's |
+| 2026-09-05 | Sven Reiser | C2–C7 pass (Track A) · C8–C11 pass (Track B) · C12 after the merge |
 
 ## 🗄️ Track A · the ETL
 
@@ -96,4 +96,33 @@ No Crambidae in the set has the probe's "14" as source alone (the probe summed b
 
 ## 🔐 Track B · identity and data
 
-*(Track B adds its table here.)*
+| Decision | Chosen | Why, and what was rejected |
+| --- | --- | --- |
+| WebAuthn library | **`@simplewebauthn/server` 14 + `@simplewebauthn/browser` 14**, `attestationType: 'none'`, `residentKey: 'required'`, `userVerification: 'preferred'` (verify with `requireUserVerification: false`) | The handoff's pick; the only maintained pure-TS pair. Resident keys so sign-in needs no username: `allowCredentials: []` and the authenticator offers what it holds for the rpID |
+| Relying party | `rpID = WEBAUTHN_RP_ID ?? 'localhost'`; `expectedOrigin = WEBAUTHN_ORIGIN` (comma-separated list) or, when unset, the request's own `Origin` **if it is `http://localhost:*`** | Dev on 3001 and 3002 both work without config; production sets both env vars. **Open (§❓ of the handoff): the production domain.** Every passkey registered before it is chosen is bound to `localhost` |
+| Challenge storage | Cookie `dex_challenge`, `Path=/api/trpc`, `Max-Age=300`, HttpOnly, Lax. Value = `base64url({challenge, kind, identityId, exp}).HMAC-SHA256`; consumed on the verify call (cleared even on failure), bound to one kind (register · authenticate) and to the identity that asked | No `Challenge` table, step 0's migration stays final. Rejected: in-memory map (dies with the process, breaks with two instances) |
+| Signing secret | `WEBAUTHN_SECRET`; a dev fallback with a warning in production | One env var for the challenge cookie and the delete token |
+| Identity in the user handle | `userID` = the identity's uuid bytes, `userName` = `dex-<first 8 chars>`, `userDisplayName` = displayName or "Dex" | The authenticator UI shows *something*; the name is never sent before a passkey exists (it is sent *with* the first one, which is the moment it may leave the device, spec §⚖️) |
+| Adoption = merge | `authenticateVerify` with a passkey of another identity: this device's anonymous rows fold **into the passkey's identity**, then the anonymous row is deleted, the `dex_id` cookie is switched. Sightings merge by `[taxonId, at]`, duplicates deleted (with their photos). Studies merge by `[taxonId]` (unique per identity): on a clash keep the earlier `at` and `recapPassed` if either side passed. Assets owned move. `Filter` and `displayName` fill a gap on the adopted side only, never overwrite. One transaction | Handoff Track B row. The passkey side wins on every tie because it is the older, synced identity; the anonymous side is at most a few days of one device |
+| Cookie switching | `createContext` now parses all cookies and exposes `setCookie(name, value, {maxAge, path})`; queued cookies go out from the route handler's `responseMeta` as multiple `Set-Cookie` headers (`Headers.append`). The mint case uses the same path | One mechanism for mint, adopt, delete and the challenge. `trpc.ts` and `route.ts` changed for this; nothing else in them |
+| `data.export` | One JSON object (not a stream): `format: 'standkreis-dex/1'`, `identity {id, createdAt, devices, displayName?}`, `filter`, `sightings[]` with taxon `{gbifKey, sciName, commonNames}` and `photos[]` as URLs, `studies[]`. `displayName` present only when `devices > 0` | Spec §⚖️ both states; doubt 39. The client turns it into a `dex-export-YYYY-MM-DD.json` download. A stream is not needed below a few thousand sightings |
+| `data.delete` | One mutation, two steps: no token → `{step:'confirm', devices, sightings, token}`; with token → hard delete of the identity (cascade: passkeys, filter, sightings and their photos, studies, assets owned) and `dex_id` cleared (`Max-Age=0`). Token = signed `{purpose:'delete', identityId}`, 5 minutes, refused for any other identity | Doubt 33. The sheet renders the first call as "2 Geräte · 14 Sichtungen". The next request mints a fresh anonymous identity, so the app never has no subject |
+| `identity.me` | Now also returns `devices`, `displayName`, `region {id, name, status}` via the filter | Du needs the region name; the counters hook needs `status` to know when to call `dex.set` |
+| Counters on Du | `useSetCounters(region)` in `IdentityCounters.tsx` returns `{state:'preparing'}`; the card renders "wird vorbereitet". **Merge with Track A:** one hook body, reads `trpc.dex.set` when `region.status === 'ready'` (TODO in the file) | Track A's router does not exist on this branch; a type-unsafe `trpc.dex?.set` was rejected |
+| Settings, synced card | Two chips: **Gerät entfernen** (opens the passkey list with per-row Entfernen) and **Passkey hinzufügen** | The mock's second chip was "E-Mail ergänzen", deferred by the handoff. A device that adopted through a synced passkey has no row of its own, so "Auf N Geräten" would stay at 1 without a way to add one; the count then means "passkeys" and says so honestly |
+| Settings, anonymous card | The mock's "Oder per E-Mail" became "Schon einen Passkey? Hier anmelden." | Without it adoption is unreachable |
+| Device name | Client-side guess from the user agent (iPhone · iPad · Android · Mac · Windows · Linux), stored as `Passkey.deviceName`; the list shows it with the creation date | "Gerät entfernen" has to name something; no fingerprinting beyond the platform word |
+| Passkey nudge | `shouldOfferPasskey(identity)` exported from `webauthn.ts`, returns `false` | Doubt 31, wording open |
+| Version row | Read from `package.json` in the settings server component | No env plumbing |
+| Not built | Photo on the profile (the avatar is initials or the person icon), XP, Dein Kreis, Design toggle, iNaturalist, email | Handoff scope. Photo waits for the fill sheet's upload path (M6) |
+| Test harness | `app/scripts/m7/`: `seed.mts` (two synthetic taxa gbifKey 900000001–2, tile bird; sightings, studies, fake passkeys, show, cleanup), `passkey-e2e.mjs` (two headless Chromes with **CDP virtual authenticators**; the credential is copied from A's authenticator to B's, which is what a synced passkey does between two devices), `data-e2e.mjs` (C9 over HTTP, C10 through the real sheet), `shots.mjs` (`shot.mjs` plus a `dex_id` cookie, dev badge stripped) | No test dependency added; everything reuses the CDP approach from findings 0004 |
+
+## 🧪 Checks C8–C11
+
+| # | Result |
+| --- | --- |
+| C8 | Browser A `4f9e8681…` registers; browser B `bf8d3137…` (2 sightings, 1 study) signs in → B's `identity.me` returns `4f9e8681…`, `4f9e8681…` now has 2 sightings and 1 study, `bf8d3137…` is gone; the card says "Verknüpft. 2 Sichtungen von hier übernommen." |
+| C9 | Anonymous export: 2 sightings, 1 study, `devices: 0`, no `displayName` key although the name "Sven" was set. After one passkey: same rows, `devices: 1`, `displayName: "Sven"`. Both parse as JSON |
+| C10 | Seeded 2 passkeys and 14 sightings; the sheet reads "2 Geräte · 14 Sichtungen"; confirm → identity GONE, response carries `set-cookie: dex_id=; Path=/; Max-Age=0`; a token replayed by another identity is refused (`BAD_REQUEST`) |
+| C11 | [`0006-shots/`](0006-shots/): Du and Einstellungen at 390 × 844, light and dark, de and en, the synced card and the delete sheet. Every string is a key (parity test passes, 64 new keys per language) |
+| Static export | `npm run check` green; `out/` has no `api/` folder; `/de/settings/` and `/en/settings/` are prerendered |

@@ -12,11 +12,77 @@
   },
   "common": {
     "comingSoon": "coming soon",
-    "close": "Close"
+    "close": "Close",
+    "error": "That did not work.",
+    "working": "One moment …"
   },
-  "dex": { "title": "Your Atlas" },
-  "quests": { "title": "Quests" },
-  "journal": { "title": "Journal" },
-  "you": { "title": "You" },
-  "log": { "title": "Log a sighting" }
+  "dex": {
+    "title": "Your Atlas"
+  },
+  "quests": {
+    "title": "Quests"
+  },
+  "journal": {
+    "title": "Journal"
+  },
+  "you": {
+    "title": "You",
+    "settings": "Settings",
+    "noName": "No name",
+    "nameHint": "Only on your profile. Nobody else sees it.",
+    "namePlaceholder": "Your name",
+    "edit": "Edit",
+    "save": "Save",
+    "cancel": "Cancel",
+    "noRegion": "No region yet",
+    "wholeYear": "Whole year",
+    "preparing": "being prepared",
+    "studied": "{n} studied",
+    "seen": "{n} discovered",
+    "possible": "{n} possible"
+  },
+  "log": {
+    "title": "Log a sighting"
+  },
+  "settings": {
+    "title": "Settings",
+    "back": "You",
+    "identity": {
+      "localTitle": "Only on this phone",
+      "localBody": "No account. A new phone starts from zero as long as you link nothing.",
+      "create": "🔑 Create a passkey",
+      "createHint": "Face ID or fingerprint, no password.",
+      "signIn": "Already have a passkey? Sign in here.",
+      "syncedTitle": "On {n, plural, one {one device} other {# devices}}",
+      "syncedBody": "Passkey, no password. Last used {when}.",
+      "syncedBodyNever": "Passkey, no password.",
+      "removeDevice": "Remove a device",
+      "addDevice": "Add a passkey",
+      "devicesTitle": "Your passkeys",
+      "unnamedDevice": "Device",
+      "remove": "Remove",
+      "done": "Done",
+      "adopted": "Linked. {sightings, plural, =0 {No sightings} one {One sighting} other {# sightings}} from here carried over.",
+      "unknownPasskey": "We do not know this passkey."
+    },
+    "data": {
+      "title": "Your data",
+      "export": "Export",
+      "exportHint": "All sightings and studied species as JSON, any time, no account needed",
+      "delete": "Delete everything",
+      "deleteHint": "On every device. Never just here.",
+      "deleteTitle": "Really delete everything?",
+      "deleteSummary": "{devices, plural, one {# device} other {# devices}} · {sightings, plural, one {# sighting} other {# sightings}}",
+      "deleteBody": "Sightings, studied species, photos and passkeys, on every device, no copy kept. Export first if you want to keep them.",
+      "deleteConfirm": "Delete for good",
+      "deleteCancel": "Keep",
+      "deleted": "Everything deleted. You start fresh."
+    },
+    "about": {
+      "title": "About",
+      "sources": "Sources",
+      "sourcesHint": "GBIF · Wikidata · Wikipedia · Wikimedia Commons · iNaturalist · GloBI",
+      "version": "Version"
+    }
+  }
 }

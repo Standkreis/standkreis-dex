@@ -1,9 +1,8 @@
-import { getTranslations, setRequestLocale } from 'next-intl/server'
-import { Page } from '@/components/Page'
+import { setRequestLocale } from 'next-intl/server'
+import { IdentityProfile } from '@/components/IdentityProfile'
 
 export default async function YouPage({ params }: PageProps<'/[locale]/you'>) {
   const { locale } = await params
   setRequestLocale(locale)
-  const t = await getTranslations('you')
-  return <Page title={t('title')} />
+  return <IdentityProfile />
 }

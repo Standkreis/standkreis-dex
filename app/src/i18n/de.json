@@ -12,11 +12,77 @@
   },
   "common": {
     "comingSoon": "kommt bald",
-    "close": "Schließen"
+    "close": "Schließen",
+    "error": "Das hat nicht geklappt.",
+    "working": "Einen Moment …"
   },
-  "dex": { "title": "Dein Atlas" },
-  "quests": { "title": "Quests" },
-  "journal": { "title": "Tagebuch" },
-  "you": { "title": "Du" },
-  "log": { "title": "Eintragen" }
+  "dex": {
+    "title": "Dein Atlas"
+  },
+  "quests": {
+    "title": "Quests"
+  },
+  "journal": {
+    "title": "Tagebuch"
+  },
+  "you": {
+    "title": "Du",
+    "settings": "Einstellungen",
+    "noName": "Ohne Namen",
+    "nameHint": "Nur auf deinem Profil. Niemand sonst sieht ihn.",
+    "namePlaceholder": "Dein Name",
+    "edit": "Ändern",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "noRegion": "Noch keine Region",
+    "wholeYear": "Ganzes Jahr",
+    "preparing": "wird vorbereitet",
+    "studied": "{n} studiert",
+    "seen": "{n} entdeckt",
+    "possible": "{n} möglich"
+  },
+  "log": {
+    "title": "Eintragen"
+  },
+  "settings": {
+    "title": "Einstellungen",
+    "back": "Du",
+    "identity": {
+      "localTitle": "Nur auf diesem Handy",
+      "localBody": "Kein Konto. Ein neues Handy fängt bei Null an, solange du nichts verknüpfst.",
+      "create": "🔑 Passkey anlegen",
+      "createHint": "Face ID oder Fingerabdruck, kein Passwort.",
+      "signIn": "Schon einen Passkey? Hier anmelden.",
+      "syncedTitle": "Auf {n, plural, one {einem Gerät} other {# Geräten}}",
+      "syncedBody": "Passkey, kein Passwort. Zuletzt {when}.",
+      "syncedBodyNever": "Passkey, kein Passwort.",
+      "removeDevice": "Gerät entfernen",
+      "addDevice": "Passkey hinzufügen",
+      "devicesTitle": "Deine Passkeys",
+      "unnamedDevice": "Gerät",
+      "remove": "Entfernen",
+      "done": "Fertig",
+      "adopted": "Verknüpft. {sightings, plural, =0 {Keine Sichtung} one {Eine Sichtung} other {# Sichtungen}} von hier übernommen.",
+      "unknownPasskey": "Diesen Passkey kennen wir nicht."
+    },
+    "data": {
+      "title": "Deine Daten",
+      "export": "Exportieren",
+      "exportHint": "Alle Sichtungen und Studiertes als JSON, jederzeit, auch ohne Konto",
+      "delete": "Alles löschen",
+      "deleteHint": "Auf allen Geräten. Nie nur hier.",
+      "deleteTitle": "Wirklich alles löschen?",
+      "deleteSummary": "{devices, plural, one {# Gerät} other {# Geräte}} · {sightings, plural, one {# Sichtung} other {# Sichtungen}}",
+      "deleteBody": "Sichtungen, Studiertes, Fotos und Passkeys, auf jedem Gerät, ohne Kopie. Exportiere vorher, wenn du sie behalten willst.",
+      "deleteConfirm": "Endgültig löschen",
+      "deleteCancel": "Behalten",
+      "deleted": "Alles gelöscht. Du fängst neu an."
+    },
+    "about": {
+      "title": "Über",
+      "sources": "Quellen",
+      "sourcesHint": "GBIF · Wikidata · Wikipedia · Wikimedia Commons · iNaturalist · GloBI",
+      "version": "Version"
+    }
+  }
 }
