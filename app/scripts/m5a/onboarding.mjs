@@ -53,8 +53,9 @@ await evaluate(`document.querySelector('[data-testid=place]').focus()`)
 await send('Input.insertText', { text: query })
 await waitFor('[data-testid=places] button')
 await sleep(300)
-await shot('1-region-search')
-await click('[data-testid=places] button')
+await shot(process.env.STOP_AT_SEARCH ? '1-region-unavailable' : '1-region-search')
+if (process.env.STOP_AT_SEARCH) { ws.close(); proc.kill(); process.exit(0) } // a query whose regions are not prepared
+await click('[data-testid=places] button[data-available=true]')
 await waitFor('[data-testid=onboarding-tiles]')
 await waitFor('[data-tile=bird] span span:nth-child(2):not(:empty)', 15_000).catch(() => {}) // counts, when the region is ready
 await sleep(300)

@@ -21,7 +21,7 @@
     "nowOnly": "now only",
     "preparing": "being prepared",
     "studied": "{n} studied",
-    "seen": "{n} seen",
+    "seen": "{n} discovered",
     "possible": "{n} possible",
     "shown": "{n} now",
     "studiedBadge": "studied",
@@ -37,7 +37,27 @@
       "insect": "Insects",
       "plant": "Plants",
       "fungus": "Fungi"
-    }
+    },
+    "search": "Search species · Amsel, Turdus …",
+    "filters": "Filters",
+    "drawerTitle": "Search & filter",
+    "reset": "Reset",
+    "region": "Region",
+    "change": "Change",
+    "groups": "Groups",
+    "nowOnlyMonth": "now only · {month}",
+    "show": "Show",
+    "showAll": "All",
+    "showStudied": "Studied",
+    "showSeen": "Discovered",
+    "showNew": "Not yet discovered",
+    "sort": "Sort",
+    "sortNow": "Likely now",
+    "sortName": "Name",
+    "sortSeen": "Last discovered",
+    "showN": "{n, plural, one {Show one species} other {Show # species}}",
+    "noMatch": "Nothing found for “{q}”.",
+    "empty": "No species matches these filters."
   },
   "quests": {
     "title": "Quests"
@@ -131,7 +151,7 @@
     "stepOf": "{step} of {of}",
     "tilesTitle": "What interests you?",
     "tilesBody": "Everything is on. Switch off what does not appeal to you; you can change it any time.",
-    "speciesHere": "{n} species here",
+    "speciesHere": "{n} species",
     "countsPending": "counting",
     "next": "Next",
     "readyTitle": "Your Atlas is ready.",
@@ -141,6 +161,9 @@
     "axisStudy": "<b>Study.</b> Read about a species and it gets a frame.",
     "axisSeen": "<b>Discover.</b> Log a sighting and the picture fills in.",
     "noAccount": "No account needed. Everything stays on this device until you want to see it elsewhere.",
-    "go": "Let's go"
+    "go": "Let's go",
+    "notAvailable": "Not available yet",
+    "notAvailableHere": "{name} is not available yet. Type another place.",
+    "cancel": "Cancel"
   }
 }

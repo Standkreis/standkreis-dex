@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useSearchParams } from 'next/navigation'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
 import { Tile } from '@/generated/prisma/enums'
 import { useRouter } from '@/i18n/navigation'
@@ -11,7 +12,11 @@ import { OnboardingSilhouette } from './OnboardingSilhouette'
 
 // Spec §🎨 1: three screens, one action each. Region (location explained before the OS prompt, "Ort eingeben" as the
 // fallback), groups as tiles all on, a ready screen with this month's count and nine grey cells. No skip, no account.
-// Rendered over the shell (z-30) so the bottom bar stays out of the first minute.
+// Rendered over the shell (z-30) so the bottom bar stays out of the first minute. "?change=1" is the drawer's Ändern:
+// the same three screens with a way back and the current tiles kept.
+//
+// Only regions the ETL has prepared (status ready) can be chosen (owner, 2026-09-05): the rest are listed but not
+// selectable, with one honest line. dex.requestRegion stays in place and unreachable from here until the loop is whole.
 
 // The splash photo, chosen once (handoff 0007 §❓): a Mainz-Bingen set member with a CC BY photo. Owner's pick pending;
 // the two alternatives shown were Kleiber (Frank Vassen, CC BY 4.0) and Amsel (Luiz Lapa, CC BY 4.0).
@@ -31,12 +36,17 @@ type Step = 'region' | 'tiles' | 'ready'
 type Region = { id: string; name: string; status: string }
 
 export function Onboarding() {
+  const change = useSearchParams().get('change') === '1'
+  const trpc = useTRPC()
+  const progress = useQuery(trpc.identity.progress.queryOptions(undefined, { enabled: change }))
   const [step, setStep] = useState<Step>('region')
   const [region, setRegion] = useState<Region | null>(null)
   const [tiles, setTiles] = useState<Set<Tile>>(() => new Set(allTiles))
+  // In change mode the tiles screen starts from the current filter, not from "all on".
+  const chosen = (r: Region) => { setRegion(r); if (change && progress.data?.tiles.length) setTiles(new Set(progress.data.tiles)); setStep('tiles') }
   return (
     <div className="fixed inset-0 z-30 overflow-y-auto bg-paper" data-testid={`onboarding-${step}`}>
-      {step === 'region' && <RegionScreen onChosen={(r) => { setRegion(r); setStep('tiles') }} />}
+      {step === 'region' && <RegionScreen change={change} onChosen={chosen} />}
       {step === 'tiles' && region && <TilesScreen region={region} tiles={tiles} setTiles={setTiles} onNext={() => setStep('ready')} />}
       {step === 'ready' && region && <ReadyScreen region={region} tiles={tiles} />}
     </div>
@@ -45,11 +55,12 @@ export function Onboarding() {
 
 // ── 1 · Region ────────────────────────────────────────────────────────────────
 
-function RegionScreen({ onChosen }: { onChosen: (r: Region) => void }) {
+function RegionScreen({ change, onChosen }: { change: boolean; onChosen: (r: Region) => void }) {
   const t = useTranslations('onboarding')
   const locale = useLocale()
   const trpc = useTRPC()
   const qc = useQueryClient()
+  const router = useRouter()
   const [mode, setMode] = useState<'locate' | 'search'>('locate')
   const [query, setQuery] = useState('')
   const [debounced, setDebounced] = useState('')
@@ -58,7 +69,9 @@ function RegionScreen({ onChosen }: { onChosen: (r: Region) => void }) {
   useEffect(() => { const h = setTimeout(() => setDebounced(query.trim()), 300); return () => clearTimeout(h) }, [query])
 
   const results = useQuery(trpc.dex.lookupRegion.queryOptions({ q: debounced }, { enabled: mode === 'search' && debounced.length >= 2 }))
-  const request = useMutation(trpc.dex.requestRegion.mutationOptions({ onSuccess: (r) => onChosen(r), onError: () => setError(t('error')) }))
+  type Unit = NonNullable<typeof results.data>[number]
+  const available = (u: Unit) => u.region?.status === 'ready'
+  const choose = (u: Unit) => onChosen({ id: u.region!.id, name: u.name, status: 'ready' })
 
   const locate = () => {
     setError(null)
@@ -69,7 +82,8 @@ function RegionScreen({ onChosen }: { onChosen: (r: Region) => void }) {
         try {
           const units = await qc.fetchQuery(trpc.dex.lookupRegion.queryOptions({ lat: coords.latitude, lng: coords.longitude }))
           if (!units[0]) throw new Error('no unit')
-          request.mutate({ gadmGid: units[0].gadmGid })
+          if (!available(units[0])) { setError(t('notAvailableHere', { name: units[0].name })); setMode('search'); return }
+          choose(units[0])
         } catch {
           setError(t('noLocation')); setMode('search')
         } finally { setLocating(false) }
@@ -78,13 +92,18 @@ function RegionScreen({ onChosen }: { onChosen: (r: Region) => void }) {
       { timeout: 15_000, maximumAge: 300_000 },
     )
   }
-  const busy = locating || request.isPending
+  const busy = locating
 
   return (
     <div className="relative flex min-h-full flex-col bg-night text-white">
       {/* eslint-disable-next-line @next/next/no-img-element -- remote CC BY photo, static export */}
       <img src={SPLASH.url} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ objectPosition: SPLASH.position }} />
       <div className="absolute inset-0 bg-gradient-to-b from-night/15 via-night/60 via-45% to-night to-90%" />
+      {change && (
+        <button type="button" onClick={() => router.back()} data-testid="cancel" className="absolute top-4 right-4 z-10 rounded-full bg-night/50 px-3.5 py-1.5 text-[14px] font-semibold text-white" style={{ top: 'calc(1rem + env(safe-area-inset-top))' }}>
+          {t('cancel')}
+        </button>
+      )}
       <div className="relative mx-auto flex w-full max-w-[520px] flex-1 flex-col justify-end px-6 pt-[40vh]" style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
         {/* The splash stays dark in both themes (spec §🎨): only theme-stable tokens here (night, moss, white). */}
         <div className="text-[13px] font-bold tracking-[0.12em] text-moss uppercase">{t('eyebrow')}</div>
@@ -112,14 +131,18 @@ function RegionScreen({ onChosen }: { onChosen: (r: Region) => void }) {
               <ul className="mt-2 overflow-hidden rounded-2xl bg-white text-night" data-testid="places">
                 {results.isLoading && <li className="px-4 py-3 text-[15px] text-night/60">{t('working')}</li>}
                 {results.data?.length === 0 && <li className="px-4 py-3 text-[15px] text-night/60">{t('noPlace')}</li>}
-                {results.data?.map((u, i) => (
-                  <li key={u.gadmGid} className={i ? 'border-t border-night/10' : ''}>
-                    <button type="button" disabled={busy} onClick={() => request.mutate({ gadmGid: u.gadmGid })} className="w-full px-4 py-3 text-left text-[17px] disabled:opacity-60">
-                      <span className="font-semibold">{u.name}</span>
-                      <span className="text-night/60"> · {[locale === 'de' ? u.type : u.typeEn, u.parent].filter(Boolean).join(', ')}</span>
-                    </button>
-                  </li>
-                ))}
+                {results.data?.map((u, i) => {
+                  const ok = available(u)
+                  return (
+                    <li key={u.gadmGid} className={i ? 'border-t border-night/10' : ''}>
+                      <button type="button" disabled={busy || !ok} aria-disabled={!ok} data-available={ok} onClick={() => choose(u)} className={`w-full px-4 py-3 text-left text-[17px] ${ok ? '' : 'text-night/50'}`}>
+                        <span className="font-semibold">{u.name}</span>
+                        <span className="text-night/60"> · {[locale === 'de' ? u.type : u.typeEn, u.parent].filter(Boolean).join(', ')}</span>
+                        {!ok && <span className="block text-[14px] text-night/50">{t('notAvailable')}</span>}
+                      </button>
+                    </li>
+                  )
+                })}
               </ul>
             )}
             <button type="button" onClick={() => { setMode('locate'); setError(null) }} className="mt-4 self-start text-[15px] text-white/75 underline underline-offset-4">

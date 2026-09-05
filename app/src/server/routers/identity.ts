@@ -76,14 +76,20 @@ export const identityRouter = router({
   }),
 
   // The two axes over the set (spec §🧬): studied and wild-seen taxon ids, plus the filter's tiles (empty = all).
-  // Du intersects them with `dex.set`; M5's grid joins the same lists per cell.
+  // Du intersects them with `dex.set`; M5's grid joins the same lists per cell. `seenAt` carries the latest wild
+  // sighting per taxon for the grid's "Zuletzt entdeckt" sort.
   progress: publicProcedure.query(async ({ ctx }) => {
     const [studies, sightings, filter] = await Promise.all([
       ctx.db.study.findMany({ where: { identityId: ctx.identity.id }, select: { taxonId: true } }),
-      ctx.db.sighting.findMany({ where: { identityId: ctx.identity.id, wildness: 'wild' }, select: { taxonId: true }, distinct: ['taxonId'] }),
+      ctx.db.sighting.groupBy({ by: ['taxonId'], where: { identityId: ctx.identity.id, wildness: 'wild' }, _max: { at: true } }),
       ctx.db.filter.findUnique({ where: { identityId: ctx.identity.id }, select: { tiles: true } }),
     ])
-    return { studied: studies.map((s) => s.taxonId), seen: sightings.map((s) => s.taxonId), tiles: filter?.tiles ?? [] }
+    return {
+      studied: studies.map((s) => s.taxonId),
+      seen: sightings.map((s) => s.taxonId),
+      seenAt: Object.fromEntries(sightings.map((s) => [s.taxonId, s._max.at?.toISOString() ?? ''])) as Record<string, string>,
+      tiles: filter?.tiles ?? [],
+    }
   }),
 
   // Name and photo are yours (spec §⚖️): local to the identity, never in a payload before a passkey exists.
