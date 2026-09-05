@@ -1,10 +1,10 @@
 {
   "app": {
-    "name": "Dex",
+    "name": "Atlas",
     "description": "Sieh, was gerade um dich herum leben könnte, lerne es kennen, und fülle die Silhouette, wenn ihr euch begegnet."
   },
   "nav": {
-    "dex": "Dex",
+    "dex": "Atlas",
     "quests": "Quests",
     "log": "Eintragen",
     "journal": "Tagebuch",
@@ -14,7 +14,7 @@
     "comingSoon": "kommt bald",
     "close": "Schließen"
   },
-  "dex": { "title": "Dein Dex" },
+  "dex": { "title": "Dein Atlas" },
   "quests": { "title": "Quests" },
   "journal": { "title": "Tagebuch" },
   "you": { "title": "Du" },
