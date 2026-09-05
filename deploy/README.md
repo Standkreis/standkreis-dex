@@ -1,5 +1,7 @@
 # 🚀 deploy — one VM, one domain ([handoff 0010](../docs/handoffs/0010-deploy.md))
 
+> 🅿️ **Parked, not the live path.** Hetzner refused the card (2026-09-05); the app runs on Vercel with Neon and Blob, see [docs/DEPLOY.md](../docs/DEPLOY.md). This folder is proven ([findings 0010](../docs/handoffs/0010-deploy-findings.md)) and kept as the exit route.
+
 Ubuntu 24.04 on a Hetzner CX22, Docker Compose, Caddy for https. One evening, top to bottom. Every command runs on the VM over SSH unless the row says "Mac".
 
 | File | Does |

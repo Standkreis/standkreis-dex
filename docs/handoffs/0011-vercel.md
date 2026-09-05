@@ -10,7 +10,7 @@
 
 ## 🎯 Why
 
-Hetzner refused the owner's card (2026-09-05, after the VM deploy was merged). **Owner's call: Vercel**, project created, root directory `app`, functions in `fra1`, Neon Postgres in Frankfurt from the marketplace, the five variables set. The first deploy will build.
+Hetzner refused the owner's card (2026-09-05, after the VM deploy was merged). **Owner's call: Vercel**, project `standkreis-dex` (team Standkreis, Pro), root directory `app`, functions in `fra1`, Node.js 24, live at **`atlas.standkreis.de`** (CNAME at united-domains; the apex stays free for a landing page). Neon Postgres in Frankfurt from the marketplace, connected to Production and Preview (not Development); Blob private store `standkreis-dex-blob` connected to all three environments. Variables set: `DATABASE_*`, `BLOB_*`, `WEBAUTHN_RP_ID=standkreis.de` (the apex, so passkeys survive a subdomain move), `WEBAUTHN_ORIGIN=https://atlas.standkreis.de`, `WEBAUTHN_SECRET`, `PHOTO_DIR=/tmp/photos`. The first deploy built and Mainz-Bingen is filled from the Mac (2026-09-06). Live stack: [docs/DEPLOY.md](../DEPLOY.md).
 
 It will not run the product for long. Three things in `main` assume one process on one disk, and serverless has neither:
 

@@ -25,6 +25,8 @@ npm run dev                    # http://localhost:3000 → /de or /en
 | `npm run build:export` | `out/` for any file server or Capacitor. The tRPC route stays out; set `NEXT_PUBLIC_API_URL` |
 | `node scripts/shot.mjs /de dark out.png` | 390 × 844 screenshot in a colour scheme, via headless Chrome |
 
+Production: push to `main` deploys to [atlas.standkreis.de](https://atlas.standkreis.de) on Vercel with Neon and Blob, see [docs/DEPLOY.md](docs/DEPLOY.md).
+
 ## 🗂️ Layout
 
 ```

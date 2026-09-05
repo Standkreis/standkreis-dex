@@ -25,33 +25,30 @@ TypeScript on `tsx`, the app's Prisma client, no other dependency. Every respons
 
 Why the region job precedes the content job: a species enters a set first, content follows. GloBI targets outside every set get a `Taxon` row (tile from GBIF's ranks, `contentAt` null) and are never picked up by the content job unless they gain a plausibility row or a sighting (record 0002 E13).
 
-## 🚀 Filling production (handoff [0010](../../docs/handoffs/0010-deploy.md))
+## 🚀 Filling production — Neon (handoff [0011](../../docs/handoffs/0011-vercel.md))
 
-The VM runs no ETL: it has no GBIF keys, no `.cache/`, and the laptop's cache turns a region fill into minutes. The dev Postgres of `deploy/compose.yml` publishes no host port, so the laptop reaches it through an SSH tunnel. Sightings, photos and identities never travel this way; only the set tables do.
+Production is **Neon Postgres** behind Vercel ([docs/DEPLOY.md](../../docs/DEPLOY.md)); no VM, no tunnel. The ETL runs on the laptop, whose `.cache/` turns a fill into minutes, against the **unpooled** Neon URL (`DATABASE_URL_UNPOOLED`; the pooled one drops long transactions). Sightings, photos and identities never travel; only the set tables do. Migrations are not the ETL's job: Vercel's build runs `prisma migrate deploy`.
 
-**Option 1 — the ETL over a tunnel** (the normal way, ~20 min for a region with content, less with a warm `.cache/`):
+**Option 1 — the ETL against Neon** (the normal way; region ≈ 2 min, content ≈ 20 min for a region, bounded by iNaturalist):
 
 ```sh
-ssh -N -L 5434:127.0.0.1:5432 <user>@<vm>           # terminal 1: 5434 on the laptop → the VM's loopback 5432 (compose binds `db` to 127.0.0.1 only)
-export DATABASE_URL='postgresql://dex:<password from deploy/.env>@localhost:5434/dex'   # terminal 2, in app/
-npm run etl -- region "Mainz-Bingen"                # Region, Taxon, Plausibility, Lookalike
-npm run etl -- content                              # images, intros, facts, edges for the set
+cd app
+npx vercel env pull --environment production /tmp/dex-prod.env   # never into the repo
+export DATABASE_URL="$(grep '^DATABASE_URL_UNPOOLED=' /tmp/dex-prod.env | cut -d= -f2- | tr -d '"')"
+npm run etl -- region "Mainz-Bingen"                # Region, Taxon, Plausibility, Lookalike (2026-09-06: 111 s, 1,617 GBIF requests, 929 species)
+npm run etl -- content --region "Mainz-Bingen"      # images, intros, facts, edges for the set
+rm /tmp/dex-prod.env
 ```
 
-The region job runs in one transaction; a dropped tunnel leaves the region `failed` and the next run replaces it. `content` is one transaction per taxon and resumes where it stopped. `ETL_BUDGET` and `ETL_YEARS` are read from the laptop's environment as always.
+The region job is one transaction; a dropped connection leaves the region `failed` and the next run replaces it. `content` is one transaction per taxon and resumes where it stopped. `ETL_BUDGET` and `ETL_YEARS` are read from the laptop's environment as always.
 
-**Option 2 — copy the set tables from the dev DB** (minutes; when the laptop already holds the region):
+**Option 2 — copy the set tables from the dev DB** (when the laptop already holds the region):
 
 ```sh
-# laptop: only the tables the ETL owns, in dependency order; never Identity, Sighting, Asset (user photos), Study, Filter
+# laptop: only the tables the ETL owns, in dependency order; never Identity, Sighting, Study, Filter
 pg_dump postgresql://dex:dex@localhost:5433/dex --data-only \
   -t '"Region"' -t '"Taxon"' -t '"Plausibility"' -t '"Lookalike"' -t '"Asset"' > set.sql
+psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f set.sql     # DATABASE_URL = the unpooled Neon URL from above
 ```
 
-`Asset` holds the reference images of the content job **and** user photos (`origin = 'user'`): dump it only into an empty production DB, or filter the user rows out first (`--data-only` with a `COPY` edit, or `DELETE FROM "Asset" WHERE origin = 'user'` on a scratch copy). Then over the tunnel:
-
-```sh
-psql 'postgresql://dex:<password>@localhost:5434/dex' -v ON_ERROR_STOP=1 -f set.sql
-```
-
-The schema must already exist: the `migrate` service of `deploy/compose.yml` ran `prisma migrate deploy` before `app` started. Afterwards `/api/health` still says `ok` and the phone's region search finds the set; the restart sweep (`instrumentation.ts`) fills any taxon whose `contentAt` is null on the next `docker compose restart app`.
+`Asset` holds the reference images of the content job **and** user photos (`origin = 'user'`): dump it only into an empty production DB, or filter the user rows out first (`DELETE FROM "Asset" WHERE origin = 'user'` on a scratch copy). Afterwards `/api/health` still says `ok` and the phone's region search finds the set. Until 0011 Track B lands, a taxon with `contentAt` null is healed only by the next `content` run from here, not by the restart sweep (it runs per cold start on Vercel).
