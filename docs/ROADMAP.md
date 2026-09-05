@@ -4,7 +4,7 @@
 
 | 🗓️ Updated | 👤 Owner | ➡️ Next |
 | --- | --- | --- |
-| 2026-09-05 | Sven Reiser | M8b C6–C8 on the VM (`standkreis.de`), then M9 |
+| 2026-09-06 | Sven Reiser | M8b on Vercel, [handoff 0011](handoffs/0011-vercel.md) |
 
 ## 📍 Milestones
 
@@ -20,7 +20,7 @@
 | M7 | 🔐 Identity + data | 1 | Anonymous id, passkey/email sync, export JSON, delete, Du with counters and settings | M2 | ✅ 2026-09-05, [findings 0006](handoffs/0006-etl-and-identity-findings.md) |
 | M7b | ✉️ Email attach | 1 | Verify an address through **Resend** (EU region), magic link adopts the identity like a passkey does, second recovery path. Needs the production domain for DKIM and the passkey relying-party id | M7, domain | owner's call 2026-09-05: Resend |
 | M8 | 📴 Offline | 1 | Atlas for the active filter opens with no network, sightings queue and sync | M5, M7 | ✅ 2026-09-05 ([findings 0009](handoffs/0009-offline-findings.md)) |
-| M8b | 🚀 Deploy | 1 | One Hetzner VM with Compose and Caddy, the domain, https, the passkey RP id, backups; the phone reaches the app from a field ([handoff 0010](handoffs/0010-deploy.md)) | M8, domain | 🟡 code merged 2026-09-05 ([findings 0010](handoffs/0010-deploy-findings.md)); C6–C8 wait for the VM |
+| M8b | 🚀 Deploy | 1 | The app on Vercel (`fra1`) with Neon Postgres and Blob photos, `standkreis.de`, the passkey RP id; the phone reaches the app from a field ([handoff 0011](handoffs/0011-vercel.md)). The VM deploy of [handoff 0010](handoffs/0010-deploy.md) is proven and parked (Hetzner refused the card) | M8, domain | ➡️ next |
 | M9 | 🚶 The first walk | 1 | The owner uses it on one walk and opens it again the next day | M6, M8b | ➡️ next, after C6–C8 |
 | M10 | 🔥 Quest + recap grill | 2 | Generator rules, repeat avoidance, the two-question recap, XP curve | M9 | |
 | M11 | 🧭 Quests + recap + XP | 2 | Three weekly quests, recap unlocks studied XP, Du with level, "kommt bald" replaced | M10, M4 data | |
