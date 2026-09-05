@@ -17,7 +17,8 @@ const tabs = [
 
 function Tab({ tab }: { tab: (typeof tabs)[number] }) {
   const t = useTranslations('nav')
-  const active = usePathname() === tab.href
+  const pathname = usePathname()
+  const active = pathname === tab.href || (tab.id === 'you' && pathname.startsWith('/settings'))
   return (
     <Link href={tab.href} aria-current={active ? 'page' : undefined} className={`flex w-16 flex-col items-center gap-0.5 text-[11px] ${active ? 'font-semibold text-moss-deep' : 'text-ink-soft'}`}>
       <span className={`flex h-7 w-10 items-center justify-center rounded-full ${active ? 'bg-moss-soft' : ''}`}><Icon name={tab.icon} size={20} /></span>

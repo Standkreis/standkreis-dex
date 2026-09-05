@@ -1,18 +1,28 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
 import { useTranslations } from 'next-intl'
+import { Tile } from '@/generated/prisma/enums'
+import { useTRPC } from '@/trpc/client'
+
+const allTiles = Object.values(Tile) as Tile[]
 
 export type SetCounters =
   | { state: 'preparing' }
   | { state: 'ready'; studied: number; seen: number; possible: number }
 
 // The three counters over the whole-year set (findings 0002 §10, doubt 41: the profile counts the year).
-// TODO(merge M4): when Track A's `dex.set` lands, read it here when `region.status === 'ready'`:
-//   const trpc = useTRPC(); const q = useQuery(trpc.dex.set.queryOptions({ regionId, tiles, nowOnly: false, month }, { enabled: ready }))
-//   and derive studied · seen · possible from the returned species. Until then every region is "wird vorbereitet".
+// Reads `dex.set` for the filter's tiles (empty = all eight) once the region is ready; before that, "wird vorbereitet".
 export function useSetCounters(region: { id: string; status: string } | null): SetCounters {
-  void region
-  return { state: 'preparing' }
+  const trpc = useTRPC()
+  const ready = region?.status === 'ready'
+  const progress = useQuery(trpc.identity.progress.queryOptions(undefined, { enabled: ready }))
+  const tiles = progress.data?.tiles.length ? progress.data.tiles : allTiles
+  const set = useQuery(trpc.dex.set.queryOptions({ regionId: region?.id ?? '', tiles, nowOnly: false }, { enabled: ready && !!progress.data }))
+  if (!ready || !progress.data || !set.data) return { state: 'preparing' }
+  const inSet = new Set(set.data.species.map((s) => s.taxonId))
+  const count = (ids: string[]) => ids.filter((id) => inSet.has(id)).length
+  return { state: 'ready', studied: count(progress.data.studied), seen: count(progress.data.seen), possible: inSet.size }
 }
 
 export function CountersCard({ regionName, counters }: { regionName: string | null; counters: SetCounters }) {

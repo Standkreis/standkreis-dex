@@ -74,6 +74,17 @@ export const identityRouter = router({
     }
   }),
 
+  // The two axes over the set (spec §🧬): studied and wild-seen taxon ids, plus the filter's tiles (empty = all).
+  // Du intersects them with `dex.set`; M5's grid joins the same lists per cell.
+  progress: publicProcedure.query(async ({ ctx }) => {
+    const [studies, sightings, filter] = await Promise.all([
+      ctx.db.study.findMany({ where: { identityId: ctx.identity.id }, select: { taxonId: true } }),
+      ctx.db.sighting.findMany({ where: { identityId: ctx.identity.id, wildness: 'wild' }, select: { taxonId: true }, distinct: ['taxonId'] }),
+      ctx.db.filter.findUnique({ where: { identityId: ctx.identity.id }, select: { tiles: true } }),
+    ])
+    return { studied: studies.map((s) => s.taxonId), seen: sightings.map((s) => s.taxonId), tiles: filter?.tiles ?? [] }
+  }),
+
   // Name and photo are yours (spec §⚖️): local to the identity, never in a payload before a passkey exists.
   setName: publicProcedure.input(z.object({ displayName: z.string().trim().max(40) })).mutation(({ ctx, input }) =>
     ctx.db.identity.update({ where: { id: ctx.identity.id }, data: { displayName: input.displayName || null }, select: { displayName: true } }),
