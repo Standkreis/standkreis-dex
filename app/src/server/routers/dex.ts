@@ -25,6 +25,13 @@ type Unit = ReturnType<typeof toUnit>
 const jobs: Map<string, Promise<void>> = ((globalThis as unknown as { __dexRegionJobs?: Map<string, Promise<void>> }).__dexRegionJobs ??= new Map())
 
 const tile = z.enum(Object.values(Tile) as [Tile, ...Tile[]])
+
+const INAT = 'https://inaturalist-open-data.s3.amazonaws.com/'
+/**
+ * The grid's image variant (handoff 0009 Track A): an iNaturalist `medium.*` (500 px, ~45–60 KB) becomes `small.*`
+ * (240 px, ~15 KB) for a 110 px cell; Wikimedia thumbs and own photos stay as they are. The species page keeps `medium`.
+ */
+export const smallVariant = (url: string) => (url.startsWith(INAT) ? url.replace(/\/medium\.(\w+)$/, '/small.$1') : url)
 const thisMonth = () => new Date().getMonth() + 1
 
 // The grid's data (spec §🧬 "The plausible set", §🎨 2). Pure read: no identity, the dex state is joined by the client (M5).
@@ -62,6 +69,7 @@ export const dexRouter = router({
           now: isNow(p.monthShare, p.peak, month),
           words: p.words,
           lead: p.taxon.assets[0] ?? null,
+          leadSmall: p.taxon.assets[0] ? smallVariant(p.taxon.assets[0].url) : null,
           hasContent: p.taxon.contentAt !== null,
         }))
         .filter((s) => !input.nowOnly || s.now)

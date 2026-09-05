@@ -18,7 +18,8 @@ import { nudgeSeen, PasskeyNudge } from './PasskeyNudge'
 
 type Species = NonNullable<ReturnType<typeof useAtlasSet>['set']>['species'][number]
 // One grid row: a set member, or a species seen wild outside the set (record 0002 E13) that sits at the bottom.
-type Row = Pick<Species, 'taxonId' | 'gbifKey' | 'sciName' | 'names' | 'tile'> & { lead: { url: string } | null; outside: boolean }
+// `leadSmall` is the grid's variant of the lead (handoff 0009); out-of-set rows carry only `lead`.
+type Row = Pick<Species, 'taxonId' | 'gbifKey' | 'sciName' | 'names' | 'tile'> & { lead: { url: string } | null; leadSmall?: string | null; outside: boolean }
 
 // The Atlas grid of spec §🎨 2 on the real set (handoff 0007 Track A). Header: title, one bar amber-then-green with the
 // three counters; one search bar with the filter button and its badge; the 3-column grid; one sources line. Region and
@@ -238,7 +239,7 @@ function FilterButton({ count, label, onClick, className, style, testId }: { cou
 // `own` = the identity's latest wild photo of the species, shown in colour instead of the reference image (spec §🎨 2).
 // `fill` = the cell of the fill moment: "pre" is drawn grey with the transition armed, "done" sweeps to colour over 400 ms under a green ring.
 function Cell({ s, name, own, isSeen, isStudied, badge, fill }: { s: Row; name: string; own: string | null; isSeen: boolean; isStudied: boolean; badge: string; fill: 'pre' | 'done' | null }) {
-  const src = own && isSeen ? photoSrc(own) : s.lead?.url ?? null
+  const src = own && isSeen ? photoSrc(own) : s.leadSmall ?? s.lead?.url ?? null
   return (
     <li className="min-w-0" data-taxon={s.taxonId} data-fill={fill ?? undefined} data-outside={s.outside || undefined} data-own={own ? 'true' : undefined}>
       <Link href={`/species/${s.gbifKey}`} className="block">
