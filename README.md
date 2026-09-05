@@ -2,9 +2,9 @@
 
 A **personal collection layer over open biodiversity data**: see what could be living around you right now, learn about it before you meet it, and fill the silhouette when you do. Web first, phone later, free forever.
 
-| 📄 Spec | 💬 Record | 🖼️ Reference screenshots |
-| --- | --- | --- |
-| [docs/specs/0001](docs/specs/0001-standkreis-dex-the-first-walk.md) | [docs/records/0001](docs/records/0001-standkreis-dex-the-first-walk.md) | [docs/adr/0001-…/](docs/adr/0001-standkreis-dex-the-first-walk/) with the [UI findings](docs/handoffs/0002-ui-exploration-findings.md) |
+| 🗺️ Roadmap | 📄 Spec | 💬 Records | 🖼️ Reference screenshots |
+| --- | --- | --- | --- |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | [docs/specs/0001](docs/specs/0001-standkreis-dex-the-first-walk.md) | [0001](docs/records/0001-standkreis-dex-the-first-walk.md) · [0002](docs/records/0002-etl-the-plausible-set.md) | [docs/adr/0001-…/](docs/adr/0001-standkreis-dex-the-first-walk/) with the [UI findings](docs/handoffs/0002-ui-exploration-findings.md) |
 
 ## 🏗️ Stack
 
