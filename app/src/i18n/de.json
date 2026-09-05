@@ -165,5 +165,119 @@
     "notAvailable": "Noch nicht verfügbar",
     "notAvailableHere": "{name} ist noch nicht verfügbar. Gib einen anderen Ort ein.",
     "cancel": "Abbrechen"
+  },
+  "species": {
+    "back": "Zurück",
+    "notFound": "Diese Art kennen wir noch nicht.",
+    "toAtlas": "Zum Atlas",
+    "noImage": "Noch kein Bild",
+    "caption": "Foto: {author} · {licence} · {origin}",
+    "origin": {
+      "inat": "iNaturalist",
+      "commons": "Wikimedia Commons",
+      "user": "Dein Foto",
+      "other": "Quelle"
+    },
+    "attribution": {
+      "title": "Bildnachweis",
+      "author": "Autor",
+      "licence": "Lizenz",
+      "source": "Quelle",
+      "hint": "Lang drücken auf ein Bild öffnet diese Angaben."
+    },
+    "state": {
+      "studied": "studiert",
+      "notStudied": "noch nicht studiert",
+      "seen": "entdeckt",
+      "notSeen": "noch nicht entdeckt"
+    },
+    "fungus": {
+      "title": "Kein Speisepilz-Ratgeber.",
+      "body": "Diese App macht keine Aussage über Essbarkeit oder Giftigkeit und übernimmt dafür keine Gewähr. Bestimme nichts zum Verzehr auf Grundlage einer App.",
+      "intro": "Der Einleitungstext stammt aus Wikipedia und ist nicht von uns geprüft."
+    },
+    "introOtherLang": "{lang}, noch keine deutsche Fassung",
+    "lang": {
+      "de": "Deutsch",
+      "en": "Englisch"
+    },
+    "noIntro": "Noch kein Einleitungstext.",
+    "empty": "Noch keine Angaben",
+    "facts": {
+      "title": "Steckbrief",
+      "size": "Größe",
+      "lifespan": "Alter",
+      "reproduction": "Nachwuchs",
+      "migration": "Zug",
+      "status": "Status",
+      "sound": "Stimme",
+      "missing": "{list}: noch keine Angaben"
+    },
+    "tile": {
+      "bird": "Vogel",
+      "mammal": "Säugetier",
+      "amphibian": "Amphibie",
+      "reptile": "Reptil",
+      "fish": "Fisch",
+      "insect": "Insekt oder Spinne",
+      "plant": "Pflanze",
+      "fungus": "Pilz"
+    },
+    "iucn": {
+      "LC": "nicht gefährdet",
+      "NT": "potenziell gefährdet",
+      "VU": "gefährdet",
+      "EN": "stark gefährdet",
+      "CR": "vom Aussterben bedroht",
+      "EW": "in der Natur ausgestorben",
+      "EX": "ausgestorben",
+      "DD": "ungenügende Daten",
+      "NE": "nicht bewertet"
+    },
+    "occurrence": {
+      "title": "Vorkommen",
+      "reports": "{n} Meldungen in zehn Jahren",
+      "wholeYear": "Ganzjährig anzutreffen",
+      "mainTime": "Hauptzeit {months}",
+      "now": "jetzt gute Chancen",
+      "rare": "hier selten gemeldet",
+      "noRegion": "Noch keine Region gewählt.",
+      "monthLetters": "J F M A M J J A S O N D",
+      "mapLabel": "Meldungen seit 2016 · GBIF · Raster ≈ {km} km",
+      "mapCredit": "© OpenStreetMap-Mitwirkende · GBIF",
+      "mapAlt": "Karte um {region} mit den gemeldeten Zellen"
+    },
+    "lookalikes": {
+      "title": "Verwechslungsgefahr",
+      "empty": "Keine Art derselben Gattung in deinem Atlas.",
+      "sameGenus": "gleiche Gattung"
+    },
+    "ecology": {
+      "title": "Ökologie",
+      "kind": {
+        "eats": "frisst",
+        "eatenBy": "wird gefressen von",
+        "pollinates": "bestäubt",
+        "visitsFlowersOf": "besucht Blüten von",
+        "hostOf": "Wirt von",
+        "parasiteOf": "Parasit von"
+      },
+      "empty": "Für {name} kennt GloBI noch keine Beziehungen. Das heißt nicht, dass es keine gibt.",
+      "more": "+{n} weitere"
+    },
+    "notInAtlas": "nicht in deinem Atlas",
+    "sources": {
+      "label": "Quellen",
+      "text": "Text: Wikipedia, {licence}",
+      "data": "Daten: {list}",
+      "occurrence": "Vorkommen: GBIF",
+      "ecology": "Ökologie: GloBI",
+      "images": "Bilder: {list}"
+    },
+    "study": {
+      "mark": "Studiert",
+      "marked": "Studiert ✓",
+      "working": "…"
+    }
   }
 }

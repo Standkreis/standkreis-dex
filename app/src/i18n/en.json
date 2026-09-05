@@ -165,5 +165,119 @@
     "notAvailable": "Not available yet",
     "notAvailableHere": "{name} is not available yet. Type another place.",
     "cancel": "Cancel"
+  },
+  "species": {
+    "back": "Back",
+    "notFound": "We do not know this species yet.",
+    "toAtlas": "To the Atlas",
+    "noImage": "No image yet",
+    "caption": "Photo: {author} · {licence} · {origin}",
+    "origin": {
+      "inat": "iNaturalist",
+      "commons": "Wikimedia Commons",
+      "user": "Your photo",
+      "other": "Source"
+    },
+    "attribution": {
+      "title": "Image credit",
+      "author": "Author",
+      "licence": "Licence",
+      "source": "Source",
+      "hint": "Long-press an image to open these details."
+    },
+    "state": {
+      "studied": "studied",
+      "notStudied": "not studied yet",
+      "seen": "seen",
+      "notSeen": "not seen yet"
+    },
+    "fungus": {
+      "title": "Not a foraging guide.",
+      "body": "This app makes no statement about edibility or toxicity and gives no guarantee. Never decide what to eat based on an app.",
+      "intro": "The introduction is Wikipedia's and has not been checked by us."
+    },
+    "introOtherLang": "{lang}, no English version yet",
+    "lang": {
+      "de": "German",
+      "en": "English"
+    },
+    "noIntro": "No introduction yet.",
+    "empty": "No data yet",
+    "facts": {
+      "title": "Profile",
+      "size": "Size",
+      "lifespan": "Lifespan",
+      "reproduction": "Offspring",
+      "migration": "Migration",
+      "status": "Status",
+      "sound": "Voice",
+      "missing": "{list}: no data yet"
+    },
+    "tile": {
+      "bird": "Bird",
+      "mammal": "Mammal",
+      "amphibian": "Amphibian",
+      "reptile": "Reptile",
+      "fish": "Fish",
+      "insect": "Insect or spider",
+      "plant": "Plant",
+      "fungus": "Fungus"
+    },
+    "iucn": {
+      "LC": "least concern",
+      "NT": "near threatened",
+      "VU": "vulnerable",
+      "EN": "endangered",
+      "CR": "critically endangered",
+      "EW": "extinct in the wild",
+      "EX": "extinct",
+      "DD": "data deficient",
+      "NE": "not evaluated"
+    },
+    "occurrence": {
+      "title": "Occurrence",
+      "reports": "{n} records in ten years",
+      "wholeYear": "Found all year",
+      "mainTime": "Peak {months}",
+      "now": "good chances now",
+      "rare": "rarely reported here",
+      "noRegion": "No region chosen yet.",
+      "monthLetters": "J F M A M J J A S O N D",
+      "mapLabel": "Records since 2016 · GBIF · grid ≈ {km} km",
+      "mapCredit": "© OpenStreetMap contributors · GBIF",
+      "mapAlt": "Map around {region} with the reported cells"
+    },
+    "lookalikes": {
+      "title": "Easily confused",
+      "empty": "No species of the same genus in your Atlas.",
+      "sameGenus": "same genus"
+    },
+    "ecology": {
+      "title": "Ecology",
+      "kind": {
+        "eats": "eats",
+        "eatenBy": "is eaten by",
+        "pollinates": "pollinates",
+        "visitsFlowersOf": "visits flowers of",
+        "hostOf": "host of",
+        "parasiteOf": "parasite of"
+      },
+      "empty": "GloBI knows no relationships for {name} yet. That does not mean there are none.",
+      "more": "+{n} more"
+    },
+    "notInAtlas": "not in your Atlas",
+    "sources": {
+      "label": "Sources",
+      "text": "Text: Wikipedia, {licence}",
+      "data": "Data: {list}",
+      "occurrence": "Occurrence: GBIF",
+      "ecology": "Ecology: GloBI",
+      "images": "Images: {list}"
+    },
+    "study": {
+      "mark": "Studied",
+      "marked": "Studied ✓",
+      "working": "…"
+    }
   }
 }
