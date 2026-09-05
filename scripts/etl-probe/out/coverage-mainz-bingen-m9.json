@@ -1,0 +1,1359 @@
+{
+ "threshold": 10,
+ "coverage": {
+  "sampled": 258,
+  "dewiki": 828,
+  "deIntro": 809,
+  "enwiki": 832,
+  "enIntro": 797,
+  "iucn": 201,
+  "anage": 149,
+  "eolPage": 258,
+  "eolHabitat": 0,
+  "globiAny": 258,
+  "globiZero": 0,
+  "lookalike": 258
+ },
+ "kinds": {
+  "eats": 44213,
+  "eatenBy": 39123,
+  "hasEctoparasite": 233,
+  "parasiteOf": 1357,
+  "hasParasite": 1355,
+  "preysOn": 19395,
+  "ectoparasiteOf": 233,
+  "preyedUponBy": 17311,
+  "createsHabitatFor": 31,
+  "hostOf": 8511,
+  "hasPathogen": 331,
+  "interactsWith": 8070,
+  "visits": 650,
+  "dispersalVectorOf": 7,
+  "hasHabitat": 31,
+  "hasHost": 8677,
+  "pathogenOf": 331,
+  "visitedBy": 650,
+  "hasDispersalVector": 7,
+  "hasEndoparasite": 72,
+  "adjacentTo": 3500,
+  "endoparasiteOf": 72,
+  "killedBy": 21,
+  "kills": 21,
+  "coOccursWith": 184,
+  "visitsFlowersOf": 8008,
+  "flowersVisitedBy": 7976,
+  "symbiontOf": 1088,
+  "hasParasitoid": 56,
+  "parasitoidOf": 56,
+  "pollinates": 3395,
+  "pollinatedBy": 3395,
+  "hasKleptoparasite": 14,
+  "kleptoparasiteOf": 14,
+  "mutualistOf": 180,
+  "hasEndoparasitoid": 10,
+  "endoparasitoidOf": 10,
+  "arbuscularMycorrhizalHostOf": 70,
+  "hasArbuscularMycorrhizalHost": 70,
+  "hasVector": 3,
+  "vectorOf": 3,
+  "hasEggsLayedOnBy": 2,
+  "laysEggsOn": 2,
+  "epiphyteOf": 33,
+  "hasEpiphyte": 33,
+  "hasEctomycorrhizalHost": 51,
+  "ectomycorrhizalHostOf": 51
+ },
+ "noEdge": [],
+ "lookalikes": [
+  [
+   "Turdus merula",
+   50,
+   "Turdus spec, Turdus gigantodes, Turdus pectoralis, Turdus leucopygus"
+  ],
+  [
+   "Phylloscopus collybita",
+   50,
+   "Phylloscopus humei, Phylloscopus trivirgatus, Phylloscopus herberti, Phylloscopus griseolus"
+  ],
+  [
+   "Turdus pilaris",
+   50,
+   "Turdus spec, Turdus gigantodes, Turdus pectoralis, Turdus leucopygus"
+  ],
+  [
+   "Cicindela campestris",
+   50,
+   "Cicindela sepulchralis, Cicindela pullata, Cicindela viridis, Cicindela crucifera"
+  ],
+  [
+   "Xestia c-nigrum",
+   50,
+   "Xestia peciosa, Xestia imperita, Xestia quieta, Xestia tecta"
+  ],
+  [
+   "Hoplitis adunca",
+   50,
+   "Hoplitis labialis, Hoplitis spec, Hoplitis ozbeki, Hoplitis ursina"
+  ],
+  [
+   "Andrena cineraria",
+   50,
+   "Andrena asluji, Andrena janthinoides, Andrena comberiana, Andrena ornithogali"
+  ],
+  [
+   "Hypena proboscidalis",
+   50,
+   "Hypena cidaroides, Hypena poecila, Hypena rhynchophora, Hypena rivuligera"
+  ],
+  [
+   "Andrena florea",
+   50,
+   "Andrena asluji, Andrena janthinoides, Andrena comberiana, Andrena ornithogali"
+  ],
+  [
+   "Andrena fulva",
+   50,
+   "Andrena asluji, Andrena janthinoides, Andrena comberiana, Andrena ornithogali"
+  ],
+  [
+   "Galium verum",
+   50,
+   "Galium stebbinsii, , Galium festivum, Galium lindbergii"
+  ],
+  [
+   "Eryngium campestre",
+   50,
+   "Eryngium creticum, Eryngium wiegandii, Eryngium madrense, Eryngium maritimum"
+  ],
+  [
+   "Geranium pyrenaicum",
+   50,
+   "Geranium hybr, Geranium solanderi, Geranium palmatum, Geranium oreganum"
+  ],
+  [
+   "Convolvulus arvensis",
+   50,
+   "Convolvulus siculus, Convolvulus chilensis, Convolvulus microsepalus, Convolvulus euphraticus"
+  ],
+  [
+   "Plantago media",
+   50,
+   ", Plantago desertorum, Plantago myosurus, Plantago zoellneriana"
+  ],
+  [
+   "Solanum nigrum",
+   50,
+   "Solanum iriosinum, Solanum magistacrolobum, Solanum sanctae, Solanum chromatophilum"
+  ],
+  [
+   "Ranunculus ficaria",
+   50,
+   ", , , "
+  ],
+  [
+   "Stachys recta",
+   50,
+   "Stachys flavescens, Stachys nigricans, Stachys pinardii, Stachys nemorivaga"
+  ],
+  [
+   "Carduus crispus",
+   50,
+   ", Carduus ibizensis, Carduus acaule, Carduus kolakovskyi"
+  ],
+  [
+   "Dianthus armeria",
+   50,
+   ", , , Dianthus hybr"
+  ],
+  [
+   "Amaranthus retroflexus",
+   50,
+   "Amaranthus hybr, Amaranthus splendens, , "
+  ],
+  [
+   "Parmelia sulcata",
+   50,
+   "Parmelia krogiae, Parmelia persulphurata, Parmelia imitans, Parmelia hieronymii"
+  ],
+  [
+   "Puccinia lagenophorae",
+   50,
+   "Puccinia paidii, Puccinia brunnea, Puccinia invelata, Puccinia paniculariae"
+  ],
+  [
+   "Xylaria hypoxylon",
+   50,
+   "Xylaria palmicola, Xylaria stromafera, Xylaria papulis, Xylaria petchii"
+  ],
+  [
+   "Amanita muscaria",
+   50,
+   "Amanita crenulata, Amanita morenoi, Amanita flavoconia, Amanita conicogrisea"
+  ],
+  [
+   "Coprinus comatus",
+   50,
+   "Coprinus galopus, Coprinus rhytiadelphus, Coprinus truncatus, Coprinus kerguelensis"
+  ],
+  [
+   "Lentinus tigrinus",
+   50,
+   "Lentinus retinervis, Lentinus zeyheri, Lentinus isabellina, Lentinus ramosii"
+  ],
+  [
+   "Puccinia malvacearum",
+   50,
+   "Puccinia paidii, Puccinia brunnea, Puccinia invelata, Puccinia paniculariae"
+  ],
+  [
+   "Amanita citrina",
+   50,
+   "Amanita crenulata, Amanita morenoi, Amanita flavoconia, Amanita conicogrisea"
+  ],
+  [
+   "Puccinia coronata",
+   50,
+   "Puccinia paidii, Puccinia brunnea, Puccinia invelata, Puccinia paniculariae"
+  ],
+  [
+   "Tulostoma brumale",
+   50,
+   "Tulostoma giganteum, Tulostoma cesatii, Tulostoma striatum, Tulostoma punctatum"
+  ],
+  [
+   "Linaria cannabina",
+   49,
+   ", Linaria paradoxa, Linaria laxiflora, Linaria macrophylla"
+  ],
+  [
+   "Turdus philomelos",
+   49,
+   "Turdus spec, Turdus gigantodes, Turdus pectoralis, Turdus leucopygus"
+  ],
+  [
+   "Synema globosum",
+   49,
+   "Synema pauciaculeis, Synema nigriventer, Synema illustre, Synema decens"
+  ],
+  [
+   "Steatoda triangulosa",
+   49,
+   "Steatoda chinchipe, Steatoda rhombifera, Steatoda perakensis, Steatoda alboclathrata"
+  ],
+  [
+   "Thomisus onustus",
+   49,
+   "Thomisus dhananjayi, Thomisus resutus, Thomisus daradioides, Thomisus scrupeus"
+  ],
+  [
+   "Evarcha arcuata",
+   49,
+   "Evarcha laetabunda, Evarcha bicoronata, Evarcha acuta, Evarcha dubia"
+  ],
+  [
+   "Dorcus parallelipipedus",
+   49,
+   "Dorcus consentaneus, Dorcus bucephalus, Dorcus alcides, Dorcus seguyi"
+  ],
+  [
+   "Triodia sylvina",
+   49,
+   "Triodia nana, Triodia racemigera, Triodia plurinervata, Triodia mitchellii"
+  ],
+  [
+   "Sympetrum sanguineum",
+   49,
+   "Sympetrum depressiusculum, Sympetrum nigrocreatum, Sympetrum striolatum, Sympetrum tibiale"
+  ],
+  [
+   "Chelostoma rapunculi",
+   49,
+   "Chelostoma siciliae, Chelostoma aureocinctum, Chelostoma subnitidum, Chelostoma tonsum"
+  ],
+  [
+   "Archips xylosteana",
+   49,
+   "Archips striatana, Archips fumiferana, Archips lambertiana, Archips pinus"
+  ],
+  [
+   "Eristalis pertinax",
+   49,
+   "Eristalis vinetorum, Eristalis agrorum, Eristalis vivax, Eristalis angustimarginalis"
+  ],
+  [
+   "Ectobius vittiventris",
+   49,
+   "Ectobius ticinus, Ectobius pallidus, Ectobius supramontes, Ectobius eckerleini"
+  ],
+  [
+   "Silene vulgaris",
+   49,
+   "Silene litrorea, Silene cinerea, Silene sericea, Silene nicaeensis"
+  ],
+  [
+   "Allium scorodoprasum",
+   49,
+   ", Allium iodanthum, Allium basrszczewskii, "
+  ],
+  [
+   "Heracleum sphondylium",
+   49,
+   ", Heracleum lallemantii, Heracleum leskovii, Heracleum schelkovnikovii"
+  ],
+  [
+   "Cardamine pratensis",
+   49,
+   "Cardamine chejiangensis, Cardamine chelidonia, Cardamine fringsii, Cardamine crassifolia"
+  ],
+  [
+   "Crataegus monogyna",
+   49,
+   "Crataegus oliviformis, Crataegus azarolus, Crataegus nikotinii, Crataegus whitakeri"
+  ],
+  [
+   "Viscum album",
+   49,
+   "Viscum orientale, Viscum vohimavoense, Viscum minimum, Viscum mysorense"
+  ],
+  [
+   "Helianthemum nummularium",
+   49,
+   ", Helianthemum kahiricum, Helianthemum sauvagei, Helianthemum pomeridianum"
+  ],
+  [
+   "Solidago gigantea",
+   49,
+   ", , , "
+  ],
+  [
+   "Trametes versicolor",
+   49,
+   "Trametes lactinea, Trametes flammula, Trametes jejuna, Trametes cupreorosea"
+  ],
+  [
+   "Pleurotus ostreatus",
+   49,
+   "Pleurotus rickii, Pleurotus cyatheicola, Pleurotus romellianus, Pleurotus penangensis"
+  ],
+  [
+   "Coprinopsis picacea",
+   49,
+   "Coprinopsis pseudoamphithalla, Coprinopsis arachnoidea, Coprinopsis phaeochlamys, Coprinopsis austrophlyctidospora"
+  ],
+  [
+   "Pholcus phalangioides",
+   48,
+   "Pholcus inermis, Pholcus faveauxi, Pholcus kamkaly, Pholcus crassus"
+  ],
+  [
+   "Salticus scenicus",
+   48,
+   "Salticus andamanensis, Salticus trematus, Salticus insperatus, Salticus tenuis"
+  ],
+  [
+   "Scytodes thoracica",
+   48,
+   "Scytodes fourchei, Scytodes kinsukus, Scytodes sansibarica, Scytodes ruizensis"
+  ],
+  [
+   "Anyphaena accentuata",
+   48,
+   "Anyphaena bromelicola, Anyphaena pretiosa, Anyphaena soricina, Anyphaena cochise"
+  ],
+  [
+   "Sphaerophoria scripta",
+   48,
+   "Sphaerophoria bengalensis, Sphaerophoria virgata, Sphaerophoria dispar, Sphaerophoria sinuata"
+  ],
+  [
+   "Hemipenthes morio",
+   48,
+   "Hemipenthes sagata, Hemipenthes wilcoxi, Hemipenthes blanchardiana, Hemipenthes gayi"
+  ],
+  [
+   "Idaea bilinearia",
+   48,
+   "Idaea rhiphidura, Idaea rebecca, Idaea laszloi, Idaea khankaensis"
+  ],
+  [
+   "Idaea dimidiata",
+   48,
+   "Idaea rhiphidura, Idaea rebecca, Idaea laszloi, Idaea khankaensis"
+  ],
+  [
+   "Bombus vestalis",
+   48,
+   "Bombus erzurumensis, Bombus applanatus, Bombus terrestris-komplekset, Bombus bohemicus"
+  ],
+  [
+   "Alsophila aescularia",
+   48,
+   "Alsophila tenuis, Alsophila alpina, Alsophila leichhardtiana, Alsophila crassicaula"
+  ],
+  [
+   "Bombus lucorum",
+   48,
+   "Bombus erzurumensis, Bombus applanatus, Bombus terrestris-komplekset, Bombus bohemicus"
+  ],
+  [
+   "Macaria wauaria",
+   48,
+   "Macaria lturata, Macaria tessellata, Macaria austrinata, Macaria tenuiscripta"
+  ],
+  [
+   "Lotus corniculatus",
+   48,
+   "Lotus hybr, Lotus maroccanus, Lotus mollis, Lotus arinagensis"
+  ],
+  [
+   "Rubus caesius",
+   48,
+   ", Rubus geoideus, Rubus hybr, Rubus kistevikensis"
+  ],
+  [
+   "Prunus cerasifera",
+   48,
+   "Prunus guianensis, Prunus hybr, Prunus depressa, Prunus syodoi"
+  ],
+  [
+   "Prunus padus",
+   48,
+   "Prunus guianensis, Prunus hybr, Prunus depressa, Prunus syodoi"
+  ],
+  [
+   "Senecio vernalis",
+   48,
+   "Senecio multifolius, Senecio hohenacke, Senecio hawarthii, Senecio marus"
+  ],
+  [
+   "Prunus laurocerasus",
+   48,
+   "Prunus guianensis, Prunus hybr, Prunus depressa, Prunus syodoi"
+  ],
+  [
+   "Onopordum acanthium",
+   48,
+   ", , Onopordum cinareum, Onopordum macranthum"
+  ],
+  [
+   "Lathyrus latifolius",
+   48,
+   "Lathyrus jepsonii, Lathyrus speciosus, Lathyrus glandulosus, Lathyrus paranensis"
+  ],
+  [
+   "Bromus sterilis",
+   48,
+   "Bromus macranthus, Bromus hybr, Bromus pitensis, Bromus gracillimus"
+  ],
+  [
+   "Scilla bifolia",
+   48,
+   "Scilla hildebrandtii, Scilla pleiophylla, Scilla lakusicii, Scilla uyuiensis"
+  ],
+  [
+   "Emberiza citrinella",
+   47,
+   "Emberiza spec, Emberiza jankowskii, Emberiza stewarti, Emberiza psittacea"
+  ],
+  [
+   "Araneus diadematus",
+   47,
+   "Araneus luteofaciens, Araneus chingaza, Araneus xizangensis, Araneus hui"
+  ],
+  [
+   "Idaea degeneraria",
+   47,
+   "Idaea rhiphidura, Idaea rebecca, Idaea laszloi, Idaea khankaensis"
+  ],
+  [
+   "Clematis vitalba",
+   47,
+   "Clematis manschurica, Clematis latifolia, Clematis hybr, Clematis finetii"
+  ],
+  [
+   "Geum urbanum",
+   47,
+   ", Geum rivaled, Geum canadense, Geum reptans"
+  ],
+  [
+   "Prunus spinosa",
+   47,
+   "Prunus guianensis, Prunus hybr, Prunus depressa, Prunus syodoi"
+  ],
+  [
+   "Equisetum arvense",
+   47,
+   ", Equisetum hybridum, Equisetum moorei, Equisetum telmateia"
+  ],
+  [
+   "Centaurea stoebe",
+   47,
+   "Centaurea ognianovii, Centaurea tchihatchewii, Centaurea adzharica, Centaurea bieberetsinii"
+  ],
+  [
+   "Fomitopsis pinicola",
+   47,
+   "Fomitopsis euosma, Fomitopsis castanea, Fomitopsis flabellata, Fomitopsis anhuiensis"
+  ],
+  [
+   "Chloris chloris",
+   46,
+   "Chloris sinica, Chloris montana, Chloris cucullata, Chloris septentrionalis"
+  ],
+  [
+   "Osmia bicornis",
+   46,
+   "Osmia caraformis, Osmia anasazi, Osmia coloradensis, Osmia conjuncta"
+  ],
+  [
+   "Agrotis puta",
+   46,
+   "Agrotis macrobscura, Agrotis leucovenata, Agrotis garretasorum, Agrotis boetica"
+  ],
+  [
+   "Vicia villosa",
+   46,
+   "Vicia pampincola, Vicia hybr, Vicia scorpiuroides, Vicia amurensis"
+  ],
+  [
+   "Argiope bruennichi",
+   45,
+   "Argiope submaronica, Argiope hinderlichi, Argiope caesarea, Argiope pictula"
+  ],
+  [
+   "Porcellio spinicornis",
+   45,
+   "Porcellio lugubris, Porcellio resacae, Porcellio conifer, Porcellio granulatus"
+  ],
+  [
+   "Rivula sericealis",
+   45,
+   "Rivula sordida, Rivula monorena, Rivula costinotata, Rivula parallela"
+  ],
+  [
+   "Lamium galeobdolon",
+   45,
+   "Lamium variegatum, Lamium sandersii, Lamium holsaticum, Lamium taiwanense"
+  ],
+  [
+   "Euphorbia esula",
+   45,
+   "Euphorbia coeladenia, Euphorbia sepens, Euphorbia adenensis, Euphorbia abramsiana"
+  ],
+  [
+   "Lamium amplexicaule",
+   45,
+   "Lamium variegatum, Lamium sandersii, Lamium holsaticum, Lamium taiwanense"
+  ],
+  [
+   "Genista sagittalis",
+   45,
+   ", , , "
+  ],
+  [
+   "Macroglossum stellatarum",
+   44,
+   "Macroglossum sulawesica, Macroglossum errans, Macroglossum alenuska, Macroglossum lifuensis"
+  ],
+  [
+   "Salvia pratensis",
+   44,
+   "Salvia himalayaca, Salvia rhinosima, Salvia napaefolia, Salvia ajugoides"
+  ],
+  [
+   "Scabiosa canescens",
+   44,
+   "Scabiosa tricuspidata, Scabiosa triniaiefolia, Scabiosa syriaca, Scabiosa velenovskiana"
+  ],
+  [
+   "Fomes fomentarius",
+   44,
+   "Fomes albotextus, Fomes unciatus, Fomes ferrugineobrunneus, Fomes noscius"
+  ],
+  [
+   "Conistra vaccinii",
+   43,
+   "Conistra politina, Conistra staudingeri, Conistra kasyi, Conistra ligula"
+  ],
+  [
+   "Melitta leporina",
+   43,
+   "Melitta rasmonti, Melitta harrietae, Melitta haemorrhoidalis, Melitta mongolica"
+  ],
+  [
+   "Juglans regia",
+   43,
+   "Juglans hybr, Juglans venezuelensis, Juglans cinerea, Juglans hirsuta"
+  ],
+  [
+   "Anemone nemorosa",
+   43,
+   "Anemone parviflora, Anemone baldensis, Anemone pittonii, Anemone rossii"
+  ],
+  [
+   "Misumena vatia",
+   42,
+   "Misumena quadrivulvata, Misumena peninsulana, Misumena pallescens, Misumena frenata"
+  ],
+  [
+   "Marpissa muscosa",
+   42,
+   "Marpissa mashibarai, Marpissa dentoides, Marpissa yawatai, Marpissa nivoyi"
+  ],
+  [
+   "Carlina vulgaris",
+   42,
+   "Carlina actinoloba, Carlina fiuminensis, Carlina hispanica, Carlina corymbosa"
+  ],
+  [
+   "Brassica napus",
+   42,
+   "Brassica caularapa, Brassica spinescens, Brassica aucheri, Brassica gravinae"
+  ],
+  [
+   "Corvus corone",
+   41,
+   "Corvus cecilae, Corvus macrorhynchus, Corvus cyanopogon, Corvus marianae"
+  ],
+  [
+   "Motacilla alba",
+   41,
+   "Motacilla camtschatkensis, Motacilla borealis, Motacilla tiphia, Motacilla philomela"
+  ],
+  [
+   "Larus michahellis",
+   41,
+   "Larus flavipes, Larus medius, Larus cinerarius, Larus septentrionalis"
+  ],
+  [
+   "Corvus frugilegus",
+   40,
+   "Corvus cecilae, Corvus macrorhynchus, Corvus cyanopogon, Corvus marianae"
+  ],
+  [
+   "Rhytisma acerinum",
+   40,
+   "Rhytisma juncicola, Rhytisma pruni, Rhytisma liriodendri, Rhytisma ilicis"
+  ],
+  [
+   "Parus major",
+   39,
+   "Parus amabilis, Parus varius, Parus rubidiventris, Parus venustulus"
+  ],
+  [
+   "Certhia brachydactyla",
+   39,
+   "Certhia viridis, Certhia flaviventris, Certhia trochilea, Certhia erythronotos"
+  ],
+  [
+   "Prunella modularis",
+   39,
+   "Prunella llensae, Prunella orientalis, Prunella cretensis, Prunella gentianifolia"
+  ],
+  [
+   "Sciurus vulgaris",
+   38,
+   "Sciurus javanicus, Sciurus urucumus, Sciurus warthae, Sciurus ictericus"
+  ],
+  [
+   "Phalangium opilio",
+   38,
+   "Phalangium ramosum, Phalangium falcatum, Phalangium ghissaricum, Phalangium palmatum"
+  ],
+  [
+   "Buteo buteo",
+   37,
+   "Buteo albonotatus, Buteo rufinus, Buteo lineatus, Buteo trizonatus"
+  ],
+  [
+   "Accipiter nisus",
+   37,
+   "Accipiter imitator, Accipiter erythropus, Accipiter sylvestris, Accipiter tachiro"
+  ],
+  [
+   "Auricularia auricula-judae",
+   37,
+   "Auricularia stellata, Auricularia cornea, Auricularia hainanensis, Auricularia xishaensis"
+  ],
+  [
+   "Falco tinnunculus",
+   36,
+   "Falco falconella, Falco pterocles, Falco striatus, Falco cuvierii"
+  ],
+  [
+   "Anas platyrhynchos",
+   36,
+   "Anas hornschuchi, Anas oxyura, Anas laysanensis, Anas crecca"
+  ],
+  [
+   "Limax maximus",
+   36,
+   "Limax engadinensis, Limax lachensis, Limax eremiophilus, Limax brandstetteri"
+  ],
+  [
+   "Eratigena atrica",
+   36,
+   "Eratigena balearica, Eratigena inermis, Eratigena arganoi, Eratigena rothi"
+  ],
+  [
+   "Vitis vinifera",
+   36,
+   "Vitis hybr, , , "
+  ],
+  [
+   "Lepus europaeus",
+   35,
+   "Lepus schlumbergeri, Lepus flavigularis, Lepus comus, Lepus ennisianus"
+  ],
+  [
+   "Helix pomatia",
+   35,
+   "Helix pyramidella, Helix hamyi, Helix coxeiranus, Helix levettei"
+  ],
+  [
+   "Columba palumbus",
+   34,
+   "Columba amboinensis, Columba eimeensis, Columba erythrothorax, Columba hodgsonii"
+  ],
+  [
+   "Columba livia",
+   34,
+   "Columba amboinensis, Columba eimeensis, Columba erythrothorax, Columba hodgsonii"
+  ],
+  [
+   "Opilio canestrinii",
+   34,
+   "Opilio putnik, Opilio apsheronicus, Opilio shirvanicus, Opilio morini"
+  ],
+  [
+   "Flavoparmelia caperata",
+   34,
+   "Flavoparmelia kantvilasii, Flavoparmelia glomelliferica, Flavoparmelia springtonensis, Flavoparmelia proeuplecta"
+  ],
+  [
+   "Sitta europaea",
+   33,
+   "Sitta spec, Sitta neumayer, Sitta oenochlamys, Sitta canadensis"
+  ],
+  [
+   "Acanthosoma haemorrhoidale",
+   33,
+   "Acanthosoma cornutum, Acanthosoma laevicorne, Acanthosoma rufescens, Acanthosoma labiduroides"
+  ],
+  [
+   "Passer domesticus",
+   32,
+   "Passer rufidorsalis, Passer eminibey, Passer pyrrhonotus, Passer euchlorus"
+  ],
+  [
+   "Monacha cartusiana",
+   32,
+   "Monacha obstructa, Monacha martensiana, Monacha crispulata, Monacha saninensis"
+  ],
+  [
+   "Vespula vulgaris",
+   32,
+   "Vespula akrei, Vespula squamosa, Vespula flavopilosa, Vespula alascensis"
+  ],
+  [
+   "Petrorhagia prolifera",
+   32,
+   "Petrorhagia grandiflora, Petrorhagia zoharyana, Petrorhagia sarbaghiae, Petrorhagia rupestris"
+  ],
+  [
+   "Syringa vulgaris",
+   32,
+   "Syringa luminifera, Syringa hybr, Syringa steencruyssii, Syringa pubescens"
+  ],
+  [
+   "Digitalis purpurea",
+   32,
+   ", Digitalis davisiana, Digitalis lamarckii, Digitalis media"
+  ],
+  [
+   "Anser anser",
+   31,
+   ", , , "
+  ],
+  [
+   "Aphomia sociella",
+   31,
+   "Aphomia monochroa, Aphomia odontella, Aphomia grisea, Aphomia argentia"
+  ],
+  [
+   "Schizophyllum commune",
+   31,
+   "Schizophyllum album, Schizophyllum brevilamellatum, Schizophyllum brasiliense, Schizophyllum radiatum"
+  ],
+  [
+   "Merops apiaster",
+   30,
+   "Merops viridissimus, Merops cinereus, Merops bulocki, Merops philippinus"
+  ],
+  [
+   "Cuculus canorus",
+   30,
+   "Cuculus tenuirostris, Cuculus variegatus, Cuculus spec, Cuculus saturatus"
+  ],
+  [
+   "Axylia putris",
+   30,
+   "Axylia rufescens, Axylia strigibasis, Axylia cinerosa, Axylia sanyetiensis"
+  ],
+  [
+   "Chrysoteuchia culmella",
+   29,
+   "Chrysoteuchia furva, Chrysoteuchia diplogrammus, Chrysoteuchia shafferi, Chrysoteuchia nonifasciaria"
+  ],
+  [
+   "Pentatoma rufipes",
+   28,
+   "Pentatoma spec, Pentatoma antiquum, Pentatoma chambonensis, Pentatoma lividum"
+  ],
+  [
+   "Sylvia atricapilla",
+   27,
+   "Sylvia margelanica, Sylvia caerulescens, Sylvia brachyura, Sylvia poicilotis"
+  ],
+  [
+   "Sylvia communis",
+   27,
+   "Sylvia margelanica, Sylvia caerulescens, Sylvia brachyura, Sylvia poicilotis"
+  ],
+  [
+   "Vanellus vanellus",
+   27,
+   "Vanellus grisescens, Vanellus gallinaceus, Vanellus duvaucelii, Vanellus miles"
+  ],
+  [
+   "Alcedo atthis",
+   27,
+   "Alcedo moluccana, Alcedo albogularis, Alcedo leucorhyncha, Alcedo purpurea"
+  ],
+  [
+   "Timandra comae",
+   27,
+   "Timandra comptaria, Timandra extremaria, Timandra griseata, Timandra ruptilinea"
+  ],
+  [
+   "Coenagrion puella",
+   27,
+   "Coenagrion mercuriale, Coenagrion lanceolatum, Coenagrion resolutum, Coenagrion intermedium"
+  ],
+  [
+   "Eupsilia transversa",
+   27,
+   "Eupsilia delicata, Eupsilia quinquelinea, Eupsilia sidus, Eupsilia contracta"
+  ],
+  [
+   "Anticlea derivata",
+   27,
+   "Anticlea vasiliata, Anticlea multiferata, Anticlea japonica, Anticlea elegans"
+  ],
+  [
+   "Ardea cinerea",
+   26,
+   "Ardea minor, Ardea leuce, Ardea timoriensis, Ardea scolopacea"
+  ],
+  [
+   "Ardea alba",
+   26,
+   "Ardea minor, Ardea leuce, Ardea timoriensis, Ardea scolopacea"
+  ],
+  [
+   "Podarcis muralis",
+   26,
+   "Podarcis tiliguerta, Podarcis liolepis, Podarcis cretensis, Podarcis guadarramae"
+  ],
+  [
+   "Xanthoria parietina",
+   26,
+   "Xanthoria schummii, Xanthoria ulophyllodes, Xanthoria juniperina, Xanthoria pruinosa"
+  ],
+  [
+   "Scutigera coleoptrata",
+   25,
+   "Scutigera buda, Scutigera parcespinosa, Scutigera oxypyga, Scutigera flavistoma"
+  ],
+  [
+   "Circus aeruginosus",
+   24,
+   "Circus teauteensis, Circus macrosceles, Circus semiinvolutus, Circus cinereus"
+  ],
+  [
+   "Phyllopertha horticola",
+   24,
+   "Phyllopertha latitarsis, Phyllopertha puncticollis, Phyllopertha latevittata, Phyllopertha obscuricolor"
+  ],
+  [
+   "Picus viridis",
+   23,
+   "Picus loricatus, Picus hirundinaceus, Picus malaccensis, Picus semirostris"
+  ],
+  [
+   "Aculepeira ceropegia",
+   23,
+   "Aculepeira busu, Aculepeira machu, Aculepeira escazu, Aculepeira visite"
+  ],
+  [
+   "Lacanobia oleracea",
+   23,
+   "Lacanobia praedita, Lacanobia radix, Lacanobia blenna, Lacanobia aliena"
+  ],
+  [
+   "Clytra laeviuscula",
+   23,
+   "Clytra duodecimmaculata, Clytra tanae, Clytra anthraphaxidis, Clytra truncatula"
+  ],
+  [
+   "Erynnis tages",
+   23,
+   "Erynnis lacustra, Erynnis somnus, Erynnis burgessi, Erynnis pacuvius"
+  ],
+  [
+   "Pelophylax lessonae",
+   23,
+   "Pelophylax saharicus, Pelophylax bedriagae, Pelophylax kurtmuelleri, Pelophylax fukienensis"
+  ],
+  [
+   "Rana temporaria",
+   23,
+   "Rana luanchanensis, Rana coerulea, Rana papillosa, Rana verrucosa"
+  ],
+  [
+   "Polygonia c-album",
+   22,
+   "Polygonia interposita, Polygonia undina, Polygonia aureum, Polygonia zephyrus"
+  ],
+  [
+   "Psyllobora vigintiduopunctata",
+   22,
+   "Psyllobora plagiata, Psyllobora intricata, Psyllobora variegata, Psyllobora parvinotata"
+  ],
+  [
+   "Apus apus",
+   21,
+   "Apus berliozi, Apus balstoni, Apus cooki, Apus leuconyx"
+  ],
+  [
+   "Hirundo rustica",
+   20,
+   "Hirundo leucopyga, Hirundo unalaschkensis, Hirundo lucida, Hirundo fossilis"
+  ],
+  [
+   "Grus grus",
+   19,
+   "Grus haydeni, Grus monacha, Grus latipes, Grus canadensis"
+  ],
+  [
+   "Triturus cristatus",
+   19,
+   "Triturus arntzeni, Triturus megacephalus, Triturus wintershofi, Triturus marmoratus"
+  ],
+  [
+   "Lacerta agilis",
+   19,
+   "Lacerta areolata, Lacerta fasciata, Lacerta ocellata, Lacerta scincoides"
+  ],
+  [
+   "Euclidia glyphica",
+   18,
+   "Euclidia derufata, Euclidia munita, Euclidia dentata, Euclidia vittata"
+  ],
+  [
+   "Pholidoptera griseoaptera",
+   18,
+   "Pholidoptera kalandadzei, Pholidoptera aptera, Pholidoptera stankoi, Pholidoptera ebneri"
+  ],
+  [
+   "Calopteryx splendens",
+   17,
+   "Calopteryx aequabilis, Calopteryx exul, Calopteryx syriaca, Calopteryx hyalina"
+  ],
+  [
+   "Hepatica nobilis",
+   17,
+   "Hepatica transsilvanica, Hepatica schlyteri, Hepatica insularis, Hepatica asiatica"
+  ],
+  [
+   "Filipendula ulmaria",
+   17,
+   "Filipendula filipendula, Filipendula vulgaris, Filipendula kiraishiensis, Filipendula multijuga"
+  ],
+  [
+   "Branta canadensis",
+   16,
+   "Branta howardae, Branta leucopis, Branta sandvicensis, Branta hutchinsii"
+  ],
+  [
+   "Cepaea nemoralis",
+   16,
+   "Cepaea agg, Cepaea beyrichi, Cepaea brandti, Cepaea paretiana"
+  ],
+  [
+   "Cepaea hortensis",
+   16,
+   "Cepaea agg, Cepaea beyrichi, Cepaea brandti, Cepaea paretiana"
+  ],
+  [
+   "Anguis fragilis",
+   16,
+   "Anguis granulatus, Anguis cerastes, Anguis colchica, Anguis clivica"
+  ],
+  [
+   "Laetiporus sulphureus",
+   16,
+   "Laetiporus gilbertsonii, Laetiporus miniatus, Laetiporus portentosus, Laetiporus cremeiporus"
+  ],
+  [
+   "Alauda arvensis",
+   15,
+   "Alauda sibirica, Alauda percutiens, Alauda rostrocrasso, Alauda spec"
+  ],
+  [
+   "Zoropsis spinimana",
+   15,
+   "Zoropsis pekingensis, Zoropsis media, Zoropsis oertzeni, Zoropsis lutea"
+  ],
+  [
+   "Cygnus olor",
+   14,
+   ", Cygnus cygnus, Cygnus columbianus, Cygnus atratus"
+  ],
+  [
+   "Bellis perennis",
+   14,
+   "Bellis hyrcanica, Bellis prostrata, Bellis annua, Bellis sylvestris"
+  ],
+  [
+   "Streptopelia decaocto",
+   13,
+   "Streptopelia reichenowi, Streptopelia bitorquata, Streptopelia vinacea, Streptopelia turtur"
+  ],
+  [
+   "Dendrocopos major",
+   13,
+   "Dendrocopos ramsayi, Dendrocopos darjellensis, Dendrocopos noguchii, Dendrocopos atratus"
+  ],
+  [
+   "Streptopelia turtur",
+   13,
+   "Streptopelia reichenowi, Streptopelia bitorquata, Streptopelia vinacea, Streptopelia lugens"
+  ],
+  [
+   "Stenurella nigra",
+   13,
+   "Stenurella approximans, Stenurella melanura, Stenurella novercalis, Stenurella jaegeri"
+  ],
+  [
+   "Phoenicurus ochruros",
+   12,
+   "Phoenicurus phoenicurus, , Phoenicurus erythrogastrus, Phoenicurus alaschanicus"
+  ],
+  [
+   "Ciconia ciconia",
+   12,
+   "Ciconia boyciana, Ciconia stehlini, Ciconia maguari, Ciconia episcopus"
+  ],
+  [
+   "Pisaura mirabilis",
+   12,
+   "Pisaura swamii, Pisaura acoreensis, Pisaura anahitiformis, Pisaura quadrilineata"
+  ],
+  [
+   "Zygiella x-notata",
+   12,
+   "Zygiella carpenteri, Zygiella minima, Zygiella dispar, Zygiella keyserlingi"
+  ],
+  [
+   "Leptinotarsa decemlineata",
+   12,
+   "Leptinotarsa texana, Leptinotarsa juncta, Leptinotarsa heydenii, Leptinotarsa collinsi"
+  ],
+  [
+   "Chroicocephalus ridibundus",
+   11,
+   "Chroicocephalus saundersi, Chroicocephalus hartlaubii, Chroicocephalus maculipennis, Chroicocephalus brunnicephalus"
+  ],
+  [
+   "Erannis defoliaria",
+   11,
+   "Erannis kashmirensis, Erannis vancouverensis, Erannis caspica, Erannis occataria"
+  ],
+  [
+   "Mesapamea secalis",
+   11,
+   "Mesapamea storai, Mesapamea maderensis, Mesapamea monotona, Mesapamea calcirena"
+  ],
+  [
+   "Anthriscus sylvestris",
+   11,
+   "Anthriscus ruprechtii, Anthriscus taiwanensis, Anthriscus glacialis, Anthriscus caucalis"
+  ],
+  [
+   "Aegithalos caudatus",
+   10,
+   "Aegithalos glaucogularis, Aegithalos concinnus, Aegithalos iouschistos, Aegithalos consobrinus"
+  ],
+  [
+   "Nymphalis polychloros",
+   10,
+   "Nymphalis laurentia, Nymphalis claudina, Nymphalis franck, Nymphalis antiopa"
+  ],
+  [
+   "Arrhenatherum elatius",
+   10,
+   "Arrhenatherum calderae, Arrhenatherum palaestinum, Arrhenatherum kotschyi, Arrhenatherum pallens"
+  ],
+  [
+   "Natrix helvetica",
+   10,
+   "Natrix natrix, Natrix maura, Natrix merkurensis, Natrix astreptophora"
+  ],
+  [
+   "Phasianus colchicus",
+   9,
+   "Phasianus hoazin, Phasianus bulgaricus, Phasianus alfhildae, Phasianus hermonis"
+  ],
+  [
+   "Ebrechtella tricuspidata",
+   9,
+   "Ebrechtella juwangensis, Ebrechtella concinna, Ebrechtella margaritacea, Ebrechtella pseudovatia"
+  ],
+  [
+   "Crocothemis erythraea",
+   9,
+   "Crocothemis chaldaeorum, Crocothemis brevistigma, Crocothemis crocea, Crocothemis servilia"
+  ],
+  [
+   "Aegopodium podagraria",
+   9,
+   "Aegopodium henryi, Aegopodium latifolium, Aegopodium tadshikorum, Aegopodium alpestre"
+  ],
+  [
+   "Bufo bufo",
+   9,
+   "Bufo leutkenii, Bufo ailaoanus, Bufo cruciger, Bufo spec"
+  ],
+  [
+   "Lissotriton vulgaris",
+   9,
+   "Lissotriton kosswigi, Lissotriton montandoni, Lissotriton helveticus, Lissotriton maltzani"
+  ],
+  [
+   "Macaroeris nidicolens",
+   8,
+   "Macaroeris moebi, Macaroeris flavicomis, Macaroeris cata, Macaroeris litoralis"
+  ],
+  [
+   "Arianta arbustorum",
+   8,
+   "Arianta petrii, Arianta hessei, Arianta chamaeleon, Arianta stenzii"
+  ],
+  [
+   "Aglais urticae",
+   8,
+   "Aglais ladakensis, Aglais orizana, Aglais nixa, Aglais caschmirensis"
+  ],
+  [
+   "Thymelicus sylvestris",
+   8,
+   "Thymelicus novus, Thymelicus stigma, Thymelicus hamza, Thymelicus leonina"
+  ],
+  [
+   "Pithya cupressina",
+   8,
+   "Pithya arctica, Pithya madothecae, Pithya vulgaris, Pithya malochi"
+  ],
+  [
+   "Pica pica",
+   7,
+   "Pica serica, Pica mauritanica, Pica asirensis, Pica nuttalli"
+  ],
+  [
+   "Eliomys quercinus",
+   7,
+   "Eliomys assimilis, Eliomys reductus, Eliomys melanurus, Eliomys intermedius"
+  ],
+  [
+   "Helicigona lapicida",
+   7,
+   "Helicigona chaignoni, Helicigona atava, Helicigona planata, Helicigona kaeufeli"
+  ],
+  [
+   "Ficaria verna",
+   7,
+   "Ficaria grandiflora, Ficaria calthifolia, Ficaria ambigua, Ficaria sellii"
+  ],
+  [
+   "Salamandra salamandra",
+   7,
+   "Salamandra corsica, Salamandra infraimmaculata, Salamandra algira, Salamandra atra"
+  ],
+  [
+   "Pelobates fuscus",
+   7,
+   "Pelobates sanchizi, Pelobates fahlbuschi, Pelobates syriacus, Pelobates balcanicus"
+  ],
+  [
+   "Sturnus vulgaris",
+   6,
+   "Sturnus tenuirostris, Sturnus luteolus, Sturnus nabirop, Sturnus unicolor"
+  ],
+  [
+   "Garrulus glandarius",
+   6,
+   "Garrulus flavirostris, Garrulus spec, Garrulus lidthi, Garrulus bispecularis"
+  ],
+  [
+   "Troglodytes troglodytes",
+   6,
+   "Troglodytes pacificus, Troglodytes cobbi, Troglodytes ochraceus, Troglodytes monticola"
+  ],
+  [
+   "Hygromia cinctella",
+   6,
+   "Hygromia carinatissima, Hygromia tassyi, Hygromia amatoris, Hygromia limbata"
+  ],
+  [
+   "Agriopis marginaria",
+   6,
+   "Agriopis aurantiaria, Agriopis dira, Agriopis budashkini, Agriopis beschkovi"
+  ],
+  [
+   "Syromastus rhombeus",
+   6,
+   "Syromastus buchii, Syromastus spec, Syromastus seyfriedi, Syromastus affinis"
+  ],
+  [
+   "Borago officinalis",
+   6,
+   "Borago macranthera, Borago trabutii, Borago gruina, Borago longifolia"
+  ],
+  [
+   "Carduelis carduelis",
+   5,
+   "Carduelis caniceps, Carduelis corsicana, Carduelis citrinella, Carduelis triasi"
+  ],
+  [
+   "Milvus migrans",
+   5,
+   "Milvus milvus, , Milvus aegyptius, Milvus cenchris"
+  ],
+  [
+   "Milvus milvus",
+   5,
+   ", Milvus aegyptius, Milvus migrans, Milvus cenchris"
+  ],
+  [
+   "Zamenis longissimus",
+   5,
+   "Zamenis persicus, Zamenis situla, Zamenis scalaris, Zamenis hohenackeri"
+  ],
+  [
+   "Evernia prunastri",
+   5,
+   "Evernia mesomorpha, Evernia perfragilis, Evernia illyrica, Evernia divaricata"
+  ],
+  [
+   "Erithacus rubecula",
+   4,
+   "Erithacus komadori, Erithacus hachisukae, Erithacus akahige, Erithacus superbus"
+  ],
+  [
+   "Capreolus capreolus",
+   4,
+   "Capreolus sussenbornensis, Capreolus formosanus, Capreolus pygargus, Capreolus constantini"
+  ],
+  [
+   "Castor fiber",
+   4,
+   "Castor jaegeri, Castor californicus, Castor canadensis, Castor peninsulatus"
+  ],
+  [
+   "Erinaceus europaeus",
+   4,
+   "Erinaceus mongolicus, Erinaceus danubicus, Erinaceus praeglacialis, Erinaceus davidi"
+  ],
+  [
+   "Xerolenta obvia",
+   4,
+   "Xerolenta razlogi, Xerolenta spiruloides, Xerolenta macedonica, Xerolenta thasia"
+  ],
+  [
+   "Aegonychon purpurocaeruleum",
+   4,
+   "Aegonychon purpurea-coeruleum, Aegonychon calabrum, Aegonychon zollingeri, Aegonychon calabricum"
+  ],
+  [
+   "Cyanistes caeruleus",
+   3,
+   "Cyanistes cyanus, , Cyanistes teneriffae"
+  ],
+  [
+   "Coccothraustes coccothraustes",
+   3,
+   "Coccothraustes simeonovi, Coccothraustes bonapartei, Coccothraustes balcanicus"
+  ],
+  [
+   "Myocastor coypus",
+   3,
+   "Myocastor brevirostris, Myocastor perditus, Myocastor ipriscus"
+  ],
+  [
+   "Cricetus cricetus",
+   3,
+   "Cricetus kormosi, Cricetus barrieri, Cricetus lophidens"
+  ],
+  [
+   "Zebrina detrita",
+   3,
+   "Zebrina cylindroides, Zebrina spratti, Zebrina gumsiana"
+  ],
+  [
+   "Nuctenea umbratica",
+   3,
+   "Nuctenea cedrorum, Nuctenea corticalis, Nuctenea silvicultrix"
+  ],
+  [
+   "Pseudochorthippus parallelus",
+   3,
+   "Pseudochorthippus tatrae, Pseudochorthippus montanus, Pseudochorthippus curtipennis"
+  ],
+  [
+   "Holosteum umbellatum",
+   3,
+   "Holosteum marginatum, Holosteum kobresietorum, Holosteum glutinosum"
+  ],
+  [
+   "Alopochen aegyptiaca",
+   2,
+   "Alopochen kervazoi, Alopochen mauritiana"
+  ],
+  [
+   "Delichon urbicum",
+   2,
+   "Delichon nipalense, Delichon dasypus"
+  ],
+  [
+   "Cornu aspersum",
+   2,
+   "Cornu insolida, Cornu spec"
+  ],
+  [
+   "Coloeus monedula",
+   1,
+   "Coloeus dauuricus"
+  ],
+  [
+   "Theria primaria",
+   1,
+   "Theria rupicapraria"
+  ],
+  [
+   "Rabelera holostea",
+   1,
+   "Rabelera cilicica"
+  ]
+ ]
+}

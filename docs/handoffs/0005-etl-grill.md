@@ -1,5 +1,7 @@
 # 🔥 [0005] Handoff — the ETL grill (M3)
 
+> ✅ **Done 2026-09-05.** Output: [record 0002](../records/0002-etl-the-plausible-set.md) · [findings 0005](0005-etl-grill-findings.md) · spec §🧬 §🗄️ §🗃️.
+>
 > A handoff for a grill, not a build. Child of [record 0001](../records/0001-standkreis-dex-the-first-walk.md) §📌 "the threshold is the product", sibling of [0004](0004-scaffold.md). Its output is a record and a spec section, not code.
 
 | 🗓️ Written | 👤 Owner | ⬆️ Parent | ⏱️ Budget |

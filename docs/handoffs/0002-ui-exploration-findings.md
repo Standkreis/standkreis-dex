@@ -434,3 +434,18 @@ The doubts that blocked the spec rewrite, one line each. Everything not listed s
 | 46 | No chip on repeats. Chips mark state changes only (Neu entdeckt, Studiert) |
 | Freeze | Removed, record Q8 amended |
 | Quests tab | Stays in slot two; slice one shows a single "kommt bald" line. Q10 is not widened |
+
+## ✅ Answered in the ETL grill 0005 (owner, 2026-09-05)
+
+Probe data in [findings 0005](0005-etl-grill-findings.md), decisions in [record 0002](../records/0002-etl-the-plausible-set.md). Two review-0003 answers are superseded: 2/41 and 4 (month is no longer a filter on the denominator), 13 (no cells at all).
+
+| Doubt | Answer |
+| --- | --- |
+| 3 | Image **ladder** (E7): iNat taxon default photo if CC0/BY/BY-NC → Commons P18 unless specimen, herbarium, plate, mounted, larva, egg or map → next licensed iNat photo → tile icon. iNat has a live, square photo for 100 % of a 120-species sample; Commons leads are 19 confirmed specimens or 1885 plates and 27 % portrait |
+| 8 | Rank is GBIF's (E6). A Wikidata item that is not a species (Draba verna → genus, 1 of 931) contributes nothing: no name, no image, logged. Two items on one key → the one with a dewiki sitelink |
+| 13 | **No cells** (E1). The Landkreis is the unit, not a label: one GADM level-2 polygon per region, GBIF facets by `gadmGid`. A 10 km union spills 78 % of its species across the Rhine. The 10 km cell survives only on the species map and the location ladder |
+| 16 | A backbone species outside the set joins the user's dex, gets content queued like a set member, sits last among the undiscovered with no bars and "hier selten gemeldet" (E13). No per-user backfill; it enters the set only if a monthly refresh lifts it over the cut |
+| 20 | Confirmed and sharpened (E8): AnAge via Wikidata P4024 covers 16 %, IUCN status 22 %. **Lebensraum is dropped** from the Steckbrief: 1 % open coverage, every richer source needs a token |
+| 21 | Look-alikes = same genus **within the region's set**, computed in the ETL (E10). 358 of 931 species have one; birds 19, insects 134, plants 198. Curated pairs stay slice two |
+| 22 | Not probed; the attribution row stands as written. Xeno-canto stays a keyed source in §🗄️ |
+| 43 | The ladder shrinks the problem: iNat's community picked and squared the photo for every species in the sample. Per-species crops remain content work for the residue that lands on Commons |
