@@ -395,5 +395,21 @@
     "body": "Ein Passkey nimmt deine Sichtungen mit auf andere Geräte. Kein Konto, keine E-Mail.",
     "later": "Später",
     "create": "Passkey anlegen"
+  },
+  "offline": {
+    "title": "Atlas offline",
+    "summary": "{n} Bilder · ~{mb} MB",
+    "load": "Für unterwegs laden",
+    "progress": "{done} / {total}",
+    "cancel": "Abbrechen",
+    "stopped": "Angehalten · {done} / {total}",
+    "resume": "Weiter laden",
+    "failed": "Netz weg bei {done} / {total}",
+    "ready": "Offline bereit · {date}",
+    "reload": "Auffrischen",
+    "banner": "Offline · dein Atlas ist da, Suche und Karten warten aufs Netz",
+    "mapWaits": "Karte wartet aufs Netz",
+    "speciesWaits": "Diese Art wartet aufs Netz",
+    "speciesHint": "Einmal mit Netz öffnen, dann bleibt sie auf dem Handy."
   }
 }

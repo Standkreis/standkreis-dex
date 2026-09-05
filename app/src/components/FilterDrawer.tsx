@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import type { Tile } from '@/generated/prisma/enums'
 import { Icon } from './Marks'
+import { OfflineDownload } from './OfflineDownload'
 import { OnboardingSilhouette } from './OnboardingSilhouette'
 
 export type Show = 'all' | 'studied' | 'seen' | 'new'
@@ -94,6 +95,7 @@ export function FilterDrawer(p: Props) {
               <Chip key={s} on={p.sort === s} onClick={() => p.onSort(s)} role="radio" checked={p.sort === s} testId={`sort-${s}`}>{t(sortKey[s])}</Chip>
             ))}
           </Section>
+          <div className="mt-4"><OfflineDownload testId="offline-download-drawer" /></div>
         </div>
         <div className="shrink-0 px-4 pt-2" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
           <button type="button" onClick={p.onClose} data-testid="apply" className="h-14 w-full rounded-2xl bg-moss text-[18px] font-bold text-white">{t('showN', { n: p.results })}</button>

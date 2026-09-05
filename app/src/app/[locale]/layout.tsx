@@ -11,7 +11,9 @@ import Script from 'next/script'
 import { ThemeBoot, themeScript } from '@/components/Appearance'
 import '../globals.css'
 
-export const dynamicParams = false
+// No `dynamicParams = false` here: Next applies it to every route below the segment (its own TODO in
+// build/static-paths/app.js), so a server build answered every species and sighting page with 404 (found in
+// handoff 0009 Track A on the production build). Unknown locales still end in notFound() below.
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
 }

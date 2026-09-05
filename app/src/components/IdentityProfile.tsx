@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { Icon } from './Marks'
 import { CountersCard, useSetCounters } from './IdentityCounters'
+import { OfflineDownload } from './OfflineDownload'
 
 export const initialsOf = (name: string | null | undefined) =>
   (name ?? '')
@@ -69,6 +70,7 @@ export function IdentityProfile() {
       <div className="mt-4">
         <CountersCard regionName={me.data?.region?.name ?? null} counters={counters} />
       </div>
+      <div className="mt-4"><OfflineDownload /></div>
     </main>
   )
 }

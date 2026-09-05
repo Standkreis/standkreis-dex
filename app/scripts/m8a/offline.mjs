@@ -1,7 +1,8 @@
 // C1 and the offline shots (handoff 0009 Track A). Headless Chrome over CDP as scripts/m5a and m6a (no dependency), but
 // attached at the browser level: `Network.emulateNetworkConditions` on the page alone leaves the service worker's own
 // fetches online, so the offline switch is applied to the page session and to every service-worker session.
-// usage: node scripts/m8a/offline.mjs c1 <dex_id> [de|en] [light|dark] [outDir] [baseUrl]
+// usage: node scripts/m8a/offline.mjs c1|c2|c3|c4|probe|shots <dex_id> [de|en] [light|dark] [outDir] [baseUrl]
+//   c4 expects the server to be restarted with a new build between the two halves: it waits on stdin for a line.
 import { spawn } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
@@ -107,7 +108,8 @@ const caches = () => evaluate(`(async () => {
   if (shell) { const c = await caches.open(shell); out.shellPages = (await c.keys()).map((k) => new URL(k.url).pathname).filter((p) => !p.startsWith('/_next')) }
   return out
 })()`)
-const persisted = () => evaluate(`new Promise((r) => { const o = indexedDB.open('keyval-store'); o.onerror = () => r(null); o.onsuccess = () => { const db = o.result; if (!db.objectStoreNames.contains('keyval')) return r(null); const g = db.transaction('keyval').objectStore('keyval').get('dex.queries'); g.onsuccess = () => r(g.result ? { at: new Date(g.result.timestamp).toISOString(), queries: g.result.clientState.queries.map((q) => q.queryKey[0].join('.') + ':' + q.state.status) } : null) } })`)
+// The store is superjson in localStorage (handoff 0009 Track A, moved off IndexedDB): the plain `json` half is enough here.
+const persisted = () => evaluate(`(() => { const raw = localStorage.getItem('dex.queries'); if (!raw) return null; const c = JSON.parse(raw).json; return { at: new Date(c.timestamp).toISOString(), chars: raw.length, queries: c.clientState.queries.map((q) => q.queryKey[0].join('.') + ':' + q.state.status), error: localStorage.getItem('dex.persist.error') } })()`)
 
 const out = {}
 if (mode === 'c1') {
@@ -145,6 +147,116 @@ if (mode === 'c1') {
   await shot('c1-offline-you')
   await goOffline(false)
 }
+
+const imageBytes = () => evaluate(`(async () => { const c = await caches.open('dex-images'); const keys = await c.keys(); let bytes = 0, opaque = 0
+  for (const k of keys) { const r = await c.match(k); if (r.type === 'opaque') opaque++; bytes += (await r.blob()).size }
+  return { entries: keys.length, bytes, mb: +(bytes / 1048576).toFixed(2), opaque, hosts: [...new Set(keys.map((k) => new URL(k.url).hostname))] } })()`)
+const swReady = async () => {
+  const t0 = Date.now()
+  while (Date.now() - t0 < 60_000) { const c = await caches(); if (c.controller && c.shellPages?.includes('/en/journal') && (await persisted())?.queries.some((q) => q.startsWith('dex.set'))) return; await sleep(500) }
+}
+
+if (mode === 'seq') {
+  // The Simulator sequence: four pages online, a wait past staleTime, then where the store loses queries.
+  await open(''); await swReady()
+  for (const p of ['you', 'journal', 'log']) { await send('Page.navigate', { url: `${base}/${locale}/${p}` }); await sleep(6000); out[`after_${p}`] = (await persisted())?.queries }
+  for (let i = 0; i < 14; i++) { await sleep(5000); out[`wait_${(i + 1) * 5}`] = (await persisted())?.queries.join(',') }
+}
+if (mode === 'probe') {
+  // What the store holds after the journal was opened online, and what the journal shows offline.
+  await open(''); await swReady()
+  await send('Page.navigate', { url: `${base}/${locale}/journal` }); await waitFor('[data-testid=day], [data-testid=empty]'); await sleep(1500)
+  out.onlinePersisted = await persisted()
+  if (process.env.STALE) await sleep(65_000) // past staleTime: the offline load refetches and fails
+  await goOffline(true)
+  await send('Page.navigate', { url: `${base}/${locale}/journal` }); await sleep(5000)
+  out.offlineJournal = { body: await evaluate('document.body.innerText.slice(0, 300)'), days: await evaluate(`document.querySelectorAll('[data-testid=day]').length`), banner: !!(await text('[data-testid=offline-banner]')) }
+  out.offlinePersisted = await persisted()
+  await goOffline(false)
+}
+
+if (mode === 'c2') {
+  // "Für unterwegs laden" from the drawer; then offline, the whole grid scrolled; the cache measured.
+  await open(''); await swReady()
+  await evaluate(`document.querySelector('[data-testid=filter-button]').click()`); await waitFor('[data-testid=offline-download-drawer]')
+  out.rowBefore = await text('[data-testid=offline-download-drawer-line]')
+  await evaluate(`document.querySelector('[data-testid=offline-download-drawer-button]').click()`)
+  await sleep(1500); out.progressEarly = await text('[data-testid=offline-download-drawer-line]')
+  // Cancel and resume once: the second run must skip what the first fetched.
+  await evaluate(`document.querySelector('[data-testid=offline-download-drawer-button]').click()`); await sleep(800)
+  out.afterCancel = { line: await text('[data-testid=offline-download-drawer-line]'), status: await evaluate(`document.querySelector('[data-testid=offline-download-drawer]').dataset.status`), cached: (await imageBytes()).entries }
+  await evaluate(`document.querySelector('[data-testid=offline-download-drawer-button]').click()`)
+  const t0 = Date.now()
+  while (Date.now() - t0 < 600_000 && (await evaluate(`document.querySelector('[data-testid=offline-download-drawer]').dataset.status`)) === 'running') await sleep(1000)
+  out.done = { line: await text('[data-testid=offline-download-drawer-line]'), status: await evaluate(`document.querySelector('[data-testid=offline-download-drawer]').dataset.status`), seconds: +((Date.now() - t0) / 1000).toFixed(0), ready: await evaluate(`Object.keys(localStorage).filter((k) => k.startsWith('dex.offline.ready.')).map((k) => localStorage.getItem(k))`) }
+  await shot('c2-drawer-ready')
+  await evaluate(`document.querySelector('[data-testid=apply]').click()`); await sleep(300)
+  // Profil shows the same state.
+  await evaluate(`document.querySelector('nav a[href$="/you"]').click()`); await waitFor('[data-testid=offline-download]'); await sleep(500)
+  out.profileLine = await text('[data-testid=offline-download-line]')
+  out.cache = await imageBytes()
+  await goOffline(true)
+  await send('Page.navigate', { url: `${base}/${locale}` }); await sleep(500); await waitFor('[data-testid=grid] li')
+  // Every tile on, then scroll the whole grid so every lazy image is asked for.
+  await evaluate(`(async () => { for (let y = 0; y < document.body.scrollHeight; y += 600) { window.scrollTo(0, y); await new Promise((r) => setTimeout(r, 120)) } window.scrollTo(0, 0) })()`)
+  await sleep(2500)
+  out.offlineGrid = await evaluate(`(() => { const imgs = [...document.querySelectorAll('[data-testid=grid] img')]; return { cells: document.querySelectorAll('[data-testid=grid] li').length, imgs: imgs.length, decoded: imgs.filter((i) => i.complete && i.naturalWidth > 0).length, broken: imgs.filter((i) => i.complete && i.naturalWidth === 0).length } })()`)
+  await shot('c2-offline-grid')
+  await goOffline(false)
+}
+
+if (mode === 'c3') {
+  const [visited, never] = (process.env.SPECIES ?? '2490719,2495455').split(',')
+  await open(''); await swReady()
+  // Visit one species page by Link (client navigation: only the RSC payload crosses the wire; the worker remembers the HTML).
+  await evaluate(`document.querySelector('[data-testid=grid] a[href$="/species/${visited}"]')?.click() ?? (location.href = '/${locale}/species/${visited}')`)
+  await waitFor('[data-testid=species]'); await waitFor('[data-testid=map]', 20_000).catch(() => null); await sleep(2500)
+  out.visitedOnline = { url: await evaluate('location.pathname'), title: await text('h1'), map: !!(await text('[data-testid=map]')), mapWaits: !!(await text('[data-testid=map-waits]')) }
+  const c = await caches(); out.rememberedHtml = c.shellPages?.filter((p) => p.includes('/species/'))
+  if (process.env.STALE) await sleep(65_000) // past staleTime: the offline load refetches, fails, and the banner keys on it
+  await goOffline(true)
+  await send('Page.navigate', { url: `${base}/${locale}/species/${visited}` }); await sleep(500)
+  try { await waitFor('[data-testid=species]', 15_000) } catch (e) { out.visitedOfflineError = e.message.slice(0, 200) }
+  await sleep(2500)
+  out.visitedOffline = { title: await text('h1'), state: await text('[data-testid=state]'), facts: !!(await text('[data-testid=facts]')), intro: (await evaluate('document.querySelector("main p[lang]")?.textContent.length')) ?? 0,
+    sliderImgs: await evaluate(`[...document.querySelectorAll('main img')].filter((i) => i.complete && i.naturalWidth > 0).length`), onLine: await evaluate('navigator.onLine'), map: !!(await text('[data-testid=map]')), mapWaits: await text('[data-testid=map-waits]'), banner: await text('[data-testid=offline-banner]'), hydrated: await evaluate(`Object.keys(document.querySelector('[data-testid=study]') ?? {}).some((k) => k.startsWith('__reactFiber'))`) }
+  await shot('c3-offline-visited')
+  await send('Page.navigate', { url: `${base}/${locale}/species/${never}` }); await sleep(2500)
+  out.neverOffline = { body: await evaluate('document.body.innerText.slice(0, 200)'), waits: !!(await evaluate(`document.body.dataset.testid === 'species-waits'`)), spinner: (await evaluate('document.body.innerText')).includes('Moment') }
+  await shot('c3-offline-never')
+  await evaluate(`document.querySelector('a').click()`); await sleep(500); try { await waitFor('[data-testid=grid] li', 10_000); out.backToAtlas = await evaluate('location.pathname') } catch { out.backToAtlas = 'failed' }
+  await goOffline(false)
+}
+
+if (mode === 'c4') {
+  await open(''); await swReady()
+  await evaluate(`document.querySelector('[data-testid=filter-button]').click()`); await waitFor('[data-testid=offline-download-drawer-button]')
+  await evaluate(`document.querySelector('[data-testid=offline-download-drawer-button]').click()`); await sleep(4000) // a few images, enough to see the cache survive
+  out.before = { caches: await caches(), images: await imageBytes(), sw: await evaluate(`navigator.serviceWorker.controller?.scriptURL`) }
+  console.error('c4: rebuild and restart the server, then press Enter')
+  await new Promise((r) => process.stdin.once('data', r))
+  await send('Page.navigate', { url: `${base}/${locale}` }); await waitFor('[data-testid=grid] li')
+  const t0 = Date.now()
+  while (Date.now() - t0 < 60_000) { const c = await caches(); if (c.names.filter((n) => n.startsWith('dex-shell-')).length === 1 && !c.names.includes(out.before.caches.names.find((n) => n.startsWith('dex-shell-'))) && c.controller) break; await sleep(500) }
+  await send('Page.reload'); await sleep(500); await waitFor('[data-testid=grid] li'); await sleep(1000)
+  out.after = { caches: await caches(), images: await imageBytes(), sw: await evaluate(`navigator.serviceWorker.controller?.scriptURL`), seconds: +((Date.now() - t0) / 1000).toFixed(1) }
+}
+
+if (mode === 'shots') {
+  await open(''); await swReady()
+  await evaluate(`document.querySelector('[data-testid=filter-button]').click()`); await waitFor('[data-testid=offline-download-drawer]'); await sleep(300)
+  await evaluate(`document.querySelector('[data-testid=offline-download-drawer]').scrollIntoView({ block: 'center' })`); await sleep(300)
+  await shot('drawer-download')
+  await evaluate(`document.querySelector('[data-testid=apply]').click()`); await sleep(300)
+  await evaluate(`document.querySelector('nav a[href$="/you"]').click()`); await waitFor('[data-testid=offline-download]'); await sleep(800)
+  await shot('profile-download')
+  await sleep(65_000) // past staleTime: the offline load refetches and fails, which is what the banner keys on (CDP leaves navigator.onLine true)
+  await goOffline(true)
+  await send('Page.navigate', { url: `${base}/${locale}` }); await sleep(500); await waitFor('[data-testid=grid] li'); await waitFor('[data-testid=offline-banner]', 10_000).catch(() => null); await sleep(2000)
+  await shot('offline-banner')
+  await goOffline(false)
+}
+
 console.log(JSON.stringify(out, null, 2))
 ws.close(); proc.kill()
 process.exit(0)

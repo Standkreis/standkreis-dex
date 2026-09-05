@@ -27,11 +27,20 @@ const jobs: Map<string, Promise<void>> = ((globalThis as unknown as { __dexRegio
 const tile = z.enum(Object.values(Tile) as [Tile, ...Tile[]])
 
 const INAT = 'https://inaturalist-open-data.s3.amazonaws.com/'
+const WIKI_THUMB = 330 // one of the widths Wikimedia serves without a scaler run (250, 330, 500, 960 ...); 110 px cell at 3×
 /**
- * The grid's image variant (handoff 0009 Track A): an iNaturalist `medium.*` (500 px, ~45–60 KB) becomes `small.*`
- * (240 px, ~15 KB) for a 110 px cell; Wikimedia thumbs and own photos stay as they are. The species page keeps `medium`.
+ * The grid's image variant (handoff 0009 Track A) for a 110 px cell. iNaturalist `medium.*` (500 px, ~45–60 KB)
+ * becomes `small.*` (240 px, ~30 KB). A Wikimedia thumb (960 px, 70–325 KB) becomes the 330 px one (~17 KB); an
+ * unscaled original (250 KB to over 1 MB, rate-limited with 429 when fetched in bulk) becomes its 330 px thumb.
+ * Own photos stay as they are. The species page keeps the full variants. Measured in findings 0009 §C2.
  */
-export const smallVariant = (url: string) => (url.startsWith(INAT) ? url.replace(/\/medium\.(\w+)$/, '/small.$1') : url)
+export const smallVariant = (url: string) => {
+  if (url.startsWith(INAT)) return url.replace(/\/medium\.(\w+)$/, '/small.$1')
+  const m = url.match(/^https:\/\/(?:thumb|upload)\.wikimedia\.org\/wikipedia\/commons\/(thumb\/)?([0-9a-f]\/[0-9a-f]{2}\/[^/?#]+)(?:\/\d+px-[^/?#]+)?(?:[?#].*)?$/)
+  if (!m) return url
+  const file = m[2].split('/').pop()!
+  return `https://upload.wikimedia.org/wikipedia/commons/thumb/${m[2]}/${WIKI_THUMB}px-${file}${/\.svg$/i.test(file) ? '.png' : ''}`
+}
 const thisMonth = () => new Date().getMonth() + 1
 
 // The grid's data (spec §🧬 "The plausible set", §🎨 2). Pure read: no identity, the dex state is joined by the client (M5).

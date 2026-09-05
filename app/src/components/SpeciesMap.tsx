@@ -1,6 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { useOffline } from './OfflineBanner'
 
 const Z = 8
 const OSM = (x: number, y: number) => `https://tile.openstreetmap.org/${Z}/${x}/${y}.png`
@@ -27,6 +29,11 @@ const tileXY = (lat: number, lng: number) => {
  */
 export function SpeciesMap({ centre, taxonKey, region }: { centre: { lat: number; lng: number }; taxonKey: number; region: string }) {
   const t = useTranslations('species.occurrence')
+  const to = useTranslations('offline')
+  // Offline (handoff 0009 Track A): tiles are never cached, so a tile that fails to load turns the card into one honest line.
+  const offline = useOffline()
+  const [failed, setFailed] = useState(false)
+  const waits = offline || failed
   const { x, y } = tileXY(centre.lat, centre.lng)
   const x0 = Math.floor(x) - 1, y0 = Math.floor(y) - 1
   const fx = x - x0, fy = y - y0 // the centre in tile units within the 3 × 3 square, each in [1, 2): never nearer than a tile to an edge
@@ -39,12 +46,13 @@ export function SpeciesMap({ centre, taxonKey, region }: { centre: { lat: number
         {tiles.map(([tx, ty], i) => (
           <span key={i} className="absolute h-1/3 w-1/3" style={{ left: `${(i % 3) * 33.3333}%`, top: `${Math.floor(i / 3) * 33.3333}%` }}>
             {/* eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser */}
-            <img src={OSM(tx, ty)} alt="" className="absolute inset-0 h-full w-full" draggable={false} />
+            <img src={OSM(tx, ty)} alt="" className="absolute inset-0 h-full w-full" draggable={false} onError={() => setFailed(true)} />
             {/* eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser */}
             <img src={GBIF(tx, ty, taxonKey)} alt="" className="absolute inset-0 h-full w-full opacity-55" draggable={false} />
           </span>
         ))}
       </div>
+      {waits && <p className="absolute inset-0 flex items-center justify-center text-[15px] font-semibold text-ink-soft" data-testid="map-waits"><span aria-hidden>📴 </span>{to('mapWaits')}</p>}
       <figcaption className="absolute top-3 left-3 rounded-full bg-card/90 px-3 py-1 text-[13px] font-semibold text-ink shadow-sm backdrop-blur">{t('mapLabel', { km: cellKm(centre.lat) })}</figcaption>
       <span className="absolute bottom-1.5 left-3 text-[10px] text-ink-soft [text-shadow:0_0_3px_#fff]">{t('mapCredit')}</span>
     </figure>

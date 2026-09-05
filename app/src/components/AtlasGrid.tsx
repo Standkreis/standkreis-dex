@@ -239,14 +239,16 @@ function FilterButton({ count, label, onClick, className, style, testId }: { cou
 // `own` = the identity's latest wild photo of the species, shown in colour instead of the reference image (spec §🎨 2).
 // `fill` = the cell of the fill moment: "pre" is drawn grey with the transition armed, "done" sweeps to colour over 400 ms under a green ring.
 function Cell({ s, name, own, isSeen, isStudied, badge, fill }: { s: Row; name: string; own: string | null; isSeen: boolean; isStudied: boolean; badge: string; fill: 'pre' | 'done' | null }) {
-  const src = own && isSeen ? photoSrc(own) : s.leadSmall ?? s.lead?.url ?? null
+  // A small variant Wikimedia cannot scale (a rare error) falls back to the lead itself.
+  const [broken, setBroken] = useState(false)
+  const src = own && isSeen ? photoSrc(own) : (broken ? null : s.leadSmall) ?? s.lead?.url ?? null
   return (
     <li className="min-w-0" data-taxon={s.taxonId} data-fill={fill ?? undefined} data-outside={s.outside || undefined} data-own={own ? 'true' : undefined}>
       <Link href={`/species/${s.gbifKey}`} className="block">
         <div className={`relative aspect-square overflow-hidden rounded-2xl bg-tile ${isStudied && !isSeen ? 'ring-2 ring-amber ring-inset' : ''} ${fill === 'done' ? 'ring-[3px] ring-moss' : ''}`}>
           {src ? (
             // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser
-            <img src={src} alt="" loading="lazy" className={`h-full w-full object-cover ${fill ? 'transition-[filter,opacity] duration-[400ms] ease-out' : ''} ${isSeen ? '' : isStudied ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />
+            <img src={src} alt="" loading="lazy" onError={() => { if (src === s.leadSmall && s.lead?.url && s.lead.url !== src) setBroken(true) }} className={`h-full w-full object-cover ${fill ? 'transition-[filter,opacity] duration-[400ms] ease-out' : ''} ${isSeen ? '' : isStudied ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />
           ) : (
             <OnboardingSilhouette tile={s.tile} className="h-full w-full p-6 text-ink-faint opacity-60" />
           )}

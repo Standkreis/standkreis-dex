@@ -395,5 +395,21 @@
     "body": "A passkey takes your sightings along to other devices. No account, no email.",
     "later": "Later",
     "create": "Create a passkey"
+  },
+  "offline": {
+    "title": "Atlas offline",
+    "summary": "{n} images · ~{mb} MB",
+    "load": "Load for the walk",
+    "progress": "{done} / {total}",
+    "cancel": "Cancel",
+    "stopped": "Paused · {done} / {total}",
+    "resume": "Keep loading",
+    "failed": "Signal lost at {done} / {total}",
+    "ready": "Ready offline · {date}",
+    "reload": "Refresh",
+    "banner": "Offline · your atlas is here, search and maps are waiting for a signal",
+    "mapWaits": "Map is waiting for a signal",
+    "speciesWaits": "This species is waiting for a signal",
+    "speciesHint": "Open it once with a signal, then it stays on your phone."
   }
 }

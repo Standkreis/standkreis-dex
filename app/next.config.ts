@@ -1,3 +1,5 @@
+import { existsSync, readFileSync } from 'node:fs'
+import { join } from 'node:path'
 import type { NextConfig } from 'next'
 import createNextIntlPlugin from 'next-intl/plugin'
 
@@ -5,7 +7,10 @@ import createNextIntlPlugin from 'next-intl/plugin'
 // are picked up, so the tRPC route handler (route.ts) drops out and the client talks to NEXT_PUBLIC_API_URL.
 const isExport = process.env.STATIC_EXPORT === '1'
 // One id per build (or per `next dev` start), on the service worker URL: a new build is a new worker (handoff 0009).
-const buildId = process.env.BUILD_ID ?? Date.now().toString(36)
+// `next build` loads this file in more than one process, so the id is minted once by scripts/m8a/build-id.mjs (prebuild)
+// and read here; `next dev` has no seed and mints its own.
+const seed = process.env.npm_lifecycle_event?.startsWith('build') ? join(process.cwd(), 'node_modules', '.cache', 'dex-build-id') : null
+const buildId = process.env.BUILD_ID ?? (seed && existsSync(seed) ? readFileSync(seed, 'utf8').trim() : Date.now().toString(36))
 
 const nextConfig: NextConfig = {
   output: isExport ? 'export' : undefined,
