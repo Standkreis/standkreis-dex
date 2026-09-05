@@ -1,13 +1,19 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
+import type { inferRouterOutputs } from '@trpc/server'
 import { useRouter } from '@/i18n/navigation'
+import type { AppRouter } from '@/server/routers/_app'
 import { useTRPC } from '@/trpc/client'
 import { useAtlasSet } from './AtlasCounters'
-import { PhotoInput, photoSrc, type PhotoState } from './LogPhoto'
+import { PhotoInput, photoSrc, queuedPhoto, type PhotoState } from './LogPhoto'
+import { enqueue, flush, landing, queuedWild, QueueFull, remove as removeRow, useOutbox, type Lead } from './Queue'
 import { Thumb, type Card, type DexState } from './SpeciesCard'
+
+type Created = inferRouterOutputs<AppRouter>['sighting']['create']
+type FillOut = NonNullable<inferRouterOutputs<AppRouter>['sighting']['fill']>
 
 type Loc = { status: 'idle' | 'asking' | 'granted' | 'denied' } & Partial<{ lat: number; lng: number }>
 
@@ -22,6 +28,7 @@ const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString()
  */
 export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; photoId: string | null; fromSpecies: boolean }) {
   const t = useTranslations('log')
+  const tq = useTranslations('queue')
   const ts = useTranslations('species')
   const tc = useTranslations('common')
   const locale = useLocale()
@@ -53,6 +60,12 @@ export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; ph
   const [photoState, setPhotoState] = useState<PhotoState>('idle')
   const here = (photo: string | null) => `/log?taxon=${gbifKey}${photo ? `&photo=${photo}` : ''}${fromSpecies ? '&from=species' : ''}`
   const removePhoto = useMutation(trpc.sighting.removePhoto.mutationOptions({ onSettled: () => router.replace(here(null)) }))
+  // A photo taken without signal is an outbox row, not an Asset: shown from its blob, removed from the box, uploaded by the flush.
+  const outbox = useOutbox()
+  const local = useMemo(() => queuedPhoto(photoId), [photoId, outbox]) // eslint-disable-line react-hooks/exhaustive-deps -- outbox is the dependency that makes rowOf() fresh
+  const localUrl = useMemo(() => (local ? URL.createObjectURL(local.blob) : null), [local])
+  useEffect(() => () => { if (localUrl) URL.revokeObjectURL(localUrl) }, [localUrl])
+  const dropPhoto = () => { if (local) void removeRow(local.id).then(() => router.replace(here(null))); else if (photoId) removePhoto.mutate({ photoId }) }
 
   // Location: if the browser already granted it, take it silently; if it is still a question, explain first and ask on a tap.
   const [loc, setLoc] = useState<Loc>({ status: 'idle' })
@@ -71,27 +84,46 @@ export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; ph
   const place = useQuery(trpc.sighting.place.queryOptions({ lat: loc.lat ?? 0, lng: loc.lng ?? 0 }, { enabled: loc.status === 'granted', staleTime: Infinity }))
   const where = loc.status === 'granted' ? (place.isLoading ? t('locating') : place.data?.place ?? region?.name ?? '') : region?.name ?? ''
 
-  const create = useMutation(
-    trpc.sighting.create.mutationOptions({
-      onSuccess: async (r) => {
-        await Promise.all([
-          qc.invalidateQueries({ queryKey: trpc.identity.progress.queryKey(), refetchType: 'all' }),
-          qc.invalidateQueries({ queryKey: trpc.sighting.photos.queryKey() }),
-          qc.invalidateQueries({ queryKey: trpc.sighting.outside.pathKey() }),
-        ])
-        // First wild sighting → the grid fills the cell (one fill implementation, handoff §❓); a repeat from the species page goes back there with the toast.
-        const again = `again=${r.id}${r.wildness === 'wild' ? '' : '&kept=1'}` // a kept sighting gets its own toast line, never "Wiedergesehen"
-        router.replace(r.first ? `/?fill=${r.id}` : fromSpecies ? `/species/${gbifKey}?${again}` : `/?${again}`)
-      },
-    }),
-  )
-  const save = (kind: 'wild' | 'kept') => {
+  // The save (handoff 0009 Track B): the row goes into the outbox first, then the flush. Online the server answers within
+  // the same tick and its `first` decides; without an answer in 3 s the client's `first` (no seenAt for the taxon, no wild
+  // row for it in the box) fills the grid, the sheet says "wird gesendet", and the flush lands when the signal is back.
+  const [saving, setSaving] = useState<'idle' | 'busy' | 'done'>('idle')
+  const [problem, setProblem] = useState<'full' | 'error' | null>(null)
+  const go = (r: { id: string; first: boolean; wildness: string }) => {
+    // First wild sighting → the grid fills the cell (one fill implementation, handoff §❓); a repeat from the species page goes back there with the toast.
+    const again = `again=${r.id}${r.wildness === 'wild' ? '' : '&kept=1'}` // a kept sighting gets its own toast line, never "Wiedergesehen"
+    router.replace(r.first ? `/?fill=${r.id}` : fromSpecies ? `/species/${gbifKey}?${again}` : `/?${again}`)
+  }
+  const save = async (kind: 'wild' | 'kept') => {
     if (!card) return
     // "Gehalten" is captive for animals and fungi, cultivated for plants (schema Wildness; spec §⚖️ wild only).
     const wildness = kind === 'wild' ? 'wild' : card.tile === 'plant' ? 'cultivated' : 'captive'
-    create.mutate({ taxonId: card.id, at, lat: loc.lat, lng: loc.lng, note: note.trim() || undefined, wildness, photoId: photoId ?? undefined })
+    const id = crypto.randomUUID()
+    const first = wildness === 'wild' && !progress?.seen.includes(card.id) && !queuedWild(outbox, card.id)
+    const placeNow = (loc.status === 'granted' ? place.data?.place : null) ?? region?.name ?? null
+    const lead: Lead = inSet?.lead ?? null
+    const taxon = { id: card.id, gbifKey, sciName: card.sciName, names: card.names, tile: card.tile, lead }
+    setSaving('busy')
+    setProblem(null)
+    try {
+      await enqueue({ id, kind: 'sighting', payload: { taxonId: card.id, at: at.toISOString(), lat: loc.lat, lng: loc.lng, note: note.trim() || undefined, wildness, photoId: photoId && !local ? photoId : undefined, photoRow: local?.id, taxon, place: placeNow, first } })
+    } catch (e) {
+      setProblem(e instanceof QueueFull ? 'full' : 'error')
+      setSaving('idle')
+      return
+    }
+    const answer = landing<Created>(id, navigator.onLine ? 3000 : 0)
+    void flush()
+    const r = await answer
+    setSaving('done')
+    if (r) return go(r)
+    // No answer: seed what the sheet and the toast read, so the grid needs no server. The flush invalidates it when the row lands.
+    const photo = local ? { id: local.id, url: URL.createObjectURL(local.blob) } : photoId ? { id: photoId, url: `/api/photo/${photoId}` } : null
+    const seeded = { id, offerPasskey: false, at, place: placeNow, wildness, evidence: photo ? 'photographed' : 'claimed', first, photo, taxon, pending: true }
+    qc.setQueryData(trpc.sighting.fill.queryKey({ id }), seeded as unknown as FillOut) // `tile` is a string here, an enum there; `photo` may be null on both sides
+    go({ id, first, wildness })
   }
-  const busy = create.isPending || create.isSuccess
+  const busy = saving !== 'idle'
 
   const day = sameDay(at, new Date()) ? `${t('today')}, ${format.dateTime(at, { day: 'numeric', month: 'short' })}` : format.dateTime(at, { weekday: 'short', day: 'numeric', month: 'short' })
   const when = `${day} · ${format.dateTime(at, { hour: '2-digit', minute: '2-digit' })}`
@@ -145,12 +177,12 @@ export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; ph
           {photoId ? (
             <div className={`mt-3 flex items-center gap-4 px-4 py-4 ${cardCls}`} data-testid="save-photo" data-photo={photoId}>
               {/* eslint-disable-next-line @next/next/no-img-element -- the identity's own upload */}
-              <img src={photoSrc(`/api/photo/${photoId}`)} alt="" className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
+              <img src={localUrl ?? photoSrc(`/api/photo/${photoId}`)} alt="" className="h-16 w-16 shrink-0 rounded-2xl object-cover" />
               <span className="min-w-0 flex-1">
                 <span className="block text-[17px] font-bold">{t('photoAttached')}</span>
                 <span className="block text-[15px] leading-snug text-ink-soft">{t('photoAttachedSub')}</span>
               </span>
-              <button type="button" onClick={() => removePhoto.mutate({ photoId })} disabled={removePhoto.isPending} className="shrink-0 text-[15px] font-semibold text-ink-soft disabled:opacity-60" data-testid="save-photo-remove">{t('removePhoto')}</button>
+              <button type="button" onClick={dropPhoto} disabled={removePhoto.isPending} className="shrink-0 text-[15px] font-semibold text-ink-soft disabled:opacity-60" data-testid="save-photo-remove">{t('removePhoto')}</button>
             </div>
           ) : (
             <button type="button" onClick={() => picker.current?.click()} disabled={photoState === 'busy'} className={`mt-3 flex w-full items-center gap-4 px-4 py-4 text-left disabled:opacity-60 ${cardCls}`} data-testid="save-photo">
@@ -174,7 +206,7 @@ export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; ph
             <button type="button" onClick={() => save('wild')} disabled={busy} data-testid="save-wild"
               className="flex h-20 flex-col items-center justify-center rounded-3xl bg-moss text-white shadow-md disabled:opacity-60">
               <span className="text-[22px] leading-tight font-bold"><span aria-hidden>🌳 </span>{t('wild')}</span>
-              <span className="text-[15px] text-white/85">{create.isPending ? t('saving') : t('wildSub')}</span>
+              <span className="text-[15px] text-white/85">{busy ? t('saving') : t('wildSub')}</span>
             </button>
             <button type="button" onClick={() => save('kept')} disabled={busy} data-testid="save-captive"
               className="flex h-20 flex-col items-center justify-center rounded-3xl bg-card shadow-[0_2px_12px_rgba(30,42,35,0.06)] disabled:opacity-60">
@@ -183,7 +215,7 @@ export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; ph
             </button>
           </div>
           <p className="mt-3 text-center text-[13px] leading-snug text-ink-faint">{t('captiveHint')}</p>
-          {create.isError && <p className="mt-2 text-center text-[13px] text-amber">{tc('error')}</p>}
+          {problem && <p className="mt-2 text-center text-[13px] text-amber" data-testid="save-problem">{problem === 'full' ? tq('full') : tc('error')}</p>}
         </>
       )}
     </main>

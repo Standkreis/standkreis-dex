@@ -24,6 +24,29 @@ type Unit = ReturnType<typeof toUnit>
 // do not start the same region twice; a second identity asking for a running region waits on the same job.
 const jobs: Map<string, Promise<void>> = ((globalThis as unknown as { __dexRegionJobs?: Map<string, Promise<void>> }).__dexRegionJobs ??= new Map())
 
+/**
+ * The region job: facets → set → content, in this process, once per gadmGid at a time. `requestRegion` starts it for a
+ * new or failed region; the restart sweep (handoff 0009 Track B, `server/sweep.ts`) restarts it for a region left
+ * `queued` by a server that died. Returns the running job, so a caller may await it.
+ */
+export function startRegionJob(gadmGid: string): Promise<void> {
+  const running = jobs.get(gadmGid)
+  if (running) return running
+  const log = (s: string) => console.log(`[region ${gadmGid}] ${s}`)
+  const job = (async () => {
+    const { runRegion } = await import('../../../etl/region')
+    const { runContent } = await import('../../../etl/content')
+    const r = await runRegion(gadmGid, log)
+    log(`ready: set ${r.set} in ${r.seconds.toFixed(1)} s`)
+    const c = await runContent({ region: gadmGid, log })
+    log(`content: ${c.done} filled, ${c.failed} failed in ${(c.seconds / 60).toFixed(1)} min`)
+  })()
+    .catch((e) => log(`failed: ${e instanceof Error ? e.message : String(e)}`))
+    .finally(() => jobs.delete(gadmGid))
+  jobs.set(gadmGid, job)
+  return job
+}
+
 const tile = z.enum(Object.values(Tile) as [Tile, ...Tile[]])
 
 const INAT = 'https://inaturalist-open-data.s3.amazonaws.com/'
@@ -147,18 +170,7 @@ export const dexRouter = router({
     }
     if (!jobs.has(gadmGid)) {
       if (region.status === 'failed') region = await ctx.db.region.update({ where: { gadmGid }, data: { status: 'queued', error: null }, select: pick })
-      const log = (s: string) => console.log(`[region ${gadmGid}] ${s}`)
-      const job = (async () => {
-        const { runRegion } = await import('../../../etl/region')
-        const { runContent } = await import('../../../etl/content')
-        const r = await runRegion(gadmGid, log)
-        log(`ready: set ${r.set} in ${r.seconds.toFixed(1)} s`)
-        const c = await runContent({ region: gadmGid, log })
-        log(`content: ${c.done} filled, ${c.failed} failed in ${(c.seconds / 60).toFixed(1)} min`)
-      })()
-        .catch((e) => log(`failed: ${e instanceof Error ? e.message : String(e)}`))
-        .finally(() => jobs.delete(gadmGid))
-      jobs.set(gadmGid, job)
+      void startRegionJob(gadmGid)
     }
     return { ...region, status: 'queued' as const, error: null }
   }),

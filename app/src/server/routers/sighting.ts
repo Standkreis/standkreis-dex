@@ -49,10 +49,13 @@ export const sightingRouter = router({
    * Save one sighting (spec §🎨 4). `evidence` follows the photo; `place` is the Gemeinde of the exact point, else the
    * region's name; the exact point is stored as is (doubt 17). Returns `first`: this row is the taxon's earliest wild
    * sighting, so the grid fills a cell; otherwise the grid shows the quiet toast (doubt 12).
+   * `id` is the client's (handoff 0009 Track B): the outbox mints it, so a flush retried after a lost answer finds the
+   * row it already made and returns it instead of a second one. Someone else's id is a conflict, never a read.
    */
   create: publicProcedure
     .input(
       z.object({
+        id: z.string().uuid().optional(),
         taxonId: z.string().uuid(),
         at: z.coerce.date(),
         lat: z.number().min(-90).max(90).optional(),
@@ -64,6 +67,11 @@ export const sightingRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       const id = ctx.identity.id
+      if (input.id) {
+        const existing = await ctx.db.sighting.findUnique({ where: { id: input.id }, select: { id: true, identityId: true, taxonId: true, at: true, createdAt: true, place: true, wildness: true, evidence: true } })
+        if (existing && existing.identityId !== id) throw new TRPCError({ code: 'CONFLICT', message: 'id taken' })
+        if (existing) return { id: existing.id, at: existing.at, place: existing.place, wildness: existing.wildness, evidence: existing.evidence, first: await isFirst(ctx.db, existing) }
+      }
       const [taxon, filter, photo] = await Promise.all([
         ctx.db.taxon.findUnique({ where: { id: input.taxonId }, select: { id: true } }),
         ctx.db.filter.findUnique({ where: { identityId: id }, select: { region: { select: { name: true } } } }),
@@ -75,6 +83,7 @@ export const sightingRouter = router({
       const place = (hasPoint ? await gemeinde(input.lat!, input.lng!) : null) ?? filter?.region?.name ?? null
       const row = await ctx.db.sighting.create({
         data: {
+          ...(input.id ? { id: input.id } : {}),
           identityId: id,
           taxonId: input.taxonId,
           at: input.at,

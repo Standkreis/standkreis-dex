@@ -411,5 +411,13 @@
     "mapWaits": "Map is waiting for a signal",
     "speciesWaits": "This species is waiting for a signal",
     "speciesHint": "Open it once with a signal, then it stays on your phone."
+  },
+  "queue": {
+    "sending": "sending",
+    "waiting": "waiting for signal",
+    "failed": "could not be saved",
+    "retry": "retry",
+    "full": "Get back online first, then save.",
+    "searchCapped": "Wait a moment · too many searches at once."
   }
 }

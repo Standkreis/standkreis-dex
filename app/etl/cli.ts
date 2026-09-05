@@ -3,6 +3,7 @@
 //   refresh [--days 30]       re-run the region job for regions older than 30 days
 //   content [--region <name>] [--purge <key>] [--limit n]
 //                             fill Taxon content (names, intro, facts, assets, interactions) once per taxon
+//   sweep                     what a server restart does (handoff 0009): restart queued regions, fill missing content, drop abandoned photos
 import { db } from './db'
 import { requests } from './fetch'
 import { TILES } from './rules'
@@ -40,8 +41,14 @@ async function main() {
       console.log(`requests ${JSON.stringify(r.requests)}`)
       break
     }
+    case 'sweep': {
+      const { sweep } = await import('../src/server/sweep')
+      const r = await sweep()
+      console.log(r ? `sweep: regions ${r.regions.join(', ') || '–'} · content ${r.content} taxa (${r.contentDone} filled, ${r.contentFailed} failed) · photos ${r.photos} · ${r.seconds.toFixed(1)} s` : 'sweep: another process holds the lock')
+      break
+    }
     default:
-      console.log('usage: npm run etl -- region <name | gadmGid> [--month m] | refresh [--days 30] | content [--region <name>] [--purge <gbifKey>] [--limit n]')
+      console.log('usage: npm run etl -- region <name | gadmGid> [--month m] | refresh [--days 30] | content [--region <name>] [--purge <gbifKey>] [--limit n] | sweep')
       process.exitCode = 1
   }
 }

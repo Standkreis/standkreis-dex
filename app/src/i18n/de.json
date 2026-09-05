@@ -411,5 +411,13 @@
     "mapWaits": "Karte wartet aufs Netz",
     "speciesWaits": "Diese Art wartet aufs Netz",
     "speciesHint": "Einmal mit Netz öffnen, dann bleibt sie auf dem Handy."
+  },
+  "queue": {
+    "sending": "wird gesendet",
+    "waiting": "wartet aufs Netz",
+    "failed": "konnte nicht gespeichert werden",
+    "retry": "erneut",
+    "full": "Erst wieder ins Netz, dann speichern.",
+    "searchCapped": "Kurz warten · zu viele Suchen auf einmal."
   }
 }

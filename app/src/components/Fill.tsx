@@ -12,6 +12,8 @@ type Fill = {
   place: string | null
   photo: { id: string; url: string } | null
   taxon: { id: string; gbifKey: number; sciName: string; names: Record<string, string>; tile: string; lead: { url: string; author: string; licence: string; licenceUrl: string | null; sourceUrl: string; origin: string } | null }
+  /** Still in the outbox (handoff 0009 Track B): the date line says so, and no second photo can be attached before the row exists. */
+  pending?: boolean
 }
 
 /**
@@ -21,6 +23,7 @@ type Fill = {
  */
 export function FillSheet({ s, onClose, onPhoto, photoState }: { s: Fill; onClose: () => void; onPhoto: (p: Photo) => void; photoState: PhotoState }) {
   const t = useTranslations('fill')
+  const tq = useTranslations('queue')
   const ts = useTranslations('species')
   const tc = useTranslations('common')
   const locale = useLocale()
@@ -56,6 +59,7 @@ export function FillSheet({ s, onClose, onPhoto, photoState }: { s: Fill; onClos
             <span className="block truncate text-[24px] leading-tight font-bold" data-testid="fill-name">{name}</span>
             <span className="mt-0.5 block text-[15px] leading-snug text-ink-soft" data-testid="fill-meta">
               <span aria-hidden>👁 </span>{t('meta', { date: format.dateTime(s.at, { day: 'numeric', month: 'short' }), place: s.place ?? '' })}
+              {s.pending && <span data-testid="fill-pending"> · {tq('sending')}</span>}
             </span>
           </span>
           <span className="shrink-0 text-[22px] text-ink-faint" aria-hidden>›</span>
@@ -66,12 +70,12 @@ export function FillSheet({ s, onClose, onPhoto, photoState }: { s: Fill; onClos
           </p>
         )}
         <div className="mt-4 flex gap-3">
-          {!s.photo && (
+          {!s.photo && !s.pending && (
             <button type="button" onClick={() => picker.current?.click()} disabled={busy} className={`flex h-13 flex-1 items-center justify-center gap-2 rounded-full bg-tile text-[17px] font-bold disabled:opacity-60 ${failed ? 'text-amber' : ''}`} data-testid="fill-photo">
               <span aria-hidden>📷</span> {busy ? tc('working') : failed ? tc('error') : t('photo')}
             </button>
           )}
-          {!s.photo && <PhotoInput ref={picker} source="gallery" onPhoto={onPhoto} onState={setPicking} testId="photo-input" />}
+          {!s.photo && !s.pending && <PhotoInput ref={picker} source="gallery" onPhoto={onPhoto} onState={setPicking} testId="photo-input" />}
           <Link href={`/species/${s.taxon.gbifKey}`} className="flex h-13 flex-[1.4] items-center justify-center rounded-full bg-moss text-[17px] font-bold text-white shadow-md" data-testid="fill-species">
             {t('toSpecies')}
           </Link>

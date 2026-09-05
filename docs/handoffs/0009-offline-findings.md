@@ -4,7 +4,7 @@
 
 | 🗓️ Date | 👤 Owner | ✅ Checks |
 | --- | --- | --- |
-| 2026-09-05 | Sven Reiser | C1 C2 C3 C4 pass (Track A, production build on 3002, Chrome over CDP and the iPhone 17 Pro Simulator) · Track B and C5–C10 in their own section |
+| 2026-09-05 | Sven Reiser | C1–C4 pass (Track A, production build, Chrome over CDP and the iPhone 17 Pro Simulator) · C5–C8 pass (Track B) · C9 C10 on `main` after both merges |
 
 
 ## 📴 Track A · the atlas without signal
@@ -133,3 +133,150 @@ The run also showed 36 opaque entries after the swap: a Wikimedia 429 on the COR
 - Locale JSONs: one top-level `offline` object appended in both; Track B appends its own. `package.json`: `prebuild` / `postbuild` / `prebuild:export` / `postbuild:export` added.
 - `SpeciesMap.tsx` and `app/[locale]/layout.tsx` touched (see tables). `AtlasGrid.tsx` gained a `useState` for the image fallback.
 - After merging, `npm run build` must print `sw-manifest <id>` with the same id as the worker URL in the served HTML.
+
+## 📮 Track B · the sightings queue and the server sweeps
+
+Branch `m8-queue`. Shots in [`0009-shots/b-*`](0009-shots/), driver `app/scripts/m8b/queue.mjs` (headless Chrome over CDP as in `m6a/log.mjs`; modes `c5` (with C6), `c7`, `shots`, `capped`), `app/scripts/m8b/q.mjs` for ad-hoc SQL. Evidence was taken against a **production build** (`next build && next start -p 3003`): the dev server cannot navigate offline (see doubts).
+
+### 🧱 What was built
+
+| Piece | File | What |
+| --- | --- | --- |
+| Outbox | `components/Queue.ts` | IndexedDB via `idb-keyval`, store `dex-outbox` / `outbox`, rows `{id, kind: sighting\|photo\|study, payload, blob?, createdAt, attempts, lastError, dead?}`. An in-memory mirror (`useOutbox`, `rowsNow`, `subscribe`) so every screen reads synchronously; `enqueue` refuses the 51st live row and a blob over 2 MB (`QueueFull`); `retry(id)`; `flush()` single-flight; `landing(id, ms)` for the save screen |
+| Flusher | `components/QueueFlusher.tsx` | Mounted once in `[locale]/layout.tsx`. Flush on load, `online`, `visibilitychange` visible, every 60 s while live rows exist. After a row lands: invalidate `identity.progress`, `journal.*`, and for sightings `sighting.photos`, `sighting.outside`, `sighting.fill({id})`. Overlays `identity.progress` with the waiting wild taxa (`seen`, `seenAt`) whenever the server's progress arrives, so a reload in the forest keeps the cells filled |
+| Diary merge | `components/QueueRows.ts` + test | `mergeQueued(days, outbox, kind)`: outbox rows become diary rows on their day (`dayKeyOf`), ids already on the server are skipped, sorted with the rest |
+| Save path | `LogSave.tsx` | Mints `crypto.randomUUID()`, computes `first` (not in `progress.seen`, no wild row for the taxon in the box), enqueues, flushes, waits **3 s online / 0 s offline** for the landing; landed → the server's answer as before; not landed → seeds `sighting.fill({id})` with `pending: true` and opens the sheet |
+| Upload path | `LogPhoto.tsx` | `uploadOrQueue`: online → `POST /api/photo` as before; offline (or the fetch throws `TypeError`) → a `photo` row with the resized JPEG blob, shown from an object URL |
+| Sheet | `Fill.tsx` | `pending` → meta line "· wird gesendet", no Foto button |
+| Diary | `Journal.tsx` | Merged rows; grey chip "wartet aufs Netz", amber button "konnte nicht gespeichert werden · erneut" (`retry`); queued sighting rows are not links (no `/sighting/<id>` yet) |
+| Server | `routers/sighting.ts` | `create` takes `id?: uuid`; an existing row of the same identity is returned as if just created (with `isFirst`); another identity's id → `CONFLICT` |
+| Search cap | `server/searchCap.ts` + test, `routers/taxon.ts` | Token bucket per identity, 30/min continuous refill, in process memory; `TOO_MANY_REQUESTS`. `LogSearch.tsx` does not retry that code and shows "Kurz warten · zu viele Suchen auf einmal." under the set rows |
+| Sweep | `server/sweep.ts`, `instrumentation.ts`, `etl/cli.ts sweep`, `photos.ts deleteAbandonedPhotos`, `dex.ts startRegionJob` | One transaction holding `pg_try_advisory_xact_lock(0x0de55eec)`: regions `queued` older than 5 min restarted in order; taxa with `contentAt = null` that are in a ready region's set **or have sightings**, content kick in batches of 20; user Assets with `sightingId = null` older than 24 h deleted, rows and files |
+| Strings | `i18n/{de,en}.json` | One new top-level object `queue` (`sending`, `waiting`, `failed`, `retry`, `full`, `searchCapped`) |
+
+### 📐 What the spec did not say
+
+| Topic | Decision | Why |
+| --- | --- | --- |
+| Where the flush lives | A vanilla `createTRPCClient` of its own inside `Queue.ts`, not the React provider | Timers and the `online` event run outside React; the provider's client is not reachable there and Track A owns `trpc/client.tsx` |
+| Idempotence | The **client id is the key**. Server: `findUnique` by id, same identity → return the row (`first` recomputed), other identity → 409. No schema change | A retried flush after a lost answer cannot create a twin; 409 is 4xx → the row falls out instead of retrying forever |
+| Order and stop rule | Rows in `createdAt` order, one at a time; the first row **without an answer** (offline, timeout, 5xx) stops the run; a row the server refuses (4xx except 401 and 429) is marked `dead`, payload kept, the line behind it moves on | Handoff §📮; a dead row must not block the forest's other finds |
+| Photo before sighting | A sighting with a `photoRow` uploads the blob first, binds the Asset id, then creates. If the **upload** is refused (4xx: not a JPEG, too big) the photo row is dropped and the sighting goes **without** it, `lastError` kept on the sighting row | The find is worth more than its picture; a stuck photo must not hold the sighting |
+| Unbound photo rows | A `photo` row no sighting refers to (chooser → back) waits; after 24 h unreferenced it is removed | Mirrors the server's abandoned-Asset rule |
+| Client `first` | `wild && !progress.seen.includes(taxon) && !queuedWild(outbox, taxon)`; the sheet says "Entdeckt" with "· wird gesendet"; the server's `first` wins after the flush through the `fill` invalidation | Handoff §📮 "counters tick, server wins"; a second offline save of the same species is not a second "first" |
+| Counters offline | The overlay adds the waiting wild taxa to `identity.progress` in the query cache (`setQueryData`, applied again on every non-manual success of that query and on every box change) | The grid, the counters and the species page all read `progress`; one overlay covers them all without touching `AtlasGrid.tsx` |
+| The save screen waits 3 s | Online the screen waits up to 3 s for the landing and then behaves exactly as before (toasts, `?fill=`); past 3 s, or offline, it opens the pending sheet at once | A slow server must not freeze the button; the row is safe in the box either way |
+| Photo URL | **Stays a capability URL** `/api/photo/<uuid>` (findings 0008 A) | The export build's `<img>` on another origin carries no cookie, the persisted query cache (Track A) would hold expired signed URLs across days, and a service worker cache needs a stable key. The uuid is unguessable; delete removes the file → 404 |
+| 51st row | `enqueue` throws `QueueFull`; the save screen shows "Erst wieder ins Netz, dann speichern." and keeps its state | Handoff §📮; iOS evicts unused stores after seven days (record Q5), so the box stays small |
+| 2 MB blob | Same `QueueFull` path and text | Only reachable offline (online uploads directly); 1,600 px q 0.85 JPEGs are ~30–300 KB, so this is a guard, not a screen |
+| Studies | The box knows `kind: 'study'` (`send` → `study.mark`, already an upsert, so no id is needed and `study.ts` is untouched), but **no screen enqueues studies yet**: the study button lives in `SpeciesPage.tsx` (not owned) and calls `study.mark` directly | One line in `SpeciesPage.tsx` at the merge: `enqueue({id: crypto.randomUUID(), kind: 'study', payload: {taxonId, taxon}})` then `flush()` instead of the mutation. `setMutationDefaults` cannot do it: explicit `mutationOptions` win |
+| Queued row's sighting page | Not built: a queued diary row is a `<div>`, not a link; the pending sheet's "Zur Art ›" goes to the species | `SightingPage.tsx` is not owned. To do at the merge: `sighting.fill`/`sighting.one` miss → look up `rowOf(id)` in the box, render the chip and no map |
+| Search cap store | `globalThis.__dexSearchBuckets`, cleared when over 10,000 identities | No table, no migration; one process per deployment for now |
+| Sweep lock | `pg_try_advisory_xact_lock` inside one `$transaction` (timeout 6 h) rather than a session lock | Dies with the connection; nothing to release on a crash |
+| Sweep "stale" | `Region.createdAt < now − 5 min` (there is no `updatedAt`) | Schema is frozen; a re-requested region keeps its `createdAt` (doubt below) |
+| Files touched outside the list | `LogSearch.tsx` (the cap line, four lines), `[locale]/layout.tsx` (mounts `<QueueFlusher />`, two lines) | No owned file could show the cap or mount the flusher; both are trivial to re-apply |
+
+### 📮 The flush rules as built
+
+```
+trigger  : load · window 'online' · document visible · every 60 s while a live row exists · after every enqueue · retry(id)
+guard    : navigator.onLine false → return without a request · one run at a time (second call joins)
+per row  : dead → skip
+           photo without forSighting → wait (drop after 24 h if unreferenced)
+           sighting with photoRow → upload blob → bind photoId → create({id, …})
+           study → mark
+           photo with forSighting → upload → attachPhoto
+on answer: 2xx → remove row, listeners (invalidate progress, journal, photos, outside, fill)
+           4xx except 401 429 → dead (payload kept, chip "konnte nicht gespeichert werden · erneut"), continue
+           no answer / 5xx / 401 / 429 → attempts+1, lastError, STOP the run
+```
+
+### ✅ Checks
+
+**C5 · offline save, sheet, counters, diary** — identity `61949416-…`, `Network.emulateNetworkConditions {offline: true}`, production build.
+
+| Evidence | Value |
+| --- | --- |
+| `navigator.onLine` | `false` |
+| URL after Wild | `/de?fill=<client uuid>` |
+| Sheet meta | "👁 5. Sept. · Mainz-Bingen · Ort grob gespeichert · wird gesendet", no Foto button, `data-testid="fill-pending"` |
+| Counters | "0 studiert · N entdeckt **+1** · 929 möglich" |
+| Grid cell | `fill: done, grayscale: false, ring: true, check: true` |
+| Outbox | one `sighting` row, `first: true`, `attempts: 0` |
+| Diary | Zilpzalp row, chips `["Neu entdeckt", "wartet aufs Netz"]`, rendered as `<div>` (no link) |
+| DB | no `Sighting` with that id |
+
+**C6 · back online, the row lands, once** — same run, `offline: false`.
+
+| Evidence | Value |
+| --- | --- |
+| Flush | landed 152 ms after the `online` event |
+| DB | `Sighting.id === client id` (`idMatches: true`), one row |
+| Sheet | not shown again |
+| Diary | chip gone, the row is a `/sighting/<id>` link |
+| Progress | client `identity.progress` equals the server's after invalidation |
+| Bonus | a row from a broken dev-server attempt (Turmfalke) survived the server restart and flushed on its own when Chrome's error page auto-reloaded |
+
+**C7 · photo offline, flush uploads first** — "one bar" (`Network.setBlockedURLs ['*/api/*']`: `navigator.onLine` true, every API call fails), then unblocked and `dispatchEvent(new Event('online'))`.
+
+| Evidence | Value |
+| --- | --- |
+| Photo strip | `data-photo=<outbox photo row id>`, `<img src="blob:…">` |
+| Outbox | `sighting` row with `photoRow`, `photo` row blob **27,623 B** |
+| Sheet | pending, image `blob:` |
+| After unblock | flush 161 ms; DB row Europäische Gottesanbeterin `evidence: photographed, photos: 1`; file `app/data/photos/<assetId>.jpg` exists |
+| Grid | cell `own: true, src: /api/photo/<assetId>` |
+| Outbox | empty |
+
+**C8 · the restart sweep** — state planted by SQL: Kyoto `status = queued` (`createdAt` 11:07Z, older than 5 min), one Mainz-Bingen set taxon (*Acanthosoma haemorrhoidale*) `contentAt = NULL`, one user Asset `sightingId = NULL`, `createdAt = now − 25 h`, with its file. Then `next start -p 3003`.
+
+| Evidence | Value |
+| --- | --- |
+| Log | `[sweep] restarting 1 queued region(s): Kyoto (JPN.22.13_1)` → `[region JPN.22.13_1] ready: set 303 in 5.9 s` → `[sweep] 1 taxa without content` → `content 1/1: … 1/1` → `[sweep] 1 abandoned photo(s) removed` → `[sweep] done: regions 1 · content 1 (1 filled, 0 failed) · photos 1 · 9.0 s` |
+| Region | `status: ready`, `refreshedAt` 16:16:55Z |
+| Taxon | `contentAt` 16:16:58Z |
+| Asset | row count 0, file gone |
+| CLI | `npm run etl sweep` afterwards: `regions – · content 0 taxa · photos 0 · 0.1 s` |
+| Lock | with `pg_try_advisory_lock(233135852)` held by another connection: `[sweep] another process is sweeping; skipped` / `sweep: another process holds the lock` |
+
+**Search cap** — 31 `taxon.search` calls in one minute from one identity, four runs (de/en × light/dark).
+
+| Evidence | Value |
+| --- | --- |
+| Statuses | 30 × `200`, 31st `429` |
+| Screen | "Kurz warten · zu viele Suchen auf einmal." / "Wait a moment · too many searches at once.", set rows kept (`setRows: 1`), backbone section hidden |
+
+**Refused row** (shots) — a planted row with an unknown taxon id: after reload `dead: true, lastError: "unknown taxon"`, diary chip "konnte nicht gespeichert werden · erneut"; a Turmfalke row waiting next to it; 51st save → "Erst wieder ins Netz, dann speichern.", no sheet.
+
+### 📸 Shots (390 wide, `0009-shots/`)
+
+| Shot | de/en × light/dark |
+| --- | --- |
+| `b-fill-pending-*` | the sheet with "· wird gesendet" | 4 |
+| `b-journal-refused-*` | waiting chip, landed row, refused row with "· erneut" | 4 |
+| `b-save-full-*` | the save screen refusing the 51st row | 4 |
+| `b-search-capped-*` | set rows kept, the cap line | 4 |
+| `b-journal-waiting-de-light`, `b-fill-pending-photo-de-light`, `b-grid-own-photo-after-flush-de-light` | C5 and C7 states | 3 |
+
+### 🤔 Doubts
+
+| Doubt | Why it matters |
+| --- | --- |
+| **Dev server offline**: `next dev` hard-navigates on `router.replace('/?fill=')` offline → Chrome's error page. The production build works because `<Link href="/">` prefetched the static route. Track A's worker should make both moot; the merge should re-run `c5` on dev with the worker | Without the worker, offline only works in prod, and only for prefetched routes: `/log` was **not** prefetched, so C7 was taken as "one bar" instead of full offline |
+| **Study rows' `at`** is the flush time (`study.mark` stamps `now()`), the diary shows the row's `createdAt` until it lands | A study marked Saturday in the forest lands as Monday's. Would need `at` on `study.mark` (schema/`study.ts`, not done) |
+| **Search cap per process**: two servers on one DB give 60/min | Fine until there is a second server; a `Redis`/table bucket is a later question |
+| **Sweep stale rule** uses `createdAt`: a region re-requested after a failure keeps its old `createdAt`, so a server starting while another server's live job runs on it would restart that job (two region jobs in parallel; the second one's `deleteMany` + recreate of the plausibility rows is the race) | Only with two servers; the advisory lock guards the sweep, not the live job. `Region.updatedAt` would fix it, schema frozen |
+| **Overlay vs. the persisted cache** (Track A): the overlay runs on non-manual `success` of `identity.progress` and on every box change; a restore from IndexedDB may surface as a different event. `apply()` also runs at mount, so the restored data is covered if it is there by then | Re-check C5's counters after a reload with both tracks merged |
+| `Error: Internal: NoFallbackError` × 461 in the first prod log | Appeared while Chrome's error page hammered the dead port; none after the restart. Not investigated |
+| The Kyoto set was rebuilt by the C8 restart (303 taxa; plausibility rows recreated). Sightings and identities untouched | Shared dev DB, worth knowing |
+
+### 🔀 For the merge (by hand)
+
+| File | What |
+| --- | --- |
+| `app/src/i18n/de.json`, `en.json` | take both: Track A's objects and the `queue` object |
+| `app/package.json` | take both: `idb-keyval: ^6.3.0` is the same in both tracks |
+| `app/src/app/[locale]/layout.tsx` | keep `<QueueFlusher />` after `<IdentityBoot />` |
+| `app/src/components/LogSearch.tsx` | keep the `retry` option and the `capped` line |
+| `SpeciesPage.tsx` | the study button through the box (one line, see decisions) |
+| `SightingPage.tsx` | a queued id: chip and no map (see decisions); then `Journal.tsx` may link queued rows again |

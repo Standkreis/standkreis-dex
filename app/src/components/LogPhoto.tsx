@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, type ChangeEvent, type Ref } from 'react'
+import { enqueue, rowOf } from './Queue'
 
 export type Photo = { id: string; url: string }
 export type PhotoState = 'idle' | 'busy' | 'error'
@@ -43,6 +44,21 @@ export async function uploadPhoto(blob: Blob): Promise<Photo> {
 }
 
 /**
+ * The upload path with no signal (handoff 0009 Track B): online the JPEG goes up as in M6 and the Asset id rides in the
+ * URL; offline, or when the upload gets no answer, the blob goes into the outbox as a `photo` row and the row's id rides
+ * in the URL instead. The save screen tells the two apart (`queuedPhoto`) and the flush uploads the blob before the sighting.
+ */
+export async function uploadOrQueue(blob: Blob): Promise<Photo> {
+  if (navigator.onLine) {
+    try { return await uploadPhoto(blob) } catch (e) { if (!(e instanceof TypeError)) throw e } // a TypeError is fetch's "no answer"; a status is the server's
+  }
+  const row = await enqueue({ id: crypto.randomUUID(), kind: 'photo', payload: {}, blob })
+  return { id: row.id, url: URL.createObjectURL(blob) }
+}
+/** The queued blob behind a photo id from the URL, if it is an outbox row and not a server Asset. */
+export const queuedPhoto = (id: string | null) => { const r = id ? rowOf(id) : undefined; return r?.kind === 'photo' ? r : null }
+
+/**
  * The hidden file input behind every "Foto" button: `camera` opens the camera on a phone (`capture`), `gallery` the
  * picker (which on phones offers the camera too). Persistent in the DOM, so a test can set its files. The caller
  * clicks it through the ref inside the user's tap.
@@ -56,7 +72,7 @@ export function PhotoInput({ source, onPhoto, onState, testId, ref }: { source: 
     setBusy(true)
     onState?.('busy')
     try {
-      onPhoto(await uploadPhoto(await shrinkToJpeg(file)))
+      onPhoto(await uploadOrQueue(await shrinkToJpeg(file)))
       onState?.('idle')
     } catch {
       onState?.('error')

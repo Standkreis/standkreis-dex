@@ -1,8 +1,10 @@
+import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import type { InteractionKind } from '@/generated/prisma/enums'
 import { get, q, UA } from '../../../etl/fetch'
 import { gbifSpecies } from '../../../etl/gbif'
 import { isNow, nowRatio, perMille, tileOf } from '../../../etl/rules'
+import { takeSearchToken } from '../searchCap'
 import { publicProcedure, router } from '../trpc'
 
 const thisMonth = () => new Date().getMonth() + 1
@@ -142,7 +144,8 @@ export const taxonRouter = router({
    * status ACCEPTED). Each key is then read through the cached `species/{key}` for its ranks; keys that fit no tile drop.
    * Ten rows, the keys most checklists agree on first.
    */
-  search: publicProcedure.input(z.object({ q: z.string().trim().min(2).max(80), locale: z.enum(['de', 'en']) })).query(async ({ input }) => {
+  search: publicProcedure.input(z.object({ q: z.string().trim().min(2).max(80), locale: z.enum(['de', 'en']) })).query(async ({ ctx, input }) => {
+    if (!takeSearchToken(ctx.identity.id)) throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'search cap' })
     const query = input.q
     const [vern, any, sci] = await Promise.all([
       gbifSearch({ q: query, qField: 'VERNACULAR', limit: 40 }),

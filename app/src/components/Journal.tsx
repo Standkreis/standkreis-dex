@@ -7,11 +7,9 @@ import { useFormatter, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { useDayLabel } from './JournalDate'
+import { retry, useOutbox } from './Queue'
+import { mergeQueued, type JournalRow as Row, type Kind, KINDS } from './QueueRows'
 import { Thumb, useName, type DexState } from './SpeciesCard'
-
-const KINDS = ['all', 'studied', 'seen'] as const
-type Kind = (typeof KINDS)[number]
-type Row = { id: string; kind: 'sighting' | 'study'; at: Date; taxon: { id: string; gbifKey: number; sciName: string; names: Record<string, string>; tile: string; lead: string | null }; place: string | null; photo: string | null; note: string | null; wildness: 'wild' | 'captive' | 'cultivated' | null; first: boolean }
 
 /**
  * The Tagebuch (spec §🎨 8, findings 0002 §8 T1, handoff 0008 Track B): one card per day, newest first, the day's places
@@ -48,8 +46,10 @@ export function Journal({ title }: { title: string }) {
     return () => io.disconnect()
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
-  const all = days.data?.pages.flatMap((p) => p.days) ?? []
-  const nothingAtAll = days.isSuccess && kind === 'all' && all.length === 0
+  // Rows still in the outbox (handoff 0009 Track B) are merged in on the client with the grey chip; they carry no server id yet.
+  const outbox = useOutbox()
+  const all = useMemo(() => mergeQueued(days.data?.pages.flatMap((p) => p.days) ?? [], outbox, kind), [days.data, outbox, kind])
+  const nothingAtAll = (days.isSuccess || days.isError) && kind === 'all' && all.length === 0
 
   return (
     <main className="mx-auto min-h-full max-w-[520px] px-4 pt-3 pb-24">
@@ -81,7 +81,7 @@ export function Journal({ title }: { title: string }) {
             </button>
           )}
           {days.isLoading && <p className="mt-3 text-[15px] text-ink-soft">{tc('working')}</p>}
-          {days.isError && <p className="mt-3 text-[15px] text-amber">{tc('error')}</p>}
+          {days.isError && all.length === 0 && <p className="mt-3 text-[15px] text-amber">{tc('error')}</p>}
           {all.length > 0 && <p className="mt-5 text-[12px] text-ink-faint">{t('footer')}</p>}
         </>
       )}
@@ -107,9 +107,14 @@ function DayCard({ day, places, rows, stateOf }: { day: string; places: string[]
 /** One row: mini tile without badges (the image tells the state), name, one chip or none, `time · Gemeinde · gehalten · 📷 · note`. */
 export function JournalRow({ row, state }: { row: Row; state: DexState }) {
   const t = useTranslations('journal')
+  const tq = useTranslations('queue')
   const format = useFormatter()
   const name = useName()
   const chip = row.kind === 'study' ? { text: t('studiedChip'), cls: 'bg-amber-soft text-amber' } : row.first ? { text: t('newlySeen'), cls: 'bg-moss-soft text-moss-deep' } : null
+  // The queue chip (handoff 0009 Track B): grey while the row waits for the signal; amber with "erneut" when the server refused it.
+  const queued = row.queued === 'dead'
+    ? <button type="button" onClick={() => retry(row.id)} className="shrink-0 rounded-full bg-amber-soft px-2 py-0.5 text-[12px] font-semibold text-amber" data-testid="chip-queued" data-state="dead">{tq('failed')} · {tq('retry')}</button>
+    : row.queued ? <span className="shrink-0 rounded-full bg-tile px-2 py-0.5 text-[12px] font-semibold text-ink-soft" data-testid="chip-queued" data-state="waiting">{tq('waiting')}</span> : null
   const meta: React.ReactNode[] = [format.dateTime(row.at, { hour: '2-digit', minute: '2-digit' })]
   if (row.place) meta.push(row.place)
   if (row.wildness && row.wildness !== 'wild') meta.push(t(row.wildness))
@@ -122,6 +127,7 @@ export function JournalRow({ row, state }: { row: Row; state: DexState }) {
         <span className="flex min-w-0 items-center gap-2">
           <span className="truncate text-[17px] leading-tight font-semibold">{name(row.taxon)}</span>
           {chip && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] font-semibold ${chip.cls}`} data-testid="chip">{chip.text}</span>}
+          {queued}
         </span>
         <span className="mt-1 block truncate text-[14px] text-ink-soft" data-testid="meta">
           {meta.map((m, i) => <span key={i}>{i > 0 && ' · '}{m}</span>)}
@@ -131,8 +137,8 @@ export function JournalRow({ row, state }: { row: Row; state: DexState }) {
   )
   const cls = 'flex items-center gap-3 py-2.5'
   return (
-    <li className="border-b border-tile last:border-b-0" data-testid="row" data-kind={row.kind}>
-      {row.kind === 'sighting' ? <Link href={`/sighting/${row.id}`} className={cls}>{inner}</Link> : <Link href={`/species/${row.taxon.gbifKey}`} className={cls}>{inner}</Link>}
+    <li className="border-b border-tile last:border-b-0" data-testid="row" data-kind={row.kind} data-queued={row.queued}>
+      {row.kind === 'sighting' && row.queued ? <div className={cls}>{inner}</div> : row.kind === 'sighting' ? <Link href={`/sighting/${row.id}`} className={cls}>{inner}</Link> : <Link href={`/species/${row.taxon.gbifKey}`} className={cls}>{inner}</Link>}
     </li>
   )
 }

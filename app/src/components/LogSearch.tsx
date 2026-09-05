@@ -20,6 +20,7 @@ type Species = NonNullable<ReturnType<typeof useAtlasSet>['set']>['species'][num
  */
 export function LogSearch({ photoId }: { photoId: string | null }) {
   const t = useTranslations('log')
+  const tq = useTranslations('queue')
   const ts = useTranslations('species')
   const tc = useTranslations('common')
   const locale = useLocale() as 'de' | 'en'
@@ -49,7 +50,8 @@ export function LogSearch({ photoId }: { photoId: string | null }) {
     return typed ? search(set.species, q, name) : set.species.filter((s) => !seen.has(s.taxonId)).slice(0, 8)
   }, [set, typed, q, name, seen])
   const setKeys = useMemo(() => new Set(set?.species.map((s) => s.gbifKey) ?? []), [set])
-  const backbone = useQuery(trpc.taxon.search.queryOptions({ q: debounced, locale }, { enabled: debounced.length >= 3, staleTime: 5 * 60_000 }))
+  const backbone = useQuery(trpc.taxon.search.queryOptions({ q: debounced, locale }, { enabled: debounced.length >= 3, staleTime: 5 * 60_000, retry: (n, e) => e.data?.code !== 'TOO_MANY_REQUESTS' && n < 3 }))
+  const capped = backbone.isError && backbone.error.data?.code === 'TOO_MANY_REQUESTS' // the search cap (handoff 0009 Track B): the set rows stay, one line says wait
   const backboneRows = useMemo(() => (backbone.data ?? []).filter((r) => !setKeys.has(r.gbifKey)), [backbone.data, setKeys])
   const ensure = useMutation(trpc.taxon.ensure.mutationOptions())
 
@@ -109,7 +111,8 @@ export function LogSearch({ photoId }: { photoId: string | null }) {
             </section>
           )}
 
-          {typed && (searching || backboneRows.length > 0) && (
+          {capped && <p className="mt-5 text-[15px] text-ink-soft" data-testid="log-capped">{tq('searchCapped')}</p>}
+          {typed && !capped && (searching || backboneRows.length > 0) && (
             <section className="mt-5" data-testid="log-backbone">
               <h2 className="text-[13px] font-bold tracking-wide text-ink-soft uppercase">{t('backbone')}</h2>
               {backboneRows.length > 0 ? (

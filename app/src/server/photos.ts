@@ -35,6 +35,19 @@ export async function deletePhotoFilesOfIdentity(identityId: string): Promise<nu
   return assets.length
 }
 
+/**
+ * Abandoned uploads (findings 0008 A7): user Asset rows no sighting ever bound, older than `olderThanMs`, with their
+ * files. The restart sweep calls this; a photo still waiting in a phone's outbox is not on the server yet, so nothing
+ * a walker still needs can be here.
+ */
+export async function deleteAbandonedPhotos(olderThanMs = 24 * 3_600_000): Promise<number> {
+  const assets = await db.asset.findMany({ where: { origin: 'user', sightingId: null, createdAt: { lt: new Date(Date.now() - olderThanMs) } }, select: { id: true } })
+  if (!assets.length) return 0
+  await Promise.all(assets.map((a) => rm(a.id)))
+  await db.asset.deleteMany({ where: { id: { in: assets.map((a) => a.id) } } })
+  return assets.length
+}
+
 /** One asset: file and row. The sighting's evidence falls back to `claimed` when it was its last photo. */
 export async function deletePhoto(assetId: string) {
   const a = await db.asset.findUnique({ where: { id: assetId }, select: { id: true, sightingId: true } })
