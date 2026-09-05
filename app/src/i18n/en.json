@@ -8,7 +8,7 @@
     "quests": "Quests",
     "log": "Log",
     "journal": "Journal",
-    "you": "You"
+    "you": "Profile"
   },
   "common": {
     "comingSoon": "coming soon",
@@ -26,7 +26,7 @@
     "title": "Journal"
   },
   "you": {
-    "title": "You",
+    "title": "Profile",
     "settings": "Settings",
     "noName": "No name",
     "nameHint": "Only on your profile. Nobody else sees it.",
@@ -46,7 +46,7 @@
   },
   "settings": {
     "title": "Settings",
-    "back": "You",
+    "back": "Profile",
     "identity": {
       "localTitle": "Only on this phone",
       "localBody": "No account. A new phone starts from zero as long as you link nothing.",

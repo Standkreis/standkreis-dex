@@ -8,7 +8,7 @@
     "quests": "Quests",
     "log": "Eintragen",
     "journal": "Tagebuch",
-    "you": "Du"
+    "you": "Profil"
   },
   "common": {
     "comingSoon": "kommt bald",
@@ -26,7 +26,7 @@
     "title": "Tagebuch"
   },
   "you": {
-    "title": "Du",
+    "title": "Profil",
     "settings": "Einstellungen",
     "noName": "Ohne Namen",
     "nameHint": "Nur auf deinem Profil. Niemand sonst sieht ihn.",
@@ -46,7 +46,7 @@
   },
   "settings": {
     "title": "Einstellungen",
-    "back": "Du",
+    "back": "Profil",
     "identity": {
       "localTitle": "Nur auf diesem Handy",
       "localBody": "Kein Konto. Ein neues Handy fängt bei Null an, solange du nichts verknüpfst.",
