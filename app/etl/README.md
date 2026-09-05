@@ -24,3 +24,36 @@ TypeScript on `tsx`, the app's Prisma client, no other dependency. Every respons
 | `fixtures/` | `fixture-mainz-bingen.json` (929), `fixture-kyoto.json` (303): the grill's sets, the seed's input |
 
 Why the region job precedes the content job: a species enters a set first, content follows. GloBI targets outside every set get a `Taxon` row (tile from GBIF's ranks, `contentAt` null) and are never picked up by the content job unless they gain a plausibility row or a sighting (record 0002 E13).
+
+## 🚀 Filling production (handoff [0010](../../docs/handoffs/0010-deploy.md))
+
+The VM runs no ETL: it has no GBIF keys, no `.cache/`, and the laptop's cache turns a region fill into minutes. The dev Postgres of `deploy/compose.yml` publishes no host port, so the laptop reaches it through an SSH tunnel. Sightings, photos and identities never travel this way; only the set tables do.
+
+**Option 1 — the ETL over a tunnel** (the normal way, ~20 min for a region with content, less with a warm `.cache/`):
+
+```sh
+ssh -N -L 5434:localhost:5432 <user>@<vm>           # terminal 1: 5434 on the laptop → the db container's 5432
+#   compose publishes no port, so add `ports: ["127.0.0.1:5432:5432"]` to the `db` service temporarily, or tunnel into
+#   the container's network address: ssh -N -L 5434:$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' deploy-db-1):5432 <vm>
+export DATABASE_URL='postgresql://dex:<password from deploy/.env>@localhost:5434/dex'   # terminal 2, in app/
+npm run etl -- region "Mainz-Bingen"                # Region, Taxon, Plausibility, Lookalike
+npm run etl -- content                              # images, intros, facts, edges for the set
+```
+
+The region job runs in one transaction; a dropped tunnel leaves the region `failed` and the next run replaces it. `content` is one transaction per taxon and resumes where it stopped. `ETL_BUDGET` and `ETL_YEARS` are read from the laptop's environment as always.
+
+**Option 2 — copy the set tables from the dev DB** (minutes; when the laptop already holds the region):
+
+```sh
+# laptop: only the tables the ETL owns, in dependency order; never Identity, Sighting, Asset (user photos), Study, Filter
+pg_dump postgresql://dex:dex@localhost:5433/dex --data-only \
+  -t '"Region"' -t '"Taxon"' -t '"Plausibility"' -t '"Lookalike"' -t '"Asset"' > set.sql
+```
+
+`Asset` holds the reference images of the content job **and** user photos (`origin = 'user'`): dump it only into an empty production DB, or filter the user rows out first (`--data-only` with a `COPY` edit, or `DELETE FROM "Asset" WHERE origin = 'user'` on a scratch copy). Then over the tunnel:
+
+```sh
+psql 'postgresql://dex:<password>@localhost:5434/dex' -v ON_ERROR_STOP=1 -f set.sql
+```
+
+The schema must already exist: the `migrate` service of `deploy/compose.yml` ran `prisma migrate deploy` before `app` started. Afterwards `/api/health` still says `ok` and the phone's region search finds the set; the restart sweep (`instrumentation.ts`) fills any taxon whose `contentAt` is null on the next `docker compose restart app`.

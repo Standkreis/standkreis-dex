@@ -5,7 +5,9 @@ import { useTranslations } from 'next-intl'
 import { useOffline } from './OfflineBanner'
 
 const Z = 8
-const OSM = (x: number, y: number) => `https://tile.openstreetmap.org/${Z}/${x}/${y}.png`
+// Through the app's own proxy (handoff 0010, findings 0007 B3): one User-Agent, a week of cache, the worker caches it like
+// an image. The static export has no route handlers and prefixes NEXT_PUBLIC_API_URL like the photos do.
+const OSM = (x: number, y: number) => `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/tiles/${Z}/${x}/${y}`
 // GBIF's occurrence density tiles since 2016, binned to squares. `squareSize` is not pixels: 64 → 9 px, 256 → 33 px on the
 // 512 px tile, 512 and above → an empty tile (probed 2026-09-05). 256 at zoom 8 is ≈ 6 km at 50° N, ≈ 8 km at 35° N: the
 // coarsest cell GBIF draws that still keeps the county in view. The 10 km cell of spec §⚖️ is the user's own sighting (M6).

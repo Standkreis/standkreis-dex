@@ -2,7 +2,7 @@
 //   navigations        network-first, 3 s timeout; offline: the page under its own path, then (species) the "wartet
 //                      aufs Netz" page, then the shell of the same locale
 //   /_next/static/**   cache-first (hashed in a build; a new build is a new worker and a new cache)
-//   reference images   cache-first in one cache capped at 2,000 entries: the three image hosts and /api/photo/
+//   reference images   cache-first in one cache capped at 2,000 entries: the three image hosts, /api/photo/ and /api/tiles/
 // Everything else (tRPC, RSC payloads, GBIF, OSM tiles, HMR) passes through untouched. An RSC payload that fails offline
 // makes the Next router fall back to a full navigation, which the first route answers from cache.
 // Registered as /sw.js?v=<build id>, so every build is a new worker: the shell and static caches carry the version
@@ -49,7 +49,7 @@ self.addEventListener('fetch', (event) => {
   else if (own && req.headers.get('RSC') === '1' && !req.headers.get('Next-Router-Prefetch') && isPagePath(url.pathname)) event.waitUntil(rememberPage(url))
 })
 
-const isImage = (url, own) => IMAGE_HOSTS.includes(url.hostname) || (own && url.pathname.startsWith('/api/photo/'))
+const isImage = (url, own) => IMAGE_HOSTS.includes(url.hostname) || (own && (url.pathname.startsWith('/api/photo/') || url.pathname.startsWith('/api/tiles/')))
 const isPagePath = (p) => !p.startsWith('/_next/') && !p.startsWith('/api/') && !p.includes('.')
 const pageKey = (url) => `${url.origin}${url.pathname}`
 

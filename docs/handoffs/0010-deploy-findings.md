@@ -4,7 +4,7 @@
 
 | 🗓️ Date | 👤 Owner | ✅ Checks |
 | --- | --- | --- |
-| 2026-09-05 | Sven Reiser | C1–C3 pass (Track A, Docker Desktop 28.5 on the Mac, `DOMAIN=localhost`) · C4–C5 Track B · C6–C8 owner |
+| 2026-09-05 | Sven Reiser | C1–C3 pass (Track A, Docker Desktop 28.5 on the Mac, `DOMAIN=localhost`) · C4 C5 pass (Track B, production build, `next start -p 3004`, headless Chrome over CDP) · C6–C8 the owner with the phone |
 
 ## 🖥️ Track A · the box
 
@@ -77,3 +77,74 @@ Branch `m8b-box`, worktree `standkreis-dex-m8ba`. Files: `app/Dockerfile`, `app/
 - `deploy/compose.yml` app healthcheck: drop `|| wget -q --spider http://127.0.0.1:3000/de/` once `/api/health` exists; `deploy/README.md` §2 has the same "once Track B is merged" aside to delete.
 - Roadmap row M8b and `deploy/README.md` are the only docs touched besides this file; `app/etl/README.md` §🚀 (Track B) should say `ssh -L 5434:localhost:5432` and `DATABASE_URL=postgresql://dex:<POSTGRES_PASSWORD>@localhost:5434/dex`, which is what the loopback port serves.
 - On `main` after both merges: `cd app && npm run build && npm run start:standalone`, then C4/C5 against it; `docker compose -f deploy/compose.yml up -d --build` with `deploy/.env` from the example is the C2 re-run.
+
+## 🌐 Track B · the app on a real origin
+
+Branch `m8b-origin`, worktree `standkreis-dex-m8bb`. Proven against `npm run build` + `NODE_ENV=production npx next start -p 3004` (the main checkout holds 3000 and 3002), the dev DB on 5433.
+
+### 📐 Decisions
+
+| Topic | Decision | Why |
+| --- | --- | --- |
+| Where the guard fires | `src/server/env.ts` reads and validates once at import; `src/instrumentation.ts` `register()` imports it **first**, before the sweep | Nothing on the start path imported `webauthn.ts`: the tRPC handler loads lazily on the first request, so a guard there would have let the server come up and only fail the first call. Instrumentation is the one hook Next runs at start |
+| How it fails | `console.error` naming every missing or invalid variable, then `process.exit(1)` | An error thrown inside `register()` is logged by Next and the server keeps serving; exit is the only way to meet "exits within a second" |
+| The build phase | Lenient when `NEXT_PHASE === 'phase-production-build'` | `next build` runs with `NODE_ENV=production`; the Dockerfile builds without a `.env`, `npm run check` builds the export on laptops and CI. The guard means the *server*, not the compiler |
+| Secret length | `WEBAUTHN_SECRET` ≥ 32 characters in production | `openssl rand -hex 32` gives 64; a ten-character secret is refused with the same message ("at least 32 characters: openssl rand -hex 32") |
+| `WEBAUTHN_ORIGIN` in dev | Optional, empty means "trust the request's localhost origin" (unchanged behaviour) | `next dev -p 3001` and 3002 keep working without a `.env` |
+| Cookie `Secure` | `x-forwarded-proto` (first value) decides; without the header, the request URL's scheme | Behind Caddy the request is plain http; on dev localhost a `Secure` cookie would never come back. Both `dex_id` and the challenge cookie go through the one `setCookie`, so both get the flag |
+| 400 days | `IDENTITY_COOKIE_MAX_AGE = 34_560_000` exported from `trpc.ts`, used by the mint and the passkey adoption | Was the literal twice; the cap browsers enforce |
+| `sweepAt` | `instrumentation.ts` stamps `globalThis.dexSweepAt` when the sweep resolves; `/api/health` reads it (`null` until then) | The route handler is its own bundle, a module variable in `instrumentation.ts` would not be shared. `sweep.ts` is not Track B's file, so the stamp stays in the hook that already had to change |
+| Health on a dead DB | `{ ok: false, error }` with **503** and `cache-control: no-store` | Compose's healthcheck and an uptime monitor key on the status |
+| Tile validation | `z` 0–19, `x` `y` digits only and `< 2^z`; else 400. Upstream not ok or unreachable (10 s timeout) → 502 | Bounded proxy; a bad URL never reaches OSM |
+| User-Agent | `standkreis-dex/<build id> (+<first WEBAUTHN_ORIGIN>)`, `https://standkreis.example` when unset | OSM asks for an identifying UA with a contact; the origin is the contact once the domain exists |
+| Tile URL on the client | `${NEXT_PUBLIC_API_URL ?? ''}/api/tiles/8/x/y` | Same rule as the photos: the static export has no route handlers |
+| Worker rule | `/api/tiles/` on the own origin joins `/api/photo/` in `isImage` → cache-first in `dex-images` | The image path already handles same-origin (`fetch(req)`, `res.ok` → put) |
+| `.env.example` | `app/.env.example`, plus `!.env.example` in `app/.gitignore` | `.env*` was ignored wholesale; without the exception the file would never have been committed |
+
+### 🧪 Checks
+
+| # | What | Evidence | Pass |
+| --- | --- | --- | --- |
+| C4a | `NODE_ENV=production npx next start -p 3005` with every variable but `WEBAUTHN_SECRET` | Log: `[env] refusing to start, the environment is incomplete:` / `WEBAUTHN_SECRET: not set` / `See app/.env.example.`; process gone and no listener on 3005 after 4 s (Next's "Ready in 60ms" banner prints before instrumentation runs). A 10-character secret: same, "at least 32 characters: openssl rand -hex 32" | ✅ |
+| C4b | All five set, `next start -p 3004` | `GET /api/health` → `200`, `cache-control: no-store`, `{"ok":true,"buildId":"mtovgmy8","sweepAt":null}`; 4 s later `"sweepAt":"2026-09-05T21:05:53.558Z"` after `[sweep] done: regions 0 · content 0 · photos 0 · 0.2 s` | ✅ |
+| C5a | `curl -H 'x-forwarded-proto: https' /api/trpc/identity.me` | `set-cookie: dex_id=5bbd009f-…; Path=/; Max-Age=34560000; HttpOnly; SameSite=Lax; Secure` | ✅ |
+| C5b | The same without the header (dev) | `…; HttpOnly; SameSite=Lax` — no `Secure`, so localhost keeps its cookie | ✅ |
+| C5c | `GET /api/tiles/8/134/86` | `200`, `content-type: image/png`, `cache-control: public, max-age=604800`, 52,135 bytes, `file`: PNG 256 × 256. `20/1/1`, `8/999/1`, `8/a/1`, `8/-1/1` → 400 | ✅ |
+| C5d | Worker caches tiles offline: headless Chrome over CDP attached at the browser level (the `offline.mjs` approach), dev identity with Mainz-Bingen, `/de` until the worker controls, then `/de/species/2490719` (Feuersalamander) | Online: map with 9 `/api/tiles/8/…` images decoded, **9 tile entries in `dex-images`**, 9 tile requests seen from the worker session. Offline: `fetch('/api/tiles/8/134/86')` → `200 image/png`, cache header intact, 52,125 bytes, from the worker; an uncached tile (`8/1/1`) throws as it should. Species page reloaded offline: map present, `map-waits` absent, 9 / 9 tiles decoded | ✅ |
+| — | `npm run check` | typecheck, lint (one pre-existing warning in `scripts/m8b/queue.mjs`), 30 tests, export build `sw-manifest mtovk0m3: 19 files, 919 KB` | ✅ |
+
+### 📁 Files touched
+
+| File | What |
+| --- | --- |
+| `app/src/server/env.ts` | new: zod schemas strict / lenient, `isProduction`, `env` |
+| `app/src/server/webauthn.ts` | `rpID`, `expectedOrigin`, `secret` from `env`; the warn line gone |
+| `app/src/server/trpc.ts` | `isHttps`, `IDENTITY_COOKIE_MAX_AGE`, `Secure` on `setCookie` |
+| `app/src/server/routers/identity.ts` | the adoption cookie uses the constant (one line, plus its import) — not on the list, the literal lived there |
+| `app/src/instrumentation.ts` | imports `env` first; stamps `globalThis.dexSweepAt` — not on the list, see decisions |
+| `app/src/app/api/health/route.ts` | new |
+| `app/src/app/api/tiles/[z]/[x]/[y]/route.ts` | new |
+| `app/src/components/SpeciesMap.tsx` | the `OSM` URL only |
+| `app/public/sw.js` | `isImage` and the header comment |
+| `app/.env.example` | new; `app/.gitignore` gained `!.env.example` |
+| `app/etl/README.md` | §🚀 Filling production |
+
+`identity.ts` under `src/server/` does not exist; the cookie is minted in `trpc.ts` and re-set in `routers/identity.ts` and `routers/data.ts` (the delete clears it with `maxAge: 0`, untouched: it goes through the same `setCookie`, so it carries `Secure` too).
+
+### ❓ Doubts
+
+| # | Doubt | Proposal |
+| --- | --- | --- |
+| B1 | `db.ts` (`DATABASE_URL`) and `photos.ts` (`PHOTO_DIR`) still read `process.env` with dev fallbacks; `env.ts` validates both are set in production but they are not read through it | Both files are outside Track B's list. One line each (`env.DATABASE_URL`, `env.PHOTO_DIR`) at the merge, or leave: the guard already refuses a server without them |
+| B2 | `SpeciesMap.tsx` line 33 still says "tiles are never cached"; now they are, and the `map-waits` line only shows for a species never opened online | Fix the comment at the merge (the file's limit was the URL) |
+| B3 | The tile proxy has no rate limit: a stranger could pull OSM through the app's origin | Nine tiles per region at one zoom; Caddy could add a `rate_limit` later. Not before there is a second user |
+| B4 | `process.exit(1)` in a module that tests could import: vitest never sets `NODE_ENV=production`, the branch throws instead | Fine; noted so nobody imports `env.ts` into a production-mode script expecting an exception |
+| B5 | The OSM `content-type` is passed through; a captive portal answering `text/html` with 200 would be cached for a week by the browser | Could pin `image/png` and reject others; left as is, the phone talks to the VM, not to OSM |
+| B6 | The tunnel in `etl/README.md` §🚀 assumes the `db` service publishes nothing (as the handoff says); the two ways around it are written down but untested without a VM | Owner: pick one at C7, correct the section |
+
+### 🔀 For the merge
+
+- Track A's `deploy/.env.example` should list the same five names as `app/.env.example` (`DATABASE_URL`, `WEBAUTHN_RP_ID`, `WEBAUTHN_ORIGIN`, `WEBAUTHN_SECRET`, `PHOTO_DIR`); production values: `WEBAUTHN_RP_ID=standkreis.<tld>`, `WEBAUTHN_ORIGIN=https://standkreis.<tld>`, `WEBAUTHN_SECRET` from `openssl rand -hex 32` (≥ 32 chars), `PHOTO_DIR=/data/photos`.
+- The Compose healthcheck may read `/api/health` (200 `ok`, 503 when the DB is gone). The image's `next build` needs **no** env: the guard skips the build phase.
+- `instrumentation.ts` and `routers/identity.ts` are touched beyond the list (two lines and one line); nothing of Track A's.
+- After merging: `npm run check`, then B1 and B2 above if wanted.

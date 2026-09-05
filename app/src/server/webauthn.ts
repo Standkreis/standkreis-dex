@@ -1,15 +1,17 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
+import { env } from './env'
 import type { Context } from './trpc'
 
 // ── Relying party ─────────────────────────────────────────────────────────────
-// Passkeys are bound to a domain (handoff 0006 §❓). Dev is `localhost` on any port; production reads both from env.
-// WEBAUTHN_RP_ID   the bare domain, e.g. dex.example.org
-// WEBAUTHN_ORIGIN  the full origin(s), comma-separated, e.g. https://dex.example.org
+// Passkeys are bound to a domain (handoff 0006 §❓). Dev is `localhost` on any port; production reads both from env
+// (server/env.ts, required there; handoff 0010: the RP id is the apex domain for good).
+// WEBAUTHN_RP_ID   the bare domain, e.g. standkreis.example
+// WEBAUTHN_ORIGIN  the full origin(s), comma-separated, e.g. https://standkreis.example
 export const rpName = 'Dex'
-export const rpID = process.env.WEBAUTHN_RP_ID ?? 'localhost'
+export const rpID = env.WEBAUTHN_RP_ID
 
 export function expectedOrigin(ctx: Pick<Context, 'origin'>): string | string[] {
-  const configured = process.env.WEBAUTHN_ORIGIN?.split(',').map((s) => s.trim()).filter(Boolean)
+  const configured = env.WEBAUTHN_ORIGIN?.split(',').map((s) => s.trim()).filter(Boolean)
   if (configured?.length) return configured
   // Dev: trust the request's own origin as long as it is localhost, so `next dev -p 3001` and 3002 both work.
   if (ctx.origin && /^https?:\/\/localhost(:\d+)?$/.test(ctx.origin)) return ctx.origin
@@ -19,8 +21,8 @@ export function expectedOrigin(ctx: Pick<Context, 'origin'>): string | string[] 
 // ── Signed tokens ─────────────────────────────────────────────────────────────
 // The challenge is not a table (handoff 0006: step 0's migration is final). It travels in a short-lived signed cookie.
 // The same signing serves the delete token. Payload is base64url JSON, signature is HMAC-SHA256 over it.
-const secret = process.env.WEBAUTHN_SECRET ?? 'dev-only-secret-set-WEBAUTHN_SECRET-in-production'
-if (process.env.NODE_ENV === 'production' && !process.env.WEBAUTHN_SECRET) console.warn('WEBAUTHN_SECRET is not set; tokens are signed with the dev secret')
+// env.ts refuses to start a production server without WEBAUTHN_SECRET; the dev secret exists only outside production.
+const secret = env.WEBAUTHN_SECRET
 
 const b64 = (s: string) => Buffer.from(s, 'utf8').toString('base64url')
 const unb64 = (s: string) => Buffer.from(s, 'base64url').toString('utf8')

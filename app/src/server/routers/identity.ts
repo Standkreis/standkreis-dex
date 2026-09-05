@@ -8,7 +8,7 @@ import {
 import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simplewebauthn/server'
 import { z } from 'zod'
 import { Tile } from '@/generated/prisma/enums'
-import { IDENTITY_COOKIE, publicProcedure, router, type Context } from '../trpc'
+import { IDENTITY_COOKIE, IDENTITY_COOKIE_MAX_AGE, publicProcedure, router, type Context } from '../trpc'
 import { expectedOrigin, issueChallenge, rpID, rpName, takeChallenge } from '../webauthn'
 
 // The WebAuthn response shapes come from the browser library; zod only checks the envelope, simplewebauthn checks the rest.
@@ -182,7 +182,7 @@ export const identityRouter = router({
 
     if (passkey.identityId === ctx.identity.id) return { id: ctx.identity.id, adopted: false as const }
     const merged = await mergeIdentities(ctx.db, ctx.identity.id, passkey.identityId)
-    ctx.setCookie(IDENTITY_COOKIE, passkey.identityId, { maxAge: 34_560_000 })
+    ctx.setCookie(IDENTITY_COOKIE, passkey.identityId, { maxAge: IDENTITY_COOKIE_MAX_AGE })
     return { id: passkey.identityId, adopted: true as const, merged }
   }),
 
