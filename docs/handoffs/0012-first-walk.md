@@ -82,6 +82,7 @@ One row per moment, written on the phone or right after. No fixes, no ideas, onl
 
 | ⏱️ When | 📍 Where in the app | 😐 What happened | 🎯 What I expected | 🔥 Severity |
 | --- | --- | --- | --- | --- |
+| before the walk, 2026-09-06 | species page, Steckbrief | Status and maybe Alter/Nachwuchs, one "noch keine Angaben" line, no Größe, Lebensraum, Zug, Stimme, no prose beyond the Wikipedia intro | Something to learn from: the spike's Steckbrief, a voice, two paragraphs that read like a naturalist wrote them | 🟠 → **M9b 📇 Steckbrief** in the roadmap; the walk says whether it is 🔴 on the path or on the sofa |
 | | | | | 🔴 stopped me · 🟠 annoyed me · 🟡 noticed |
 
 Also, in one line each: what surprised you positively; what you looked for and did not find; whether the set felt right.
@@ -91,7 +92,7 @@ Also, in one line each: what surprised you positively; what you looked for and d
 | Do | Output |
 | --- | --- |
 | Read the friction log, reproduce every 🔴 and 🟠 on the production build or the Simulator | `0012-first-walk-findings.md`: the spec's nine acceptance boxes ticked or not with the walk as evidence, the friction log with a reproduction per row |
-| Sort: bug in what exists (→ a fix list) · missing thing the spec already names (→ handoff 0013) · new idea (→ M10 grill input, no code) | Three lists, each row named by a GLOSSARY word |
+| Sort: bug in what exists (→ a fix list) · missing thing the spec already names (→ handoff 0013) · Steckbrief depth (→ the M9b grill) · new idea (→ M10 grill input, no code) | Four lists, each row named by a GLOSSARY word |
 | Roadmap | M9 ✅ only if the next-morning answer is yes; otherwise M9 stays open with the fix list as M9.1 and the walk is repeated |
 
 Question for the triage to keep asking: is this friction, or is this the product being honest (an empty source, a species with no image)? The spec allows the second.
