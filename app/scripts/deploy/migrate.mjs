@@ -33,7 +33,7 @@ for (let attempt = 1; ; attempt++) {
 // Prisma wait. Production builds on Vercel do not overlap.
 async function clearStaleLock(client) {
   const { rows } = await client.query(
-    `select l.pid, a.state, a.application_name, now() - a.state_change as idle_for
+    `select l.pid, a.state, a.application_name, (now() - a.state_change)::text as idle_for
        from pg_locks l join pg_stat_activity a on a.pid = l.pid
       where l.locktype = 'advisory' and l.objid = 72707369 and l.pid <> pg_backend_pid()`,
   )
