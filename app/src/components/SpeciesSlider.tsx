@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import type { Tile } from '@/generated/prisma/enums'
 import { useRouter } from '@/i18n/navigation'
 import { OnboardingSilhouette } from './OnboardingSilhouette'
-import { SourceInfo, SourceSheet, useImageSource, useOriginName } from './SourceInfo'
+import { SourceInfo, SourceSheet, useImageSource } from './SourceInfo'
 import { speciesOrigin } from './SpeciesOrigin'
 
 export type Asset = { id: string; kind: string; url: string; author: string; licence: string; licenceUrl: string | null; sourceUrl: string; origin: string; caption: string | null }
@@ -13,14 +13,13 @@ export type Asset = { id: string; kind: string; url: string; author: string; lic
 const LONG_PRESS_MS = 500
 
 /**
- * The image slider of spec §🎨 3 with attribution per view (spec §⚖️): one caption under the image at readable size,
- * author · licence · source on long-press, on the ⓘ over the image (handoff 0014 D3) or on a tap on the caption: all the same sheet.
+ * The image slider of spec §🎨 3 with attribution per view (spec §⚖️): the ⓘ over the image (handoff 0014 D3) and a
+ * long-press open the same sheet with author · licence · source. The caption line under the image went with 0014.
  * Scroll-snap, no library; the dots follow the scroll offset.
  */
 export function SpeciesSlider({ assets, tile }: { assets: Asset[]; tile: string }) {
   const t = useTranslations('species')
   const router = useRouter()
-  const origin = useOriginName()
   const imageSource = useImageSource()
   const [index, setIndex] = useState(0)
   const [sheet, setSheet] = useState<Asset | null>(null)
@@ -69,11 +68,7 @@ export function SpeciesSlider({ assets, tile }: { assets: Asset[]; tile: string 
           </div>
         )}
       </div>
-      {current && (
-        <button type="button" onClick={() => setSheet(current)} className="mt-2 block w-full truncate px-4 text-left text-[13px] text-ink-faint" data-testid="caption">
-          {current.origin === 'user' ? t('origin.user') : t('caption', { author: current.author, licence: current.licence, origin: origin(current.origin) })}
-        </button>
-      )}
+      {/* No caption line under the image since 0014: the ⓘ over the image is the attribution per view (spec §⚖️), owner's call. */}
       {sheet && (
         <SourceSheet title={t('attribution.title')} sources={[imageSource(sheet)]} onClose={() => setSheet(null)}>
           <p className="mt-4 text-[12px] text-ink-faint">{t('attribution.hint')}</p>

@@ -284,7 +284,6 @@
     "notFound": "We do not know this species yet.",
     "toAtlas": "To the Atlas",
     "noImage": "No image yet",
-    "caption": "Photo: {author} · {licence} · {origin}",
     "origin": {
       "inat": "iNaturalist",
       "commons": "Wikimedia Commons",
