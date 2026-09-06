@@ -1,6 +1,6 @@
 # ▲ Deploy — the live stack
 
-> How the app runs in production as of 2026-09-06. Decisions and the open work: [handoff 0011](handoffs/0011-vercel.md). The one-VM deploy of [handoff 0010](handoffs/0010-deploy.md) was removed, see §🗑️.
+> How the app runs in production as of 2026-09-06. Decisions: [handoff 0011](handoffs/0011-vercel.md) and its findings. The one-VM deploy of [handoff 0010](handoffs/0010-deploy.md) was removed, see §🗑️.
 
 | 🗓️ Updated | 👤 Owner | 🌐 Live | 🔁 Fallback |
 | --- | --- | --- | --- |
@@ -12,7 +12,7 @@
 | --- | --- | --- | --- |
 | App | **Vercel** (team "Standkreis", Pro), project `standkreis-dex` | functions in `fra1`, Node.js 24 | root directory `app`; build command `npx prisma migrate deploy && npm run build` |
 | Database | **Neon Postgres** (Free), store `standkreis-atlas` | Frankfurt `eu-central-1` | via the Vercel marketplace; connected to Production and Preview only, so local dev keeps the Docker Postgres on `:5433` |
-| Photos | **Vercel Blob**, private store `standkreis-dex-blob` | `iad1` | connected to all three environments; the Blob-backed photo store is **not built yet** ([0011 Track A](handoffs/0011-vercel.md)) |
+| Photos | **Vercel Blob**, private store `standkreis-dex-blob` | `iad1` | connected to all three environments; user photos live at `photos/<assetId>.jpg`, streamed by `/api/photo/<id>` (0011 Track A) |
 | Mail | **Resend** (EU region) | — | for M7b; the domain is not yet added at Resend |
 | DNS | united-domains | — | `atlas` CNAME → Vercel; the apex `standkreis.de` is reserved for a later landing page |
 
@@ -27,7 +27,7 @@ No values here. Set in Vercel → Settings → Environment Variables unless the 
 | `DATABASE_URL` | Neon integration (prefix `DATABASE_`), Prod + Preview | The app's pooled connection | yes |
 | `DATABASE_URL_UNPOOLED` | Neon integration, Prod + Preview | The ETL from the Mac (§🗄️); unused by the app | yes |
 | `DATABASE_*` (the rest) | Neon integration | Host, user, password pieces the integration adds; unused | yes |
-| `BLOB_READ_WRITE_TOKEN` | Blob integration, all environments; also `app/.env.local` on the Mac (git-ignored) | Photo store, once 0011 Track A lands | yes |
+| `BLOB_READ_WRITE_TOKEN` | Blob integration, all environments; also `app/.env.local` on the Mac (git-ignored) | Photo store: set → Blob, unset → disk under `PHOTO_DIR` | yes |
 | `WEBAUTHN_RP_ID` | project, value `standkreis.de` | Passkey relying-party id: the **apex**, so passkeys survive a subdomain move | no |
 | `WEBAUTHN_ORIGIN` | project, value `https://atlas.standkreis.de` | The origin passkeys are minted for | no |
 | `WEBAUTHN_SECRET` | project | HMAC key for challenge cookies and delete tokens, 64 hex | yes |
@@ -83,11 +83,11 @@ First fill on 2026-09-06: the region job took 111 s (1,617 GBIF requests), set o
 
 ## 🚧 Not done yet
 
-Everything below is [handoff 0011](handoffs/0011-vercel.md).
+[Handoff 0011](handoffs/0011-vercel.md) is closed ([findings](handoffs/0011-vercel-findings.md)); the table keeps what it settled.
 
 | Gap | Today | Track |
 | --- | --- | --- |
-| Photos persist | `/tmp`, gone on the next invocation | A: Blob behind the `photos.ts` seam |
+| Photos persist | ✅ private Blob behind the `photos.ts` seam, streamed with an immutable cache header (0011 A, C1–C3); owner's C6 on the phone | A, done |
 | Region job, content kick outlive the response | ✅ `waitUntil` via `server/jobs.ts`, `maxDuration = 300` on the tRPC route (0011 B, C4); proven on Vercel itself by the owner's C6 | B, done |
 | Restart sweep | ✅ hourly `GET /api/cron/sweep` with `CRON_SECRET`, `register()` skips the sweep on Vercel (0011 B, C5) | B, done |
 | Resend domain, magic link | not added | M7b |
