@@ -234,9 +234,9 @@
   },
   "onboarding": {
     "eyebrow": "Standkreis Atlas",
-    "headline": "Alles, was vor deiner Haustür lebt.",
-    "promise": "Lern es kennen. Find es draußen. Ohne Konto, ohne Rangliste.",
-    "question": "Wo gehst du spazieren?",
+    "headline": "Kennst du die Natur vor deiner Tür?",
+    "promise": "Der Atlas zeigt dir, was es zu entdecken und zu erforschen gibt.",
+    "question": "Verfügbare Regionen",
     "useLocation": "Meinen Standort nutzen",
     "locationHint": "Dein Handy fragt gleich nach der Erlaubnis. Wir speichern nur den Landkreis; genaue Orte bleiben auf deinem Gerät.",
     "typePlace": "Ort eingeben",
@@ -270,7 +270,8 @@
     "promisesGo": "Bin dabei",
     "notAvailable": "Noch nicht verfügbar",
     "notAvailableHere": "{name} ist noch nicht verfügbar. Gib einen anderen Ort ein.",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "comingSoon": "bald"
   },
   "species": {
     "back": "Zurück",

@@ -26,6 +26,10 @@ const SPLASH = { src: '/splash.jpg', srcSet: '/splash-720.jpg 720w, /splash.jpg 
 // The place search (handoff 0013 O6) is off the screen while one region exists; the second region brings it back.
 // The code and its server side stay (findings 0012 F1).
 const SEARCH_MIN_REGIONS = 2
+// Owner, 2026-09-06 (walk feedback): the location button only makes sense once the atlas has scaled; off until then.
+const LOCATE = false
+// Regions announced but not filled: shown disabled, so the list does not look like a single forced choice.
+const COMING_SOON = ['Zweibrücken']
 
 const allTiles = Object.values(Tile) as Tile[]
 // The tiles screen's order: the big groups first, as findings 0006 C2 lists them, fish last.
@@ -84,10 +88,12 @@ function RegionScreen({ change, onChosen }: { change: boolean; onChosen: (r: Reg
   const [locating, setLocating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   useEffect(() => { const h = setTimeout(() => setDebounced(query.trim()), 300); return () => clearTimeout(h) }, [query])
+  const [picked, setPicked] = useState<string | null>(null)
 
   // O6: what exists is offered. The ready regions as buttons; the search only once there are two of them.
   const regions = useQuery(trpc.dex.regions.queryOptions())
   const ready = (regions.data ?? []).filter((r) => r.status === 'ready')
+  const selected = ready.find((r) => r.id === picked) ?? ready[0] // the first ready region is pre-selected
   const search = ready.length >= SEARCH_MIN_REGIONS
 
   // No retry (handoff 0012 F1): three retries with backoff kept "Einen Moment" up for seven seconds and the error never
@@ -136,18 +142,36 @@ function RegionScreen({ change, onChosen }: { change: boolean; onChosen: (r: Reg
 
         {mode === 'locate' ? (
           <>
-            <ul className="mt-3 flex flex-col gap-2" data-testid="regions">
-              {ready.map((r) => (
-                <li key={r.id}>
-                  <button type="button" disabled={busy} data-region={r.id} onClick={() => onChosen({ id: r.id, name: r.name, status: r.status })} className="h-14 w-full truncate rounded-2xl bg-white px-4 text-left text-[18px] font-bold text-night disabled:opacity-60">
-                    {r.name}
-                  </button>
+            <ul role="radiogroup" className="mt-3 flex flex-col gap-2" data-testid="regions">
+              {ready.map((r) => {
+                const on = selected?.id === r.id
+                return (
+                  <li key={r.id}>
+                    <button type="button" role="radio" aria-checked={on} disabled={busy} data-region={r.id} onClick={() => setPicked(r.id)} className={`flex h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-[18px] font-bold disabled:opacity-60 ${on ? 'bg-white text-night' : 'bg-white/10 text-white'}`}>
+                      <span aria-hidden className={`grid size-6 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-moss' : 'border-white/50'}`}>{on && <span className="size-3 rounded-full bg-moss" />}</span>
+                      <span className="truncate">{r.name}</span>
+                    </button>
+                  </li>
+                )
+              })}
+              {COMING_SOON.map((name) => (
+                <li key={name}>
+                  <div role="radio" aria-checked={false} aria-disabled data-coming-soon className="flex h-14 w-full items-center gap-3 rounded-2xl bg-white/5 px-4 text-left text-[18px] font-bold text-white/45">
+                    <span aria-hidden className="size-6 shrink-0 rounded-full border-2 border-white/25" />
+                    <span className="truncate">{name}</span>
+                    <span className="ml-auto shrink-0 text-[13px] font-semibold tracking-wide text-white/45 uppercase">{t('comingSoon')}</span>
+                  </div>
                 </li>
               ))}
             </ul>
-            <button type="button" onClick={locate} disabled={busy} data-testid="locate" className={`${ready.length ? 'mt-2' : 'mt-3'} h-14 w-full rounded-2xl bg-moss text-[18px] font-bold text-white disabled:opacity-60`}>
-              {busy ? t('working') : t('useLocation')}
+            <button type="button" disabled={busy || !selected} data-testid="region-next" onClick={() => selected && onChosen({ id: selected.id, name: selected.name, status: selected.status })} className="mt-3 h-14 w-full rounded-2xl bg-moss text-[18px] font-bold text-white disabled:opacity-60">
+              {t('next')}
             </button>
+            {LOCATE && (
+              <button type="button" onClick={locate} disabled={busy} data-testid="locate" className="mt-2 h-14 w-full rounded-2xl border border-white/40 text-[18px] font-bold text-white disabled:opacity-60">
+                {busy ? t('working') : t('useLocation')}
+              </button>
+            )}
             {search && (
               <button type="button" onClick={() => setMode('search')} className="mt-4 h-13 w-full rounded-2xl border border-white/40 py-3.5 text-[17px] font-semibold text-white">
                 {t('typePlace')}

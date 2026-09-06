@@ -234,9 +234,9 @@
   },
   "onboarding": {
     "eyebrow": "Standkreis Atlas",
-    "headline": "Everything that lives outside your door.",
-    "promise": "Get to know it. Find it outdoors. No account, no leaderboard.",
-    "question": "Where do you go for a walk?",
+    "headline": "Do you know the nature outside your door?",
+    "promise": "The atlas shows you what there is to discover and explore.",
+    "question": "Available regions",
     "useLocation": "Use my location",
     "locationHint": "Your phone will ask for permission in a moment. We store only the district; exact places stay on your device.",
     "typePlace": "Type a place",
@@ -270,7 +270,8 @@
     "promisesGo": "I'm in",
     "notAvailable": "Not available yet",
     "notAvailableHere": "{name} is not available yet. Type another place.",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "comingSoon": "soon"
   },
   "species": {
     "back": "Back",
