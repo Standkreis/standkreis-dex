@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "next-env.d.ts",
     "src/generated/**",
+    // The BioCLIP probe's Python venv (handoff 0015b) ships JS inside torch.
+    "scripts/id-probe/bioclip/.venv/**",
   ]),
 ]);
 
