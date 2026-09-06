@@ -247,7 +247,7 @@ function TilesScreen({ of, region, tiles, setTiles, onNext }: { of: number; regi
               {/* The grid's cell language (spec §🎨 2), theme-stable over the splash: on = white card, the photo in colour, the moss check on it;
                   off = glass, greyscale at 45 %, no check. Stacked so the German group names never truncate at 360 px. */}
               <button type="button" role="checkbox" aria-checked={on} onClick={() => toggle(x)} data-tile={x}
-                className={`flex h-[108px] w-full flex-col rounded-2xl p-3 text-left ${on ? 'bg-white text-night ring-2 ring-moss ring-inset' : 'bg-white/10 text-white/60'}`}>
+                className={`flex h-[108px] w-full flex-col rounded-2xl p-3 text-left ${on ? 'bg-white text-night' : 'bg-white/10 text-white/60'}`}>
                 <span className="relative h-11 w-11 shrink-0">
                   <span className={`flex h-full w-full items-center justify-center overflow-hidden rounded-full ${on ? 'bg-tile' : 'bg-white/10'}`}>
                     {thumb ? (
