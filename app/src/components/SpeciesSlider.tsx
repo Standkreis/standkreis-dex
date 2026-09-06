@@ -2,7 +2,10 @@
 
 import { useRef, useState, type PointerEvent } from 'react'
 import { useTranslations } from 'next-intl'
+import type { Tile } from '@/generated/prisma/enums'
 import { useRouter } from '@/i18n/navigation'
+import { OnboardingSilhouette } from './OnboardingSilhouette'
+import { speciesOrigin } from './SpeciesOrigin'
 
 export type Asset = { id: string; kind: string; url: string; author: string; licence: string; licenceUrl: string | null; sourceUrl: string; origin: string; caption: string | null }
 
@@ -13,7 +16,7 @@ const LONG_PRESS_MS = 500
  * author · licence · source on long-press (or a tap on the caption, which is the same sheet without the trick).
  * Scroll-snap, no library; the dots follow the scroll offset.
  */
-export function SpeciesSlider({ assets, tileIcon }: { assets: Asset[]; tileIcon: string }) {
+export function SpeciesSlider({ assets, tile }: { assets: Asset[]; tile: string }) {
   const t = useTranslations('species')
   const tc = useTranslations('common')
   const router = useRouter()
@@ -32,7 +35,9 @@ export function SpeciesSlider({ assets, tileIcon }: { assets: Asset[]; tileIcon:
   const move = (e: PointerEvent) => { if (start.current && Math.hypot(e.clientX - start.current.x, e.clientY - start.current.y) > 10) cancel() }
 
   const origin = (o: string) => (o === 'inat' || o === 'commons' || o === 'user' ? t(`origin.${o}`) : t('origin.other'))
-  const back = () => { if (window.history.length > 1) router.back(); else router.push('/') }
+  // P4 (handoff 0014): not history.back(). Back goes to where the chain of species pages started, the atlas or the diary
+  // (SpeciesOrigin), so a lookalike → lookalike hop never traps the reader between two pages.
+  const back = () => router.push(speciesOrigin())
 
   return (
     <>
@@ -49,7 +54,7 @@ export function SpeciesSlider({ assets, tileIcon }: { assets: Asset[]; tileIcon:
           </div>
         ) : (
           <div className="flex aspect-[4/3] flex-col items-center justify-center gap-2 bg-tile text-ink-faint">
-            <span className="text-[56px] opacity-50" aria-hidden>{tileIcon}</span>
+            <OnboardingSilhouette tile={tile as Tile} className="h-16 w-16 opacity-50" />
             <span className="text-[13px]">{t('noImage')}</span>
           </div>
         )}

@@ -148,7 +148,7 @@ function RegionScreen({ change, onChosen }: { change: boolean; onChosen: (r: Reg
                 return (
                   <li key={r.id}>
                     <button type="button" role="radio" aria-checked={on} disabled={busy} data-region={r.id} onClick={() => setPicked(r.id)} className={`flex h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-[18px] font-bold disabled:opacity-60 ${on ? 'bg-white text-night' : 'bg-white/10 text-white'}`}>
-                      <span aria-hidden className={`grid size-6 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-moss' : 'border-white/50'}`}>{on && <span className="size-3 rounded-full bg-moss" />}</span>
+                      <span aria-hidden className={`grid size-6 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-sky' : 'border-white/50'}`}>{on && <span className="size-3 rounded-full bg-sky" />}</span>
                       <span className="truncate">{r.name}</span>
                     </button>
                   </li>
@@ -244,8 +244,8 @@ function TilesScreen({ of, region, tiles, setTiles, onNext }: { of: number; regi
           const thumb = thumbs.get(x)
           return (
             <li key={x}>
-              {/* The grid's cell language (spec §🎨 2), theme-stable over the splash: on = white card, the photo in colour, the moss check on it;
-                  off = glass, greyscale at 45 %, no check. Stacked so the German group names never truncate at 360 px. */}
+              {/* The grid's cell language (spec §🎨 2), theme-stable over the splash: on = white card, the photo in colour, a check on it in
+                  sky (handoff 0014 G5: selection is blue, moss means "entdeckt"); off = glass, greyscale at 45 %, no check. Stacked so the German group names never truncate at 360 px. */}
               <button type="button" role="checkbox" aria-checked={on} onClick={() => toggle(x)} data-tile={x}
                 className={`flex h-[108px] w-full flex-col rounded-2xl p-3 text-left ${on ? 'bg-white text-night' : 'bg-white/10 text-white/60'}`}>
                 <span className="relative h-11 w-11 shrink-0">
@@ -257,7 +257,7 @@ function TilesScreen({ of, region, tiles, setTiles, onNext }: { of: number; regi
                       <OnboardingSilhouette tile={x} className={`h-7 w-7 ${on ? 'text-ink-soft' : 'text-white/40'}`} />
                     )}
                   </span>
-                  {on && <span className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-moss text-[12px] font-bold text-white ring-2 ring-white" aria-hidden>✓</span>}
+                  {on && <span className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-sky text-[12px] font-bold text-white ring-2 ring-white" aria-hidden>✓</span>}
                 </span>
                 <span className="mt-auto block w-full truncate text-[15px] leading-tight font-bold">{tt(x)}</span>
                 <span className={`mt-0.5 block text-[13px] leading-tight ${on ? 'text-ink-soft' : ''}`}>{n === undefined ? (ready ? '' : t('countsPending')) : t('speciesHere', { n })}</span>
@@ -298,14 +298,15 @@ function ReadyScreen({ of, region, tiles, onNext }: { of: number; region: Region
         : status === 'failed' ? t('readyFailed', { region: region.name }) : t('readyPreparing', { region: region.name })}
       action={<button type="button" data-testid={last ? 'go' : 'ready-next'} onClick={onNext} className="h-14 w-full rounded-2xl bg-moss text-[18px] font-bold text-white">{last ? t('go') : t('next')}</button>}>
       <div className="mt-5 flex flex-col gap-3" data-testid="preview">
-        <DemoCard demo={demo} state="studied" text={t.rich('axisStudy', { b: (c) => <strong>{c}</strong> })} />
+        {/* Seen before studied (handoff 0014 D1), as on the species page. */}
         <DemoCard demo={demo} state="seen" text={t.rich('axisSeen', { b: (c) => <strong>{c}</strong> })} />
+        <DemoCard demo={demo} state="studied" text={t.rich('axisStudy', { b: (c) => <strong>{c}</strong> })} />
       </div>
     </StepFrame>
   )
 }
 
-// One axis, shown rather than told: the same cell grey, then studied (amber frame, book) or discovered (colour, check),
+// One axis, shown rather than told: the same cell grey, then discovered (colour, moss frame, check) or studied (amber frame, book),
 // drawn like AtlasGrid's Cell so the grid looks familiar on first open. Cards opaque like the tile cards (step 2).
 function DemoCard({ demo, state, text }: { demo: DemoSpecies | null; state: 'studied' | 'seen'; text: React.ReactNode }) {
   return (
@@ -325,7 +326,7 @@ type DemoSpecies = { tile: Tile; lead: { url: string } | null; leadSmall: string
 function DemoCell({ demo, state }: { demo: DemoSpecies | null; state: 'new' | 'studied' | 'seen' }) {
   const src = demo?.leadSmall ?? demo?.lead?.url ?? null
   return (
-    <div className={`relative h-16 w-16 overflow-hidden rounded-xl bg-tile ${state === 'studied' ? 'ring-2 ring-amber ring-inset' : ''}`}>
+    <div className={`relative h-16 w-16 overflow-hidden rounded-xl bg-tile ${state === 'seen' ? 'ring-2 ring-moss ring-inset' : state === 'studied' ? 'ring-2 ring-amber ring-inset' : ''}`}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts
         <img src={src} alt="" className={`h-full w-full object-cover ${state === 'seen' ? '' : state === 'studied' ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />

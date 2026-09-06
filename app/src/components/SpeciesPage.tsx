@@ -8,13 +8,12 @@ import { Link, useRouter } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { Toast } from './Fill'
 import { Icon, SeenMark, StudiedMark } from './Marks'
-import { EcologyChip, LookalikeCard, tileIcon, type Card, type DexState } from './SpeciesCard'
+import { EcologyChip, LookalikeCard, type Card, type DexState } from './SpeciesCard'
 import { SpeciesMap } from './SpeciesMap'
 import { SpeciesSlider } from './SpeciesSlider'
 import { enqueue, flush, type Lead } from './Queue'
 
 const FACT_KEYS = ['size', 'lifespan', 'reproduction', 'migration', 'status', 'sound'] as const
-const FACT_ICONS: Record<(typeof FACT_KEYS)[number], string> = { size: '📏', lifespan: '⏳', reproduction: '🥚', migration: '🧭', status: '🏷️', sound: '🎵' }
 const KINDS = ['eats', 'eatenBy', 'pollinates', 'visitsFlowersOf', 'hostOf', 'parasiteOf'] as const
 const CHIP_CAP = 24
 // The ETL writes the year strip's words in German (record 0002 E3, schema comment); en swaps the four abbreviations that differ.
@@ -22,8 +21,9 @@ const MONTHS_EN: Record<string, string> = { Mär: 'Mar', Mai: 'May', Okt: 'Oct',
 
 /**
  * The species page (spec §🎨 3, handoff 0007 Track B): slider, three names, the two-axis state row, intro, Steckbrief,
- * Vorkommen, Verwechslungsgefahr, Ökologie, one Quellen line, the sticky "Studiert". Dex state is the client's join of
- * `identity.progress`; an empty section shows one grey line, never a heading over nothing.
+ * Vorkommen, Verwechslungsgefahr, Ökologie, one Quellen line, the sticky "Entdeckt" and "Studiert". Dex state is the client's
+ * join of `identity.progress`. Empty Steckbrief and Vorkommen show one grey line (absence is a fact worth reading); empty
+ * lookalikes and ecology are left out (handoff 0014 D5). No emoji on the page (D2), seen before studied (D1).
  */
 export function SpeciesPage() {
   const t = useTranslations('species')
@@ -103,26 +103,26 @@ export function SpeciesPage() {
 
   return (
     <main className="mx-auto min-h-full max-w-[520px] pb-28 [&~nav]:hidden" data-testid="species">
-      <SpeciesSlider assets={s.assets.filter((a) => a.kind === 'image')} tileIcon={tileIcon[s.tile] ?? '?'} />
+      <SpeciesSlider assets={s.assets.filter((a) => a.kind === 'image')} tile={s.tile} />
 
       <div className="px-4">
         <h1 className={`mt-3 text-[28px] leading-tight font-bold tracking-tight ${title === s.sciName ? 'italic' : ''}`}>{title}</h1>
         {sub.length > 0 && <p className="mt-1 text-[17px] text-ink-soft">{sub.map((n, i) => <span key={i}>{i > 0 && ' · '}{n}</span>)}</p>}
 
         <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-[17px]" data-testid="state">
-          <span className={`flex items-center gap-2 ${isStudied ? 'font-semibold text-amber' : 'text-ink-faint'}`}>
-            {isStudied ? <StudiedMark size={22} title={t('state.studied')} /> : <Grey><Icon name="book" size={13} /></Grey>}
-            {isStudied ? t('state.studied') : t('state.notStudied')}
-          </span>
-          <span className={`flex items-center gap-2 ${isSeen ? 'font-semibold text-moss-deep' : 'text-ink-faint'}`}>
+          <span className={`flex items-center gap-2 ${isSeen ? 'font-semibold text-moss-deep' : 'text-ink-faint'}`} data-testid="state-seen">
             {isSeen ? <SeenMark size={22} title={t('state.seen')} /> : <Grey><span className="h-2 w-2 rounded-full border border-current" /></Grey>}
             {isSeen ? seenLabel : t('state.notSeen')}
+          </span>
+          <span className={`flex items-center gap-2 ${isStudied ? 'font-semibold text-amber' : 'text-ink-faint'}`} data-testid="state-studied">
+            {isStudied ? <StudiedMark size={22} title={t('state.studied')} /> : <Grey><Icon name="book" size={13} /></Grey>}
+            {isStudied ? t('state.studied') : t('state.notStudied')}
           </span>
         </p>
 
         {s.tile === 'fungus' && (
           <aside className="mt-4 rounded-2xl border border-amber/40 bg-amber-soft px-4 py-3 text-[15px] leading-snug" data-testid="fungus-notice">
-            <span aria-hidden>🍄 </span><strong>{t('fungus.title')}</strong> {t('fungus.body')}
+            <strong>{t('fungus.title')}</strong> {t('fungus.body')}
             {s.intro && <p className="mt-1.5 text-[13px] text-ink-soft">{t('fungus.intro')}</p>}
           </aside>
         )}
@@ -140,7 +140,7 @@ export function SpeciesPage() {
           <div className="grid grid-cols-2 gap-3">
             {cells.map((c, i) => (
               <div key={c.k} className={`rounded-2xl bg-card px-4 py-3 shadow-[0_2px_12px_rgba(30,42,35,0.06)] ${i === cells.length - 1 && cells.length % 2 ? 'col-span-2' : ''}`}>
-                <div className="text-[13px] text-ink-soft"><span aria-hidden>{FACT_ICONS[c.k]} </span>{t(`facts.${c.k}`)}</div>
+                <div className="text-[13px] text-ink-soft">{t(`facts.${c.k}`)}</div>
                 <div className="mt-1 text-[17px] leading-tight font-bold">{c.value}</div>
                 {c.sub && <div className="mt-1 text-[13px] text-ink-soft">{c.sub}</div>}
               </div>
@@ -176,17 +176,15 @@ export function SpeciesPage() {
           {region && p && centre.data && <SpeciesMap centre={centre.data} taxonKey={s.gbifKey} region={region.name} />}
         </Section>
 
-        <Section title={t('lookalikes.title')} testId="lookalikes">
-          {s.lookalikes.length ? (
+        {s.lookalikes.length > 0 && (
+          <Section title={t('lookalikes.title')} testId="lookalikes">
             <Row>{s.lookalikes.map((c: Card) => <LookalikeCard key={c.id} card={c} state={stateOf(c.id)} />)}</Row>
-          ) : (
-            <p className="text-[15px] text-ink-faint">{t('lookalikes.empty')}</p>
-          )}
-        </Section>
+          </Section>
+        )}
 
-        <Section title={t('ecology.title')} testId="ecology">
-          {kinds.length ? (
-            kinds.map((k) => {
+        {kinds.length > 0 && (
+          <Section title={t('ecology.title')} testId="ecology">
+            {kinds.map((k) => {
               const all = s.interactions[k]!
               const shown = expanded[k] ? all : all.slice(0, CHIP_CAP)
               return (
@@ -202,24 +200,22 @@ export function SpeciesPage() {
                   </Row>
                 </div>
               )
-            })
-          ) : (
-            <p className="rounded-2xl border border-dashed border-ink-faint/40 px-4 py-3 text-[15px] text-ink-soft">{t('ecology.empty', { name: title })}</p>
-          )}
-        </Section>
+            })}
+          </Section>
+        )}
 
         <p className="mt-8 text-[13px] leading-snug text-ink-faint" data-testid="sources">
           <span className="font-semibold">{t('sources.label')}</span> · {sources.join(' · ')}
         </p>
       </div>
 
-      {/* The sticky bar (spec §🎨 3): "Entdeckt" opens the save screen with the species preset (handoff 0008 Track A); "Studiert" toggles. The tab bar (a later sibling of main) is hidden on this page, as in the mock. */}
+      {/* The sticky bar (spec §🎨 3): "Entdeckt" opens the save screen with the species preset (handoff 0008 Track A); "Studiert" toggles. Icons from the set, no emoji (0014 D2). The tab bar (a later sibling of main) is hidden on this page, as in the mock. */}
       <div className="fixed inset-x-0 z-10" style={{ bottom: 'env(safe-area-inset-bottom)' }}>
         <div className="mx-auto flex max-w-[520px] gap-3 bg-gradient-to-t from-paper via-paper/95 to-paper/0 px-4 pt-6 pb-2">
           <button type="button" disabled={!progress.data} data-testid="log"
             onClick={() => router.push(`/log?taxon=${s.gbifKey}&from=species`)}
             className="flex h-13 flex-[1.3] items-center justify-center gap-2 rounded-full bg-moss text-[17px] font-bold text-white shadow-md disabled:opacity-60">
-            <span aria-hidden>👁</span> {isSeen ? tl('logAgain') : tl('logFirst')}
+            <Icon name="check" size={20} /> {isSeen ? tl('logAgain') : tl('logFirst')}
           </button>
           <button type="button" disabled={busy || !progress.data} aria-pressed={isStudied} data-testid="study"
             onClick={() => (isStudied ? unmark.mutate({ taxonId: s.id }) : void mark({ id: s.id, gbifKey: s.gbifKey, sciName: s.sciName, names: s.names, tile: s.tile, lead: s.assets[0] ? { url: s.assets[0].url, author: s.assets[0].author, licence: s.assets[0].licence, licenceUrl: s.assets[0].licenceUrl, sourceUrl: s.assets[0].sourceUrl, origin: s.assets[0].origin } : null }))}

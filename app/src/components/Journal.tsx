@@ -4,17 +4,18 @@ import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
 import { useFormatter, useTranslations } from 'next-intl'
-import { Link } from '@/i18n/navigation'
+import { Link, usePathname } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { useDayLabel } from './JournalDate'
 import { retry, useOutbox } from './Queue'
 import { mergeQueued, type JournalRow as Row, type Kind, KINDS } from './QueueRows'
 import { Thumb, useName, type DexState } from './SpeciesCard'
+import { rememberSpeciesOrigin, restoreSpeciesOrigin } from './SpeciesOrigin'
 
 /**
  * The Tagebuch (spec §🎨 8, findings 0002 §8 T1, handoff 0008 Track B): one card per day, newest first, the day's places
- * on the right, rows with a mini tile, the name, one chip and the meta line. Pills Alle · Studiert · Entdeckt (order rule:
- * amber before green). Studies are rows too. Infinite scroll by day, 30 days per page. The pill lives in the URL so back restores it.
+ * on the right, rows with a mini tile, the name, one chip and the meta line. Pills Alle · Entdeckt · Studiert (handoff 0014
+ * D1: seen before studied; G5: the selected pill is sky). Studies are rows too. Infinite scroll by day, 30 days per page. The pill lives in the URL so back restores it.
  */
 export function Journal({ title }: { title: string }) {
   const t = useTranslations('journal')
@@ -50,6 +51,10 @@ export function Journal({ title }: { title: string }) {
   const outbox = useOutbox()
   const all = useMemo(() => mergeQueued(days.data?.pages.flatMap((p) => p.days) ?? [], outbox, kind), [days.data, outbox, kind])
   const nothingAtAll = (days.isSuccess || days.isError) && kind === 'all' && all.length === 0
+  // P4: back from a species chain lands here by push; the saved scroll offset is put back once the days are up.
+  const pathname = usePathname()
+  const listUp = all.length > 0
+  useEffect(() => { if (listUp) restoreSpeciesOrigin(pathname) }, [listUp, pathname])
 
   return (
     <main className="mx-auto min-h-full max-w-[520px] px-4 pt-3 pb-24">
@@ -64,7 +69,7 @@ export function Journal({ title }: { title: string }) {
           <div className="mt-3 flex gap-2" role="tablist" data-testid="pills">
             {KINDS.map((k) => (
               <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => setKind(k)} data-testid={`pill-${k}`}
-                className={`rounded-full px-4 py-2 text-[15px] font-semibold ${kind === k ? 'bg-moss-soft text-moss-deep ring-1 ring-moss' : 'bg-tile text-ink-soft'}`}>
+                className={`rounded-full px-4 py-2 text-[15px] font-semibold ${kind === k ? 'bg-sky-soft text-sky-deep ring-1 ring-sky' : 'bg-tile text-ink-soft'}`}>
                 {t(k)}
               </button>
             ))}
@@ -110,6 +115,7 @@ export function JournalRow({ row, state }: { row: Row; state: DexState }) {
   const tq = useTranslations('queue')
   const format = useFormatter()
   const name = useName()
+  const pathname = usePathname()
   const chip = row.kind === 'study' ? { text: t('studiedChip'), cls: 'bg-amber-soft text-amber' } : row.first ? { text: t('newlySeen'), cls: 'bg-moss-soft text-moss-deep' } : null
   // The queue chip (handoff 0009 Track B): grey while the row waits for the signal; amber with "erneut" when the server refused it.
   const queued = row.queued === 'dead'
@@ -138,7 +144,7 @@ export function JournalRow({ row, state }: { row: Row; state: DexState }) {
   const cls = 'flex items-center gap-3 py-2.5'
   return (
     <li className="border-b border-tile last:border-b-0" data-testid="row" data-kind={row.kind} data-queued={row.queued}>
-      {row.kind === 'sighting' && row.queued ? <div className={cls}>{inner}</div> : row.kind === 'sighting' ? <Link href={`/sighting/${row.id}`} className={cls}>{inner}</Link> : <Link href={`/species/${row.taxon.gbifKey}`} className={cls}>{inner}</Link>}
+      {row.kind === 'sighting' && row.queued ? <div className={cls}>{inner}</div> : row.kind === 'sighting' ? <Link href={`/sighting/${row.id}`} className={cls}>{inner}</Link> : <Link href={`/species/${row.taxon.gbifKey}`} className={cls} onClick={() => rememberSpeciesOrigin(pathname)}>{inner}</Link>}
     </li>
   )
 }

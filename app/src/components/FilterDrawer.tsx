@@ -6,6 +6,7 @@ import type { Tile } from '@/generated/prisma/enums'
 import { Icon } from './Marks'
 import { OfflineDownload } from './OfflineDownload'
 import { OnboardingSilhouette } from './OnboardingSilhouette'
+import { useDragDismiss } from './useDragDismiss'
 
 export type Show = 'all' | 'studied' | 'seen' | 'new'
 export type Sort = 'now' | 'name' | 'seen'
@@ -44,6 +45,8 @@ export function FilterDrawer(p: Props) {
   const tt = useTranslations('dex.tile')
   const input = useRef<HTMLInputElement>(null)
   useEffect(() => { if (p.focusSearch) input.current?.focus() }, [p.focusSearch])
+  // G1: the handle and the title row pull the sheet down; the scrolling body keeps its scroll.
+  const { sheet, dragProps, sheetStyle } = useDragDismiss(p.onClose)
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') p.onClose() }
     window.addEventListener('keydown', onKey)
@@ -52,16 +55,17 @@ export function FilterDrawer(p: Props) {
 
   return (
     <div className="fixed inset-0 z-40 flex items-end bg-ink/40" onClick={p.onClose} role="presentation" data-testid="drawer">
-      <div role="dialog" aria-modal aria-labelledby="filter-title" onClick={(e) => e.stopPropagation()}
+      <div ref={sheet} role="dialog" aria-modal aria-labelledby="filter-title" onClick={(e) => e.stopPropagation()} style={sheetStyle}
         className="mx-auto flex max-h-[92vh] w-full max-w-[520px] flex-col rounded-t-3xl bg-paper">
-        <div className="mx-auto mt-3 h-1 w-10 shrink-0 rounded-full bg-ink/20" />
-        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3">
+        <div {...dragProps} className="shrink-0 cursor-grab px-4 pt-3 pb-1 select-none" data-testid="drawer-handle">
+          <div className="mx-auto h-1 w-10 rounded-full bg-ink/20" />
           <div className="mt-4 flex items-center justify-between">
             <h2 id="filter-title" className="text-[24px] leading-none font-bold tracking-tight">{t('drawerTitle')}</h2>
             <button type="button" onClick={p.onReset} className="text-[15px] text-ink-soft" data-testid="reset">{t('reset')}</button>
           </div>
-
-          <label className="mt-3 flex h-12 items-center gap-3 rounded-2xl bg-card px-4 shadow-[0_2px_12px_rgba(30,42,35,0.06)]">
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-3">
+          <label className="mt-2 flex h-12 items-center gap-3 rounded-2xl bg-card px-4 shadow-[0_2px_12px_rgba(30,42,35,0.06)]">
             <Icon name="search" size={20} className="shrink-0 text-ink-faint" />
             <input ref={input} value={p.query} onChange={(e) => p.onQuery(e.target.value)} placeholder={t('search')} data-testid="drawer-search"
               className="min-w-0 flex-1 bg-transparent text-[17px] outline-none placeholder:text-ink-faint" />
@@ -78,7 +82,7 @@ export function FilterDrawer(p: Props) {
               return (
                 <Chip key={tile} on={on} onClick={() => p.onToggleTile(tile)} role="checkbox" checked={on} testId={`tile-${tile}`}>
                   <OnboardingSilhouette tile={tile} className="-ml-0.5 h-5 w-5 shrink-0" />
-                  {tt(tile)}<span className={`ml-1 text-[13px] font-normal ${on ? 'text-moss-deep/70' : 'text-ink-faint'}`}>{count}</span>
+                  {tt(tile)}<span className={`ml-1 text-[13px] font-normal ${on ? 'text-sky-deep/70' : 'text-ink-faint'}`}>{count}</span>
                 </Chip>
               )
             })}
@@ -120,9 +124,10 @@ function Section({ title, aside, children }: { title: string; aside?: React.Reac
   )
 }
 
-// One chip shape for region, tiles, states and sorts: green outline when on, tile-grey when off (the reference shot).
+// One chip shape for region, tiles, states and sorts: sky outline on a faint sky ground when on (handoff 0014 G5: blue is
+// selection, moss stays for the action button and "Ändern"), tile-grey when off.
 function Chip({ on, onClick, role, checked, testId, children }: { on: boolean; onClick?: () => void; role?: 'checkbox' | 'radio'; checked?: boolean; testId?: string; children: React.ReactNode }) {
-  const cls = `inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-[15px] font-semibold ${on ? 'bg-paper text-moss-deep ring-[1.5px] ring-moss ring-inset' : 'bg-tile text-ink-soft'}`
+  const cls = `inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-[15px] font-semibold ${on ? 'bg-sky-soft text-sky-deep ring-[1.5px] ring-sky ring-inset' : 'bg-tile text-ink-soft'}`
   if (!onClick) return <span className={cls}>{children}</span>
   return (
     <button type="button" onClick={onClick} role={role} aria-checked={role ? checked : undefined} aria-pressed={role ? undefined : on} data-testid={testId} className={cls}>

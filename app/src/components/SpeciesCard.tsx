@@ -14,11 +14,11 @@ export function useName() {
   return (c: { names: Record<string, string>; sciName: string }) => c.names[locale] ?? c.names.de ?? c.names.en ?? c.sciName
 }
 
-/** The mini tile of findings 0002 §🏷️: no badge, the image tells the state (grey · grey with amber ring · colour). */
+/** The mini tile of findings 0002 §🏷️: no badge, the image tells the state (grey · grey with amber ring · colour with moss ring, handoff 0014 G4). */
 export function Thumb({ card, state, size, inSet = true }: { card: Card; state: DexState; size: number; inSet?: boolean }) {
   const cls = state === 'seen' ? '' : state === 'studied' ? 'opacity-70 grayscale' : 'opacity-45 grayscale'
   return (
-    <span className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-tile ${state === 'studied' ? 'ring-2 ring-amber ring-inset' : ''}`} style={{ width: size, height: size }} aria-hidden>
+    <span className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-tile ${state === 'seen' ? 'ring-2 ring-moss ring-inset' : state === 'studied' ? 'ring-2 ring-amber ring-inset' : ''}`} style={{ width: size, height: size }} aria-hidden>
       {card.lead && inSet ? (
         // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser
         <img src={card.lead} alt="" loading="lazy" className={`h-full w-full object-cover ${cls}`} />

@@ -5,6 +5,7 @@ import { useFormatter, useLocale, useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { PhotoInput, photoSrc, type Photo, type PhotoState } from './LogPhoto'
 import { tileIcon } from './SpeciesCard'
+import { rememberSpeciesOrigin } from './SpeciesOrigin'
 
 type Fill = {
   id: string
@@ -36,6 +37,7 @@ export function FillSheet({ s, onClose, onPhoto, photoState }: { s: Fill; onClos
   const image = s.photo ? photoSrc(s.photo.url) : s.taxon.lead?.url ?? null
   const origin = s.taxon.lead ? (ts.has(`origin.${s.taxon.lead.origin}`) ? ts(`origin.${s.taxon.lead.origin}`) : s.taxon.lead.origin) : ''
   const startY = useRef<number | null>(null)
+  const open = () => rememberSpeciesOrigin('/') // P4: "Zur Art" starts a chain on the atlas
   return (
     <div className="fixed inset-0 z-30 flex items-end" onClick={onClose} role="presentation">
       <div role="dialog" aria-modal aria-label={t('label')} data-testid="fill-sheet"
@@ -45,7 +47,7 @@ export function FillSheet({ s, onClose, onPhoto, photoState }: { s: Fill; onClos
         onPointerDown={(e) => (startY.current = e.clientY)}
         onPointerUp={(e) => { if (startY.current !== null && e.clientY - startY.current > 60) onClose(); startY.current = null }}>
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/20" />
-        <Link href={`/species/${s.taxon.gbifKey}`} className="flex items-center gap-4">
+        <Link href={`/species/${s.taxon.gbifKey}`} className="flex items-center gap-4" onClick={open}>
           <span className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-tile ring-[3px] ring-moss" aria-hidden>
             {image ? (
               // eslint-disable-next-line @next/next/no-img-element -- remote hosts, no optimiser
@@ -76,7 +78,7 @@ export function FillSheet({ s, onClose, onPhoto, photoState }: { s: Fill; onClos
             </button>
           )}
           {!s.photo && !s.pending && <PhotoInput ref={picker} source="gallery" onPhoto={onPhoto} onState={setPicking} testId="photo-input" />}
-          <Link href={`/species/${s.taxon.gbifKey}`} className="flex h-13 flex-[1.4] items-center justify-center rounded-full bg-moss text-[17px] font-bold text-white shadow-md" data-testid="fill-species">
+          <Link href={`/species/${s.taxon.gbifKey}`} className="flex h-13 flex-[1.4] items-center justify-center rounded-full bg-moss text-[17px] font-bold text-white shadow-md" data-testid="fill-species" onClick={open}>
             {t('toSpecies')}
           </Link>
         </div>

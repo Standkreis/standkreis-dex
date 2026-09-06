@@ -5,7 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
 import { useFormatter, useLocale, useTranslations } from 'next-intl'
 import type { Tile } from '@/generated/prisma/enums'
-import { Link, useRouter } from '@/i18n/navigation'
+import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { allTiles, countersOf, CountersBar, useAtlasSet } from './AtlasCounters'
 import { search } from './AtlasSearch'
@@ -14,6 +14,7 @@ import { FillSheet, Toast } from './Fill'
 import { photoSrc } from './LogPhoto'
 import { Icon } from './Marks'
 import { OnboardingSilhouette } from './OnboardingSilhouette'
+import { rememberSpeciesOrigin, restoreSpeciesOrigin } from './SpeciesOrigin'
 import { nudgeSeen, PasskeyNudge } from './PasskeyNudge'
 
 type Species = NonNullable<ReturnType<typeof useAtlasSet>['set']>['species'][number]
@@ -32,6 +33,7 @@ export function AtlasGrid({ title }: { title: string }) {
   const trpc = useTRPC()
   const qc = useQueryClient()
   const router = useRouter()
+  const pathname = usePathname()
 
   // No region yet → onboarding. While a region job runs, poll every 5 s; a failed job offers a retry.
   const me = useQuery(trpc.identity.me.queryOptions(undefined, { refetchInterval: (q) => (q.state.data?.region?.status === 'queued' ? 5000 : false) }))
@@ -156,6 +158,9 @@ export function AtlasGrid({ title }: { title: string }) {
     return () => io.disconnect()
   }, [ready, set])
   const month = format.dateTime(new Date(), { month: 'long' })
+  // P4: back from a species chain lands here by push; the scroll offset saved with the origin is put back once the grid is up.
+  const gridUp = visible.length > 0
+  useEffect(() => { if (gridUp) restoreSpeciesOrigin(pathname) }, [gridUp, pathname])
   const reset = () => { setParams({ show: null, sort: null, now: null, q: null }); if (tilesShown.length > tilesOn.size) writeTiles(allTiles) }
 
   return (
@@ -196,7 +201,7 @@ export function AtlasGrid({ title }: { title: string }) {
             <p className="mt-6 text-center text-[15px] text-ink-soft" data-testid="empty">{query.trim() ? t('noMatch', { q: query.trim() }) : t('empty')}</p>
           ) : (
             <ul className="mt-4 grid grid-cols-3 gap-2" data-testid="grid">
-              {visible.map((s) => <Cell key={s.taxonId} s={s} name={name(s)} own={photos.data?.[s.taxonId] ?? null} isSeen={seen.has(s.taxonId)} isStudied={studied.has(s.taxonId)} badge={t('studiedBadge')} fill={fill.data?.taxon.id === s.taxonId && fillId ? fillPhase : null} />)}
+              {visible.map((s) => <Cell key={s.taxonId} s={s} name={name(s)} own={photos.data?.[s.taxonId] ?? null} isSeen={seen.has(s.taxonId)} isStudied={studied.has(s.taxonId)} badge={t('studiedBadge')} fill={fill.data?.taxon.id === s.taxonId && fillId ? fillPhase : null} onOpen={() => rememberSpeciesOrigin(pathname)} />)}
             </ul>
           )}
           <p className="mt-4 text-[12px] text-ink-faint">{t('sources')}</p>
@@ -237,15 +242,16 @@ function FilterButton({ count, label, onClick, className, style, testId }: { cou
 // One cell, three states (findings 0002 revision 3): not yet = greyscale 45 %, studied = greyscale 70 % with an amber
 // inset ring and the book, discovered = colour with the check. Species without an image show the group silhouette.
 // `own` = the identity's latest wild photo of the species, shown in colour instead of the reference image (spec §🎨 2).
-// `fill` = the cell of the fill moment: "pre" is drawn grey with the transition armed, "done" sweeps to colour over 400 ms under a green ring.
-function Cell({ s, name, own, isSeen, isStudied, badge, fill }: { s: Row; name: string; own: string | null; isSeen: boolean; isStudied: boolean; badge: string; fill: 'pre' | 'done' | null }) {
+// `fill` = the cell of the fill moment: "pre" is drawn grey with the transition armed, "done" sweeps to colour over 400 ms under a 3 px green ring.
+// Rings (handoff 0014 G4): a seen cell keeps a 2 px inset moss ring for good, a studied-only cell the amber one; the sweep's ring is the exception.
+function Cell({ s, name, own, isSeen, isStudied, badge, fill, onOpen }: { s: Row; name: string; own: string | null; isSeen: boolean; isStudied: boolean; badge: string; fill: 'pre' | 'done' | null; onOpen: () => void }) {
   // A small variant Wikimedia cannot scale (a rare error) falls back to the lead itself.
   const [broken, setBroken] = useState(false)
   const src = own && isSeen ? photoSrc(own) : (broken ? null : s.leadSmall) ?? s.lead?.url ?? null
   return (
     <li className="min-w-0" data-taxon={s.taxonId} data-fill={fill ?? undefined} data-outside={s.outside || undefined} data-own={own ? 'true' : undefined}>
-      <Link href={`/species/${s.gbifKey}`} className="block">
-        <div className={`relative aspect-square overflow-hidden rounded-2xl bg-tile ${isStudied && !isSeen ? 'ring-2 ring-amber ring-inset' : ''} ${fill === 'done' ? 'ring-[3px] ring-moss' : ''}`}>
+      <Link href={`/species/${s.gbifKey}`} className="block" onClick={onOpen}>
+        <div className={`relative aspect-square overflow-hidden rounded-2xl bg-tile ${fill === 'done' ? 'ring-[3px] ring-moss' : isSeen ? 'ring-2 ring-moss ring-inset' : isStudied ? 'ring-2 ring-amber ring-inset' : ''}`}>
           {src ? (
             // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser
             <img src={src} alt="" loading="lazy" onError={() => { if (src === s.leadSmall && s.lead?.url && s.lead.url !== src) setBroken(true) }} className={`h-full w-full object-cover ${fill ? 'transition-[filter,opacity] duration-[400ms] ease-out' : ''} ${isSeen ? '' : isStudied ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />

@@ -4,7 +4,7 @@ import type { Row as QueueRow } from './Queue'
 // The diary's view of the outbox (handoff 0009 Track B): rows still waiting, or fallen out, rendered among the server's
 // days with a chip. Pure functions, so they test without a browser.
 
-export const KINDS = ['all', 'studied', 'seen'] as const
+export const KINDS = ['all', 'seen', 'studied'] as const // seen before studied (handoff 0014 D1)
 export type Kind = (typeof KINDS)[number]
 export type JournalRow = {
   id: string

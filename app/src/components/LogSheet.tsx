@@ -4,6 +4,7 @@ import { useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { PhotoInput, type PhotoState } from './LogPhoto'
+import { useDragDismiss } from './useDragDismiss'
 
 // The chooser (spec §🎨 4, record Q10): Foto · Galerie · Suchen, Suchen primary. Foto and Galerie take the picture first
 // (resized and re-encoded on the device, uploaded unattached) and land on the same search with `?photo=<id>`.
@@ -14,13 +15,17 @@ export function LogSheet({ onClose }: { onClose: () => void }) {
   const camera = useRef<HTMLInputElement>(null)
   const gallery = useRef<HTMLInputElement>(null)
   const [state, setState] = useState<PhotoState>('idle')
+  // G1: the handle and the title pull the sheet down; click-outside stays.
+  const { sheet, dragProps, sheetStyle } = useDragDismiss(onClose)
   const tile = 'flex flex-1 flex-col items-center gap-1 rounded-3xl py-5 shadow-[0_2px_12px_rgba(30,42,35,0.06)] disabled:opacity-60'
   const onPhoto = (p: { id: string }) => { onClose(); router.push(`/log?photo=${p.id}`) }
   return (
     <div className="fixed inset-0 z-30 flex items-end bg-ink/40" onClick={onClose} role="presentation" data-testid="chooser">
-      <div role="dialog" aria-modal aria-labelledby="log-title" className="mx-auto w-full max-w-[520px] rounded-t-3xl bg-paper px-4 pt-3" style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }} onClick={(e) => e.stopPropagation()}>
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/20" />
-        <h2 id="log-title" className="text-[13px] font-bold tracking-wide text-ink-soft uppercase">{t('title')}</h2>
+      <div ref={sheet} role="dialog" aria-modal aria-labelledby="log-title" className="mx-auto w-full max-w-[520px] rounded-t-3xl bg-paper px-4" style={{ ...sheetStyle, paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }} onClick={(e) => e.stopPropagation()}>
+        <div {...dragProps} className="-mx-4 cursor-grab px-4 pt-3 select-none" data-testid="chooser-handle">
+          <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-ink/20" />
+          <h2 id="log-title" className="text-[13px] font-bold tracking-wide text-ink-soft uppercase">{t('title')}</h2>
+        </div>
         <div className="mt-3 flex gap-3">
           <button type="button" onClick={() => camera.current?.click()} disabled={state === 'busy'} className={`${tile} bg-card`} data-testid="choose-photo">
             <span className="text-[34px] leading-none" aria-hidden>📷</span>

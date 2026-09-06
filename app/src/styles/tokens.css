@@ -13,9 +13,9 @@
   --color-moss: #16a34a;          /* primary, saturated: surfaces, badges, buttons */
   --color-moss-deep: #15803d;     /* text on paper, AA contrast */
   --color-moss-soft: #dcf5e3;
-  --color-amber: #b8701a;
+  --color-amber: #c4620f;         /* handoff 0014 G4: one step more saturated than #b8701a; 4.1:1 on white */
   --color-amber-soft: #f4e4c8;
-  --color-sky: #2563eb;           /* XP and level only: the third axis, personal progression */
+  --color-sky: #2563eb;           /* the third axis (XP, level) and, since handoff 0014 G5, selection: chips, radio dot, check badge */
   --color-sky-deep: #1d4ed8;
   --color-sky-soft: #dbeafe;
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
@@ -34,7 +34,7 @@
     --color-moss: #22c55e;
     --color-moss-deep: #4ade80;
     --color-moss-soft: #17402a;
-    --color-amber: #e09a3a;
+    --color-amber: #f0a030;
     --color-amber-soft: #3b2a12;
     --color-sky: #3b82f6;
     --color-sky-deep: #60a5fa;
@@ -53,7 +53,7 @@
     --color-moss: #22c55e;
     --color-moss-deep: #4ade80;
     --color-moss-soft: #17402a;
-    --color-amber: #e09a3a;
+    --color-amber: #f0a030;
     --color-amber-soft: #3b2a12;
     --color-sky: #3b82f6;
     --color-sky-deep: #60a5fa;

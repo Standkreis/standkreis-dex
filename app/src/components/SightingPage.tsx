@@ -10,6 +10,7 @@ import { useDayLabel } from './JournalDate'
 import { Icon } from './Marks'
 import { tileIcon, useName } from './SpeciesCard'
 import { SightingMap } from './SightingMap'
+import { rememberSpeciesOrigin } from './SpeciesOrigin'
 
 type Wildness = 'wild' | 'captive' | 'cultivated'
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -95,7 +96,7 @@ export function SightingPage() {
         </div>
         {chip && <span className={`mt-2 shrink-0 rounded-full px-2.5 py-1 text-[13px] font-semibold ${chip.cls}`} data-testid="chip">{chip.text}</span>}
       </div>
-      <Link href={`/species/${row.taxon.gbifKey}`} className="mt-1 inline-block text-[15px] font-semibold text-moss-deep" data-testid="to-species">{t('toSpecies')}</Link>
+      <Link href={`/species/${row.taxon.gbifKey}`} className="mt-1 inline-block text-[15px] font-semibold text-moss-deep" data-testid="to-species" onClick={() => rememberSpeciesOrigin(`/sighting/${id}`)}>{t('toSpecies')}</Link>
 
       <Section title={t('when')}>
         <p className="text-[17px] font-semibold" data-testid="when">{t('dateTime', { day: full(row.at), time: format.dateTime(row.at, { hour: '2-digit', minute: '2-digit' }) })}</p>

@@ -16,7 +16,8 @@ export function CountersCard({ regionName, counters }: { regionName: string | nu
         {regionName ?? t('noRegion')} · {t('wholeYear')}
       </div>
       <CountersBar counters={counters} className="mt-3" />
-      <p className="mt-3 text-[17px]" data-testid="counters">
+      {/* 15 px like the atlas header (handoff 0014 P1). */}
+      <p className="mt-3 text-[15px] text-ink-soft" data-testid="counters">
         {ready ? (
           <>
             <span className="font-bold text-amber">{t('studied', { n: counters.studied })}</span>
