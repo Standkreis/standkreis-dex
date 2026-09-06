@@ -85,3 +85,24 @@ Under 1 MB as asked, but note: with `PAGE_CAP` species pages (~59 KB each) the s
 ### 🔀 For the merge
 
 Track 0 alone on `main`; no shared files with another track. The worker changed (`sw.js`): every build is a new worker, so the phone picks it up on the next visit with signal. `npm run check` green on `0012-t0`.
+
+## 🚶 Owner's friction log
+
+### Onboarding (2026-09-06, before leaving, Simulator and phone)
+
+| # | 📍 Where | 😐 What happened | 🎯 Expected | 🔥 | Triage |
+| --- | --- | --- | --- | --- | --- |
+| O1 | all steps | No commitment to nature anywhere | A positive line the user signs up to: explore and discover, never damage or disturb, never rush, hunt or kill for a picture | 🟠 | new slide; spec §⚖️ has the rules, the onboarding has to say them warmly |
+| O2 | step 1 | The splash photo (Grünspecht) does not land | An image the owner picks | 🟡 | owner's pick was pending since 0007; pick from the set's CC BY leads |
+| O3 | all steps | The wording does not catch | Copy in the owner's voice | 🟠 | rewrite with the owner, not for them |
+| O4 | step 1, Safari | The bottom bar has another background colour | The image runs through | 🟡 | Safari tints its bar from the page's bottom edge; body background = the image's bottom colour. Moot in the installed PWA |
+| O5 | step 1 | 📍 emoji on the button, the permission hint below | Plain button, no hint | 🟡 | remove; the privacy promise of the hint moves to the commitment slide |
+| O6 | step 1 | Search for a place, then "noch nicht verfügbar" | Only what exists is offered | 🟠 | show the available regions as buttons (one today); search returns with the second region |
+| O7 | step 1 | Photo credit at the bottom | Gone | 🟡 | cannot go (CC BY, spec §⚖️); fold into an ⓘ that reveals it, like the species page's long-press |
+| O8a | step 2 | The tile cards and icons look poor | Cards that look like the atlas | 🟠 | design pass; candidates: the tile's silhouettes, real leads from the set |
+| O8b | step 2 | Plain background | The splash image stays behind all steps | 🟡 | with O2 |
+| O9a | step 3 | Only "this month" count | Also the whole year's set | 🟡 | `setSize` is already in `dex.set`; two numbers |
+| O9b | step 3 | "Alle noch grau" says nothing to a new user | "This is what we found" then "this is what you can do now" | 🟠 | rewrite with O3 |
+| O10 | step 3 | "Kein Konto nötig…" as a trailing line | Its own slide, or gone | 🟡 | one "promises" slide: ours (no account, no leaderboard, stays on the device) and yours (O1) |
+
+Owner's rule stands: nothing built before the walk. These become handoff 0013 (onboarding, second pass) after the triage.
