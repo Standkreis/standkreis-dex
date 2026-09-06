@@ -5,7 +5,8 @@
 import { spawnSync } from 'node:child_process'
 import pg from 'pg'
 
-const url = process.env.DATABASE_URL
+// Direct (unpooled) connection, the same one prisma.config.ts hands to migrate: advisory locks and PgBouncer do not mix.
+const url = process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL
 if (!url) { console.error('migrate: DATABASE_URL is not set'); process.exit(1) }
 
 const deadline = Date.now() + 90_000

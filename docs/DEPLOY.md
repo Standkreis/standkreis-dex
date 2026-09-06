@@ -25,7 +25,7 @@ No values here. Set in Vercel → Settings → Environment Variables unless the 
 | Variable | Set where | Purpose | Sensitive |
 | --- | --- | --- | --- |
 | `DATABASE_URL` | Neon integration (prefix `DATABASE_`), Prod + Preview | The app's pooled connection | yes |
-| `DATABASE_URL_UNPOOLED` | Neon integration, Prod + Preview | The ETL from the Mac (§🗄️); unused by the app | yes |
+| `DATABASE_URL_UNPOOLED` | Neon integration, Prod + Preview | `prisma migrate deploy` in the build (advisory locks through PgBouncer left a stale lock, `P1002`, 2026-09-06) and the ETL from the Mac (§🗄️); unused by the app at runtime | yes |
 | `DATABASE_*` (the rest) | Neon integration | Host, user, password pieces the integration adds; unused | yes |
 | `BLOB_READ_WRITE_TOKEN` | Blob integration, all environments; also `app/.env.local` on the Mac (git-ignored) | Photo store: set → Blob, unset → disk under `PHOTO_DIR` | yes |
 | `WEBAUTHN_RP_ID` | project, value `standkreis.de` | Passkey relying-party id: the **apex**, so passkeys survive a subdomain move | no |
@@ -43,7 +43,7 @@ No values here. Set in Vercel → Settings → Environment Variables unless the 
 | Push to `main` | Production deploy → atlas.standkreis.de |
 | Push to any other branch | Preview deploy on a `*.vercel.app` URL, against the same Neon DB (Preview is connected). Passkeys fail there by design (RP id) |
 
-The build command runs `scripts/deploy/migrate.mjs` first: it polls `select 1` until Neon's compute is awake (the Free tier suspends after 5 idle minutes and the cold start beat Prisma's 10 s lock timeout three times on 2026-09-06, `P1002`), then `prisma migrate deploy` with up to three attempts. **Migrations run only there**, never from the Mac (owner's dev rule: no reset, no push, no dev migrate against production). Then `npm run build`: `prebuild` mints the build id, `next build`, `postbuild` writes the worker manifest.
+The build command runs `scripts/deploy/migrate.mjs` first: it polls `select 1` until Neon's compute is awake (the Free tier suspends after 5 idle minutes and the cold start beat Prisma's 10 s lock timeout three times on 2026-09-06, `P1002`), then `prisma migrate deploy` with up to three attempts, both over `DATABASE_URL_UNPOOLED` (`prisma.config.ts` prefers it). **Migrations run only there**, never from the Mac (owner's dev rule: no reset, no push, no dev migrate against production). Then `npm run build`: `prebuild` mints the build id, `next build`, `postbuild` writes the worker manifest.
 
 ## 🩺 Health, cron, background work
 
