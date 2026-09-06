@@ -14,7 +14,10 @@ const strict = z.object({
   WEBAUTHN_RP_ID: required,
   WEBAUTHN_ORIGIN: required, // the full https origin(s), comma-separated
   WEBAUTHN_SECRET: z.string().trim().min(32, 'at least 32 characters: openssl rand -hex 32'),
-  PHOTO_DIR: required,
+  PHOTO_DIR: z.string().trim().transform((s) => s || undefined).optional(), // required unless photos go to Blob (below)
+  BLOB_READ_WRITE_TOKEN: z.string().trim().transform((s) => s || undefined).optional(), // set: photos in Vercel Blob (handoff 0011 A)
+}).superRefine((e, ctx) => {
+  if (!e.PHOTO_DIR && !e.BLOB_READ_WRITE_TOKEN) ctx.addIssue({ code: 'custom', path: ['PHOTO_DIR'], message: 'not set (or set BLOB_READ_WRITE_TOKEN to store photos in Vercel Blob)' })
 })
 const lenient = z.object({
   DATABASE_URL: z.string().trim().min(1).default('postgresql://dex:dex@localhost:5433/dex'),
@@ -22,6 +25,7 @@ const lenient = z.object({
   WEBAUTHN_ORIGIN: z.string().trim().transform((s) => s || undefined).optional(), // unset: trust the request's localhost origin
   WEBAUTHN_SECRET: z.string().trim().min(1).default('dev-only-secret-set-WEBAUTHN_SECRET-in-production'),
   PHOTO_DIR: z.string().trim().min(1).default(join(process.cwd(), 'data', 'photos')),
+  BLOB_READ_WRITE_TOKEN: z.string().trim().transform((s) => s || undefined).optional(), // set: photos in Vercel Blob instead of PHOTO_DIR
 })
 
 export type Env = z.infer<typeof strict> & z.infer<typeof lenient>
@@ -33,6 +37,7 @@ function read(): Env {
     WEBAUTHN_ORIGIN: process.env.WEBAUTHN_ORIGIN,
     WEBAUTHN_SECRET: process.env.WEBAUTHN_SECRET,
     PHOTO_DIR: process.env.PHOTO_DIR,
+    BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
   }
   const parsed = (isProduction ? strict : lenient).safeParse(source)
   if (parsed.success) return parsed.data as Env

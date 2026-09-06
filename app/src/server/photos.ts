@@ -1,21 +1,48 @@
-import { mkdir, unlink, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, unlink, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
+import { del, get, put } from '@vercel/blob'
 import { db } from './db'
 import { env } from './env'
 
-// User photos on disk (handoff 0008 Track A): `app/data/photos/<assetId>.jpg`, gitignored. A laptop answer; an object
-// store or the device (M15) decides later. The file name IS the Asset id, so a row and its file always find each other.
-export const PHOTO_DIR = env.PHOTO_DIR
+// User photos (handoff 0008 Track A, 0011 Track A). Two stores behind one seam, picked once at start:
+//   BLOB_READ_WRITE_TOKEN set → Vercel Blob, private store, `photos/<assetId>.jpg` (Vercel: /tmp does not survive a request)
+//   otherwise                → disk under PHOTO_DIR, `<assetId>.jpg` (dev, tests, the VM)
+// The object's name IS the Asset id, so a row and its file always find each other and nothing new is stored in the DB.
+// The URL a photo carries never changes (`/api/photo/<id>`): the outbox uploads to it, the worker caches it.
+const BLOB_TOKEN = env.BLOB_READ_WRITE_TOKEN
+export const photoStore: 'blob' | 'disk' = BLOB_TOKEN ? 'blob' : 'disk'
+export const PHOTO_DIR = env.PHOTO_DIR ?? join(process.cwd(), 'data', 'photos')
 export const photoPath = (assetId: string) => join(PHOTO_DIR, `${assetId}.jpg`)
+export const blobPath = (assetId: string) => `photos/${assetId}.jpg`
 /** The URL a photo Asset carries: same-origin, served by GET /api/photo/<id>. The static export prefixes NEXT_PUBLIC_API_URL on the client. */
 export const photoUrl = (assetId: string) => `/api/photo/${assetId}`
 
 export async function writePhoto(assetId: string, bytes: Uint8Array) {
+  if (BLOB_TOKEN) {
+    await put(blobPath(assetId), Buffer.from(bytes), { access: 'private', addRandomSuffix: false, contentType: 'image/jpeg', token: BLOB_TOKEN })
+    return
+  }
   await mkdir(PHOTO_DIR, { recursive: true })
   await writeFile(photoPath(assetId), bytes)
 }
 
-const rm = (assetId: string) => unlink(photoPath(assetId)).catch(() => undefined) // a missing file is already gone
+/** The bytes behind GET /api/photo/<id>: a stream from the private blob, or the file. `null` when the store has nothing. */
+export async function readPhoto(assetId: string): Promise<{ body: ReadableStream<Uint8Array> | Uint8Array<ArrayBuffer>; size?: number } | null> {
+  if (BLOB_TOKEN) {
+    const r = await get(blobPath(assetId), { access: 'private', token: BLOB_TOKEN }).catch(() => null)
+    if (!r || r.statusCode !== 200) return null
+    return { body: r.stream, size: r.blob.size }
+  }
+  try {
+    const bytes = new Uint8Array(await readFile(photoPath(assetId))) // a copy into its own ArrayBuffer: what Response accepts
+    return { body: bytes, size: bytes.length }
+  } catch {
+    return null
+  }
+}
+
+// A missing object is already gone: neither store's miss is an error here.
+const rm = (assetId: string) => (BLOB_TOKEN ? del(blobPath(assetId), { token: BLOB_TOKEN }) : unlink(photoPath(assetId))).catch(() => undefined)
 
 /**
  * Remove the files of every user photo on the given sightings. Call it BEFORE deleting the rows: the Sighting cascade

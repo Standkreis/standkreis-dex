@@ -2,7 +2,7 @@ import { createContext } from '@/server/trpc'
 import { photoUrl, writePhoto } from '@/server/photos'
 
 // POST /api/photo (handoff 0008 Track A): one multipart field `file`, a JPEG the client already resized and re-encoded
-// through a canvas (no EXIF, no GPS). Stored under app/data/photos/<assetId>.jpg; the Asset row belongs to the identity
+// through a canvas (no EXIF, no GPS). Stored by `writePhoto` (Blob or disk, server/photos.ts); the Asset row belongs to the identity
 // (owner) and to no sighting yet: `sighting.create({photoId})` or `sighting.attachPhoto` binds it. Out of the static export.
 const MAX = 8 * 1024 * 1024
 
