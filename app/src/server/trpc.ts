@@ -1,6 +1,7 @@
 import { initTRPC } from '@trpc/server'
 import superjson from 'superjson'
 import { db } from './db'
+import { localeOf } from './locale'
 
 export const IDENTITY_COOKIE = 'dex_id'
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
@@ -40,7 +41,7 @@ export async function createContext({ req }: { req: Request }) {
   const setCookie = (name: string, value: string, { maxAge, path = '/' }: CookieOptions) =>
     outCookies.push(`${name}=${value}; Path=${path}; Max-Age=${maxAge}; HttpOnly; SameSite=Lax${secure}`)
   if (!existing) setCookie(IDENTITY_COOKIE, identity.id, { maxAge: IDENTITY_COOKIE_MAX_AGE })
-  return { db, identity, minted: !existing, cookies, setCookie, outCookies, origin: req.headers.get('origin') }
+  return { db, identity, minted: !existing, cookies, setCookie, outCookies, origin: req.headers.get('origin'), locale: localeOf(req) }
 }
 export type Context = Awaited<ReturnType<typeof createContext>>
 

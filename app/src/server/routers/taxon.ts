@@ -57,6 +57,53 @@ function kickContent(gbifKey: number) {
   background(job)
 }
 
+export type SearchRow = { gbifKey: number; sciName: string; names: Record<string, string>; tile: string }
+/**
+ * The backbone for the log's typed search (handoff 0008 Track A), also the scan's join for names outside the set (handoff 0016 A3).
+ * Three GBIF calls: vernacular names over every checklist dataset folded to the backbone key (`nubKey`), because the backbone's own
+ * vernaculars are thin ("Eichenprozessionsspinner" is not among them); the same query over every field, because `qField=VERNACULAR`
+ * is whole-word and misses the hyphenated "Eichen-Prozessionsspinner" that the plain search matches; plus scientific names in the
+ * backbone itself (rank SPECIES, status ACCEPTED). Each key is then read through the cached `species/{key}` for its ranks; keys that
+ * fit no tile drop. Ten rows, the keys most checklists agree on first.
+ */
+export async function backboneSearch(query: string): Promise<SearchRow[]> {
+  const [vern, any, sci] = await Promise.all([
+    gbifSearch({ q: query, qField: 'VERNACULAR', limit: 40 }),
+    gbifSearch({ q: query, limit: 40 }),
+    gbifSearch({ q: query, qField: 'SCIENTIFIC', datasetKey: BACKBONE, rank: 'SPECIES', status: 'ACCEPTED', limit: 10 }),
+  ])
+  // Fold the vernacular and any-field hits by backbone key; the more checklists agree, the higher the row.
+  const folded = new Map<number, { hits: number; names: Record<string, Set<string>> }>()
+  for (const h of [...vern, ...any]) {
+    const key = h.nubKey ?? (h.key && sci.some((s) => s.key === h.key) ? h.key : undefined)
+    if (!key) continue
+    const f = folded.get(key) ?? { hits: 0, names: { de: new Set(), en: new Set() } }
+    f.hits++
+    for (const v of h.vernacularNames ?? []) { const lang = v.language === 'deu' ? 'de' : v.language === 'eng' ? 'en' : null; if (lang) f.names[lang].add(v.vernacularName) }
+    folded.set(key, f)
+  }
+  const order = [...[...folded.entries()].sort((a, b) => b[1].hits - a[1].hits).map(([k]) => k), ...sci.map((s) => s.key)]
+  const keys = [...new Set(order)].slice(0, 14)
+  const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+  const pick = (set: Set<string> | undefined) => { const all = [...(set ?? [])]; return all.find((n) => fold(n).includes(fold(query))) ?? all[0] ?? null }
+  const rows = await Promise.all(
+    keys.map(async (key) => {
+      const s = await gbifSpecies(key)
+      if (!s || (s.rank && s.rank !== 'SPECIES')) return null
+      const tile = tileOf(s)
+      if (!tile) return null
+      const f = folded.get(key)
+      const names: Record<string, string> = {}
+      const de = pick(f?.names.de), en = pick(f?.names.en)
+      if (de) names.de = de
+      if (en) names.en = en
+      for (const v of sci.find((x) => x.key === key)?.vernacularNames ?? []) { if (v.language === 'deu' && !names.de) names.de = v.vernacularName; if (v.language === 'eng' && !names.en) names.en = v.vernacularName }
+      return { gbifKey: key, sciName: s.canonicalName ?? s.scientificName ?? String(key), names, tile }
+    }),
+  )
+  return rows.filter((r): r is NonNullable<typeof r> => !!r).slice(0, 10)
+}
+
 // The species page (spec §🎨 3). Pure read; the dex state row (studiert · entdeckt) is the client's join (M5/M6).
 export const taxonRouter = router({
   /**
@@ -142,51 +189,9 @@ export const taxonRouter = router({
     return { ...created, lead: null, created: true }
   }),
 
-  /**
-   * The backbone for the log's typed search (handoff 0008 Track A). Three GBIF calls: vernacular names over every checklist
-   * dataset folded to the backbone key (`nubKey`), because the backbone's own vernaculars are thin ("Eichenprozessionsspinner"
-   * is not among them); the same query over every field, because `qField=VERNACULAR` is whole-word and misses the hyphenated
-   * "Eichen-Prozessionsspinner" that the plain search matches; plus scientific names in the backbone itself (rank SPECIES,
-   * status ACCEPTED). Each key is then read through the cached `species/{key}` for its ranks; keys that fit no tile drop.
-   * Ten rows, the keys most checklists agree on first.
-   */
+  /** The typed search, capped per identity (handoff 0009 Track B); the work is `backboneSearch`. `locale` is accepted for the client's cache key. */
   search: publicProcedure.input(z.object({ q: z.string().trim().min(2).max(80), locale: z.enum(['de', 'en']) })).query(async ({ ctx, input }) => {
     if (!takeSearchToken(ctx.identity.id)) throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'search cap' })
-    const query = input.q
-    const [vern, any, sci] = await Promise.all([
-      gbifSearch({ q: query, qField: 'VERNACULAR', limit: 40 }),
-      gbifSearch({ q: query, limit: 40 }),
-      gbifSearch({ q: query, qField: 'SCIENTIFIC', datasetKey: BACKBONE, rank: 'SPECIES', status: 'ACCEPTED', limit: 10 }),
-    ])
-    // Fold the vernacular and any-field hits by backbone key; the more checklists agree, the higher the row.
-    const folded = new Map<number, { hits: number; names: Record<string, Set<string>> }>()
-    for (const h of [...vern, ...any]) {
-      const key = h.nubKey ?? (h.key && sci.some((s) => s.key === h.key) ? h.key : undefined)
-      if (!key) continue
-      const f = folded.get(key) ?? { hits: 0, names: { de: new Set(), en: new Set() } }
-      f.hits++
-      for (const v of h.vernacularNames ?? []) { const lang = v.language === 'deu' ? 'de' : v.language === 'eng' ? 'en' : null; if (lang) f.names[lang].add(v.vernacularName) }
-      folded.set(key, f)
-    }
-    const order = [...[...folded.entries()].sort((a, b) => b[1].hits - a[1].hits).map(([k]) => k), ...sci.map((s) => s.key)]
-    const keys = [...new Set(order)].slice(0, 14)
-    const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
-    const pick = (set: Set<string> | undefined) => { const all = [...(set ?? [])]; return all.find((n) => fold(n).includes(fold(query))) ?? all[0] ?? null }
-    const rows = await Promise.all(
-      keys.map(async (key) => {
-        const s = await gbifSpecies(key)
-        if (!s || (s.rank && s.rank !== 'SPECIES')) return null
-        const tile = tileOf(s)
-        if (!tile) return null
-        const f = folded.get(key)
-        const names: Record<string, string> = {}
-        const de = pick(f?.names.de), en = pick(f?.names.en)
-        if (de) names.de = de
-        if (en) names.en = en
-        for (const v of sci.find((x) => x.key === key)?.vernacularNames ?? []) { if (v.language === 'deu' && !names.de) names.de = v.vernacularName; if (v.language === 'eng' && !names.en) names.en = v.vernacularName }
-        return { gbifKey: key, sciName: s.canonicalName ?? s.scientificName ?? String(key), names, tile }
-      }),
-    )
-    return rows.filter((r): r is NonNullable<typeof r> => !!r).slice(0, 10)
+    return backboneSearch(input.q)
   }),
 })

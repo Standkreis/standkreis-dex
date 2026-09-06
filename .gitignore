@@ -16,3 +16,6 @@ app/scripts/id-probe/.cache/
 app/scripts/id-probe/bioclip/.venv/
 app/scripts/id-probe/bioclip/.cache/
 app/scripts/id-probe/bioclip/__pycache__/
+
+# 0016 Track A: raw answers of the identify check
+app/scripts/m12/.cache/

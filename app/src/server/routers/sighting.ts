@@ -1,9 +1,11 @@
 import { TRPCError } from '@trpc/server'
 import { z } from 'zod'
 import { UA } from '../../../etl/fetch'
-import { deletePhoto } from '../photos'
+import { identify, isJpeg, regionSet } from '../identify'
+import { deletePhoto, readPhoto } from '../photos'
 import { shouldOfferPasskey } from '../webauthn'
 import { publicProcedure, router, type Context } from '../trpc'
+import { backboneSearch } from './taxon'
 
 // The sighting is the atom (record Q1, spec §🧬). This router creates one and reads one back for the fill moment
 // (handoff 0008 Track A). Lists and edits are the Tagebuch's (`journal.ts`, Track B).
@@ -98,6 +100,33 @@ export const sightingRouter = router({
       })
       const first = await isFirst(ctx.db, row)
       return { id: row.id, at: row.at, place: row.place, wildness: row.wildness, evidence: row.evidence, first }
+    }),
+
+  /**
+   * The scan (handoff 0016 Track A, record 0003): one of the identity's uploaded photos, attached or not, against a
+   * region's set through Claude Sonnet 5 (`server/identify.ts`). The set prompt is built once per region and cached
+   * in this process and, for five minutes, at Anthropic. Returns the subject gate, the answer joined to the set (species
+   * rank only at confidence ≥ 0.7), the outside guess, the ladder with its evidence, the hint and the cost line.
+   * Nothing is stored: the sighting is the client's next call. Every failure is a typed error (415, 429, 408, 502, 422).
+   * `locale` overrides the request's (the outbox flush and scripts); the ladder's prose comes back in that language.
+   */
+  identify: publicProcedure
+    .input(z.object({ photoId: z.string().uuid(), regionId: z.string().uuid(), locale: z.enum(['de', 'en']).optional() }))
+    .mutation(async ({ ctx, input }) => {
+      const photo = await ctx.db.asset.findFirst({ where: { id: input.photoId, ownerId: ctx.identity.id, origin: 'user' }, select: { id: true } })
+      if (!photo) throw new TRPCError({ code: 'NOT_FOUND', message: 'unknown photo' })
+      const set = await regionSet(input.regionId, async () => {
+        const region = await ctx.db.region.findUnique({ where: { id: input.regionId }, select: { id: true, name: true, higher: true } })
+        if (!region) return null
+        const rows = await ctx.db.plausibility.findMany({ where: { regionId: region.id }, select: { taxon: { select: { gbifKey: true, sciName: true, commonNames: true } } } })
+        return { region, rows: rows.map((r) => ({ gbifKey: r.taxon.gbifKey, sciName: r.taxon.sciName, de: (r.taxon.commonNames as Record<string, string>).de ?? null })) }
+      })
+      if (!set) throw new TRPCError({ code: 'NOT_FOUND', message: 'unknown region' })
+      const file = await readPhoto(photo.id)
+      if (!file) throw new TRPCError({ code: 'NOT_FOUND', message: 'photo file missing' })
+      const jpeg = file.body instanceof Uint8Array ? file.body : new Uint8Array(await new Response(file.body).arrayBuffer())
+      if (!isJpeg(jpeg)) throw new TRPCError({ code: 'UNSUPPORTED_MEDIA_TYPE', message: 'not a JPEG' })
+      return identify({ jpeg, set, locale: input.locale ?? ctx.locale, search: backboneSearch })
     }),
 
   /** Bind an uploaded, still unattached photo (POST /api/photo) to one of the identity's sightings: the fill sheet's "Foto". */

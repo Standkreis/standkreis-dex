@@ -33,6 +33,8 @@ No values here. Set in Vercel → Settings → Environment Variables unless the 
 | `WEBAUTHN_SECRET` | project | HMAC key for challenge cookies and delete tokens, 64 hex | yes |
 | `PHOTO_DIR` | not set on Vercel (removed 2026-09-06 after 0011 A) | Disk photo store for dev and `next start`; on Vercel the Blob token replaces it | no |
 | `CRON_SECRET` | project, Prod + Preview | Guards `GET /api/cron/sweep`; Vercel's cron sends it as `Authorization: Bearer …` (0011 Track B). Unset: the route answers 401 to everyone | yes |
+| `ANTHROPIC_API_KEY` | project, Prod + Preview; also `app/.env.local` on the Mac | The scan (0016 Track A): `sighting.identify` proxies the photo to Claude Sonnet 5, the key never leaves the server. **Required**: the server refuses to start without it, like the others | yes |
+| `ANTHROPIC_BASE_URL` | never on Vercel | Checks only: points `identify` at a stub (`app/scripts/m12/identify.mjs errors`) | no |
 
 `next.config.ts` picks `output` by environment: `'export'` for the static export, `undefined` otherwise (Vercel's tracer fails on `standalone`: `ENOENT next-server.js.nft.json`).
 

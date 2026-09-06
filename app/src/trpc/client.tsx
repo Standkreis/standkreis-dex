@@ -118,7 +118,8 @@ function watchIdentity(qc: QueryClient) {
 export function TRPCReactProvider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(makeQueryClient)
   const [trpcClient] = useState(() =>
-    createTRPCClient<AppRouter>({ links: [httpBatchLink({ url: apiUrl, transformer: superjson, fetch: (url, opts) => fetch(url, { ...opts, credentials: 'include' }) })] }),
+    // `x-dex-locale` (handoff 0016 A5): the page's language, so a procedure that writes prose (the scan's ladder) answers in it.
+    createTRPCClient<AppRouter>({ links: [httpBatchLink({ url: apiUrl, transformer: superjson, headers: () => ({ 'x-dex-locale': document.documentElement.lang }), fetch: (url, opts) => fetch(url, { ...opts, credentials: 'include' }) })] }),
   )
   return (
     <PersistQueryClientProvider
