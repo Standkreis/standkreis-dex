@@ -76,3 +76,5 @@ Owner 2026-09-06: *"go with Sonnet for now, if it becomes too expensive we go wi
 ---
 
 ## 📎 Addenda
+
+- **2026-09-06, owner:** the fixture risk (§⚠️ row 1) is accepted as is. Instead of a second fixture before the build, M12 ships, two more regions are filled, and the scan is tested on walks in all three regions in one go.
