@@ -1,0 +1,698 @@
+{
+ "Turdus merula": {
+  "gbifKey": 2490719,
+  "tile": "bird",
+  "names": {
+   "de": "Amsel",
+   "en": "Common blackbird",
+   "ja": "クロウタドリ"
+  },
+  "regions": [
+   "Mainz-Bingen",
+   "Schagen",
+   "Südwestpfalz"
+  ],
+  "facts": [
+   {
+    "id": "F1",
+    "source": "GBIF",
+    "text": "Scientific name Turdus merula; rank species; class Aves, order Passeriformes; tile bird.",
+    "url": "https://www.gbif.org/species/2490719"
+   },
+   {
+    "id": "F2",
+    "source": "Wikidata",
+    "text": "German name: Amsel."
+   },
+   {
+    "id": "F3",
+    "source": "Wikidata",
+    "text": "English name: Common blackbird."
+   },
+   {
+    "id": "F4",
+    "source": "IUCN Red List via Wikidata P141",
+    "text": "IUCN status: LC."
+   },
+   {
+    "id": "F5",
+    "source": "AnAge",
+    "text": "lifespan: 21.8 years (wild).",
+    "url": "https://genomics.senescence.info/species/entry.php?species=Turdus_merula"
+   },
+   {
+    "id": "F6",
+    "source": "AnAge",
+    "text": "reproduction: mature at 365 days.",
+    "url": "https://genomics.senescence.info/species/entry.php?species=Turdus_merula"
+   },
+   {
+    "id": "F7",
+    "source": "AVONET (Tobias et al. 2022, CC BY 4.0)",
+    "text": "Body mass 102.7 g; wing length 128.4 mm; tail 106.3 mm; beak (culmen) 28.5 mm; habitat Forest (density 2: 1 dense, 3 open); migration 1 (1 sedentary, 2 partial, 3 migratory); trophic niche Omnivore; primary lifestyle Generalist."
+   },
+   {
+    "id": "F8",
+    "source": "EltonTraits (Wilman et al. 2014, CC0)",
+    "text": "Diet shares (%): invertebrates 50, vertebrates 10, scavenging 0, fruit 20, nectar 0, seeds 20, other plant 0; dominant Omnivore; foraging on the ground 60 %, understory 20 %, canopy 0 %; nocturnal no."
+   },
+   {
+    "id": "F9",
+    "source": "Wikidata",
+    "text": "wingspan: 36 (unit as entered: cm or m).",
+    "url": "https://www.wikidata.org/wiki/Q25234"
+   },
+   {
+    "id": "F10",
+    "source": "GloBI",
+    "text": "eats: Gewöhnliche Robinie (Robinia pseudoacacia), Vogelknöterich (Polygonum aviculare), Rotbuche (Fagus sylvatica), Behaartes Schaumkraut (Cardamine hirsuta), Gewöhnliche Rosskastanie (Aesculus hippocastanum), Ranunculus ficaria, Klatschmohn (Papaver rhoeas), Stinkende Nieswurz (Helleborus foetidus), Gemeiner Flieder (Syringa vulgaris), Schwarz-Pappel (Populus nigra), Echter Beinwell (Symphytum officinale), Echte Nelkenwurz (Geum urbanum) and 188 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Turdus%20merula"
+   },
+   {
+    "id": "F11",
+    "source": "GBIF occurrences",
+    "text": "Region Mainz-Bingen: 6009 observations in ten years; main time \"Ganzes Jahr\"; month profile as % of the peak month: Jan 100, Feb 85, Mär 63, Apr 50, Mai 43, Jun 38, Jul 36, Aug 21, Sep 36, Okt 49, Nov 84, Dez 95."
+   },
+   {
+    "id": "F12",
+    "source": "GBIF occurrences",
+    "text": "Region Schagen: 1683 observations in ten years; main time \"Ganzes Jahr\"; month profile as % of the peak month: Jan 100, Feb 78, Mär 38, Apr 38, Mai 35, Jun 20, Jul 24, Aug 11, Sep 10, Okt 56, Nov 100, Dez 81."
+   },
+   {
+    "id": "F13",
+    "source": "GBIF occurrences",
+    "text": "Region Südwestpfalz: 944 observations in ten years; main time \"Mai · Nov–Mär\"; month profile as % of the peak month: Jan 100, Feb 51, Mär 50, Apr 22, Mai 30, Jun 10, Jul 6, Aug 6, Sep 5, Okt 11, Nov 45, Dez 67."
+   }
+  ]
+ },
+ "Lycaena phlaeas": {
+  "gbifKey": 1929697,
+  "tile": "insect",
+  "names": {
+   "de": "Kleiner Feuerfalter",
+   "ja": "ベニシジミ"
+  },
+  "regions": [
+   "Kyoto",
+   "Mainz-Bingen",
+   "Schagen",
+   "Südwestpfalz"
+  ],
+  "facts": [
+   {
+    "id": "F1",
+    "source": "GBIF",
+    "text": "Scientific name Lycaena phlaeas; rank species; class Insecta, order Lepidoptera; tile insect.",
+    "url": "https://www.gbif.org/species/1929697"
+   },
+   {
+    "id": "F2",
+    "source": "Wikidata",
+    "text": "German name: Kleiner Feuerfalter."
+   },
+   {
+    "id": "F3",
+    "source": "Wikidata",
+    "text": "wingspan: 25.5 (unit as entered: cm or m).",
+    "url": "https://www.wikidata.org/wiki/Q740169"
+   },
+   {
+    "id": "F4",
+    "source": "GloBI",
+    "text": "eats: Vogelknöterich (Polygonum aviculare), Gewöhnliche Kreuzblume (Polygala vulgaris), Vogel-Wicke (Vicia cracca), Zypressen-Wolfsmilch (Euphorbia cyparissias), Weiße Fetthenne (Sedum album), Oregano (Origanum vulgare), Echter Baldrian (Valeriana officinalis), Loesels Rauke (Sisymbrium loeselii), Ringelblume (Calendula officinalis), Wiesen-Flockenblume (Centaurea jacea), Wiesen-Sauerampfer (Rumex acetosa), Kanadische Goldrute (Solidago canadensis) and 20 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lycaena%20phlaeas"
+   },
+   {
+    "id": "F5",
+    "source": "GloBI",
+    "text": "visitsFlowersOf: Strahlenlose Kamille (Matricaria discoidea), Gewöhnliche Kratzdistel (Cirsium vulgare), Hopfenklee (Medicago lupulina), Pyrenäen-Storchschnabel (Geranium pyrenaicum), Ranunculus ficaria, Echte Nelkenwurz (Geum urbanum), Weg-Rauke (Sisymbrium officinale), Vogel-Wicke (Vicia cracca), Zypressen-Wolfsmilch (Euphorbia cyparissias), Scharbockskraut (Ficaria verna), Acker-Hornkraut (Cerastium arvense), Bibernell-Rose (Rosa spinosissima) and 86 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lycaena%20phlaeas"
+   },
+   {
+    "id": "F6",
+    "source": "GloBI",
+    "text": "pollinates: Ranunculus ficaria, Esels-Wolfsmilch (Euphorbia esula), Mittlerer Klee (Trifolium medium), Gemeiner Efeu (Hedera helix), Ringelblume (Calendula officinalis), Wiesen-Storchschnabel (Geranium pratense), Dolden-Milchstern (Ornithogalum umbellatum), Kanadische Goldrute (Solidago canadensis), Möhre (Daucus carota), Hundsrose (Rosa canina), Kriechendes Fingerkraut (Potentilla reptans), Weißer Gänsefuß (Chenopodium album) and 20 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lycaena%20phlaeas"
+   },
+   {
+    "id": "F7",
+    "source": "GloBI",
+    "text": "eatenBy: Rauchschwalbe (Hirundo rustica), Saatkrähe (Corvus frugilegus), Kernbeißer (Coccothraustes coccothraustes), Mauersegler (Apus apus), Kleiber (Sitta europaea), Heckenbraunelle (Prunella modularis), Star (Sturnus vulgaris), Fasan (Phasianus colchicus), Kuckuck (Cuculus canorus), Rabenkrähe (Corvus corone), Mönchsgrasmücke (Sylvia atricapilla), Haussperling (Passer domesticus) and 26 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lycaena%20phlaeas"
+   },
+   {
+    "id": "F8",
+    "source": "GBIF occurrences",
+    "text": "Region Mainz-Bingen: 126 observations in ten years; main time \"Apr–Mai · Jul–Okt\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 7, Apr 53, Mai 38, Jun 11, Jul 79, Aug 64, Sep 100, Okt 57, Nov 0, Dez 0."
+   },
+   {
+    "id": "F9",
+    "source": "GBIF occurrences",
+    "text": "Region Schagen: 878 observations in ten years; main time \"Apr–Mai · Jul–Sep\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 1, Apr 53, Mai 100, Jun 24, Jul 68, Aug 40, Sep 85, Okt 22, Nov 6, Dez 0."
+   },
+   {
+    "id": "F10",
+    "source": "GBIF occurrences",
+    "text": "Region Kyoto: 45 observations in ten years; main time \"Apr · Jun–Aug\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 0, Apr 45, Mai 25, Jun 100, Jul 49, Aug 51, Sep 9, Okt 17, Nov 22, Dez 0."
+   },
+   {
+    "id": "F11",
+    "source": "GBIF occurrences",
+    "text": "Region Südwestpfalz: 1288 observations in ten years; main time \"Jul–Okt\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 1, Apr 19, Mai 24, Jun 16, Jul 47, Aug 37, Sep 100, Okt 62, Nov 8, Dez 0."
+   }
+  ]
+ },
+ "Amanita muscaria": {
+  "gbifKey": 8168319,
+  "tile": "fungus",
+  "names": {
+   "de": "Fliegenpilz",
+   "ja": "ベニテングタケ"
+  },
+  "regions": [
+   "Mainz-Bingen",
+   "Schagen",
+   "Südwestpfalz"
+  ],
+  "facts": [
+   {
+    "id": "F1",
+    "source": "GBIF",
+    "text": "Scientific name Amanita muscaria; rank species; class Agaricomycetes, order Agaricales; tile fungus.",
+    "url": "https://www.gbif.org/species/8168319"
+   },
+   {
+    "id": "F2",
+    "source": "Wikidata",
+    "text": "German name: Fliegenpilz."
+   },
+   {
+    "id": "F3",
+    "source": "Wikidata",
+    "text": "edibility: Giftpilz, psychoaktive Pilze, Mykotherapie.",
+    "url": "https://www.wikidata.org/wiki/Q131227"
+   },
+   {
+    "id": "F4",
+    "source": "Wikidata",
+    "text": "spore print colour: Weiß.",
+    "url": "https://www.wikidata.org/wiki/Q131227"
+   },
+   {
+    "id": "F5",
+    "source": "Wikidata",
+    "text": "ecological type: Mykorrhiza.",
+    "url": "https://www.wikidata.org/wiki/Q131227"
+   },
+   {
+    "id": "F6",
+    "source": "Wikidata",
+    "text": "cap shape: gewölbt, ausgebreitet.",
+    "url": "https://www.wikidata.org/wiki/Q131227"
+   },
+   {
+    "id": "F7",
+    "source": "GloBI",
+    "text": "eatenBy: Sciurus niger, Ariolimax buttoni, Waldmistkäfer (Anoplotrupes stercorosus), Ariolimax columbianus, Mesarion, Tigerschnegel (Limax maximus), Sciurus lis, Prophysaon andersonii, Ambigolimax.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Amanita%20muscaria"
+   },
+   {
+    "id": "F8",
+    "source": "GloBI",
+    "text": "hostOf: Cladosporium epimyces, Hypomyces, Chalciporus piperatus, Hypomyces hyalinus.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Amanita%20muscaria"
+   },
+   {
+    "id": "F9",
+    "source": "GBIF occurrences",
+    "text": "Region Mainz-Bingen: 19 observations in ten years; main time \"Okt–Nov\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 13, Apr 0, Mai 3, Jun 0, Jul 0, Aug 0, Sep 17, Okt 100, Nov 28, Dez 0."
+   },
+   {
+    "id": "F10",
+    "source": "GBIF occurrences",
+    "text": "Region Schagen: 181 observations in ten years; main time \"Okt–Nov\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 0, Apr 0, Mai 0, Jun 0, Jul 0, Aug 0, Sep 11, Okt 100, Nov 25, Dez 3."
+   },
+   {
+    "id": "F11",
+    "source": "GBIF occurrences",
+    "text": "Region Südwestpfalz: 103 observations in ten years; main time \"Okt–Nov\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 0, Apr 0, Mai 0, Jun 0, Jul 0, Aug 1, Sep 15, Okt 100, Nov 71, Dez 0."
+   }
+  ]
+ },
+ "Salamandra salamandra": {
+  "gbifKey": 2431776,
+  "tile": "amphibian",
+  "names": {
+   "de": "Feuersalamander",
+   "en": "Fire salamander",
+   "ja": "ファイアサラマンダー"
+  },
+  "regions": [
+   "Mainz-Bingen",
+   "Südwestpfalz"
+  ],
+  "facts": [
+   {
+    "id": "F1",
+    "source": "GBIF",
+    "text": "Scientific name Salamandra salamandra; rank species; class Amphibia, order Caudata; tile amphibian.",
+    "url": "https://www.gbif.org/species/2431776"
+   },
+   {
+    "id": "F2",
+    "source": "Wikidata",
+    "text": "German name: Feuersalamander."
+   },
+   {
+    "id": "F3",
+    "source": "Wikidata",
+    "text": "English name: Fire salamander."
+   },
+   {
+    "id": "F4",
+    "source": "IUCN Red List via Wikidata P141",
+    "text": "IUCN status: VU."
+   },
+   {
+    "id": "F5",
+    "source": "AmphiBIO (Oliveira et al. 2017, CC BY 4.0)",
+    "text": "max body size 280 mm; max longevity 24 years; clutch 8–54 eggs; maturity from 3 years; habitat: fossorial, terrestrial, aquatic; activity: diurnal, nocturnal, crepuscular; diet: arthro; viviparous/ovoviviparous."
+   },
+   {
+    "id": "F6",
+    "source": "GloBI",
+    "text": "eatenBy: Pelophylax bedriagae, Kranich (Grus grus), Desmana moschata, Turdus torquatus, Burhinus oedicnemus, Larus cachinnans, Kleiner Wasserfrosch (Pelophylax lessonae), Emys orbicularis, Zamenis persicus, Mauremys leprosa, Ommatotriton ophryticus, Triturus pygmaeus and 43 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Salamandra%20salamandra"
+   },
+   {
+    "id": "F7",
+    "source": "GloBI",
+    "text": "eats: Limax dacampi, Pipunculus fonsecai, Tetragnatha nigrita, Schwarzer Schnegel (Limax cinereoniger), Procladius sagittalis, Notonecta maculata, Contarinia onobrychidis, Pipunculus, Italienische Schönschrecke (Calliptamus italicus), Gnathonarium, Rhithrogena nivata, Ceratina cyanea and 120 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Salamandra%20salamandra"
+   },
+   {
+    "id": "F8",
+    "source": "GBIF occurrences",
+    "text": "Region Mainz-Bingen: 48 observations in ten years; main time \"Mär–Mai · Aug–Dez\"; month profile as % of the peak month: Jan 12, Feb 0, Mär 30, Apr 50, Mai 60, Jun 18, Jul 18, Aug 30, Sep 64, Okt 100, Nov 62, Dez 42."
+   },
+   {
+    "id": "F9",
+    "source": "GBIF occurrences",
+    "text": "Region Südwestpfalz: 106 observations in ten years; main time \"Feb–Mär · Sep–Dez\"; month profile as % of the peak month: Jan 5, Feb 85, Mär 44, Apr 20, Mai 8, Jun 3, Jul 7, Aug 2, Sep 38, Okt 92, Nov 100, Dez 64."
+   }
+  ]
+ },
+ "Urtica dioica": {
+  "gbifKey": 7960979,
+  "tile": "plant",
+  "names": {
+   "de": "Große Brennnessel",
+   "ja": "イラクサ"
+  },
+  "regions": [
+   "Mainz-Bingen",
+   "Schagen",
+   "Südwestpfalz"
+  ],
+  "facts": [
+   {
+    "id": "F1",
+    "source": "GBIF",
+    "text": "Scientific name Urtica dioica; rank species; class Magnoliopsida, order Rosales; tile plant.",
+    "url": "https://www.gbif.org/species/7960979"
+   },
+   {
+    "id": "F2",
+    "source": "Wikidata",
+    "text": "German name: Große Brennnessel."
+   },
+   {
+    "id": "F3",
+    "source": "IUCN Red List via Wikidata P141",
+    "text": "IUCN status: LC."
+   },
+   {
+    "id": "F4",
+    "source": "Wikidata",
+    "text": "habitat: Landfläche.",
+    "url": "https://www.wikidata.org/wiki/Q155909"
+   },
+   {
+    "id": "F5",
+    "source": "GIFT (Weigelt et al. 2020)",
+    "text": "flowering start: May; flowering end: Oct; pollination: wind; dispersal: anemochorous.",
+    "url": "https://gift.uni-goettingen.de"
+   },
+   {
+    "id": "F6",
+    "source": "GloBI",
+    "text": "eatenBy: Eupteryx calcarata, Scymnus rubromaculatus, Chrysomela polita, Hebata vergena, Acanalonia conica, Hephathus nanus, Agallia consobrina, Orientus ishidae, Eupteryx stachydearum, Siebenpunkt-Marienkäfer (Coccinella septempunctata), Eupteryx cyclops, Orosanga japonica and 30 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Urtica%20dioica"
+   },
+   {
+    "id": "F7",
+    "source": "GloBI",
+    "text": "hostOf: Dialonectria sanguinea, Dendryphion nanum, Mollisia cinerea, Nectriella sambuci, Phomatodes nebulosa, Brauner Bär (Arctia caja), Lachnella alboviolascens, Puccinia urticata, Didymella eupyrena, Sclerotinia sclerotiorum, Languria mozardi mozardi, Zoophthora aphidis and 33 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Urtica%20dioica"
+   },
+   {
+    "id": "F8",
+    "source": "GloBI",
+    "text": "eats: Colpocephalum indi, Splendoroffula tauracobia, Eomenopon ryani, Myrsidea breviventris, Eomenopon sintillatae.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Urtica%20dioica"
+   },
+   {
+    "id": "F9",
+    "source": "GBIF occurrences",
+    "text": "Region Mainz-Bingen: 259 observations in ten years; main time \"Apr–Jul\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 14, Apr 31, Mai 100, Jun 28, Jul 37, Aug 15, Sep 18, Okt 25, Nov 9, Dez 3."
+   },
+   {
+    "id": "F10",
+    "source": "GBIF occurrences",
+    "text": "Region Schagen: 101 observations in ten years; main time \"Ganzes Jahr\"; month profile as % of the peak month: Jan 22, Feb 49, Mär 43, Apr 49, Mai 62, Jun 100, Jul 59, Aug 56, Sep 95, Okt 62, Nov 46, Dez 60."
+   },
+   {
+    "id": "F11",
+    "source": "GBIF occurrences",
+    "text": "Region Südwestpfalz: 52 observations in ten years; main time \"Feb · Apr–Sep\"; month profile as % of the peak month: Jan 0, Feb 72, Mär 0, Apr 56, Mai 100, Jun 70, Jul 89, Aug 36, Sep 54, Okt 0, Nov 0, Dez 0."
+   }
+  ]
+ },
+ "Zoropsis spinimana": {
+  "gbifKey": 2153287,
+  "tile": "insect",
+  "names": {
+   "de": "Nosferatu-Spinne"
+  },
+  "regions": [
+   "Mainz-Bingen",
+   "Südwestpfalz"
+  ],
+  "facts": [
+   {
+    "id": "F1",
+    "source": "GBIF",
+    "text": "Scientific name Zoropsis spinimana; rank species; class Arachnida, order Araneae; tile insect.",
+    "url": "https://www.gbif.org/species/2153287"
+   },
+   {
+    "id": "F2",
+    "source": "Wikidata",
+    "text": "German name: Nosferatu-Spinne."
+   },
+   {
+    "id": "F3",
+    "source": "GloBI",
+    "text": "eats: Araneae, Lepidoptera.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Zoropsis%20spinimana"
+   },
+   {
+    "id": "F4",
+    "source": "GBIF occurrences",
+    "text": "Region Mainz-Bingen: 1077 observations in ten years; main time \"Aug–Nov\"; month profile as % of the peak month: Jan 12, Feb 16, Mär 16, Apr 14, Mai 6, Jun 4, Jul 12, Aug 28, Sep 100, Okt 45, Nov 34, Dez 17."
+   },
+   {
+    "id": "F5",
+    "source": "GBIF occurrences",
+    "text": "Region Südwestpfalz: 35 observations in ten years; main time \"Okt–Dez\"; month profile as % of the peak month: Jan 3, Feb 10, Mär 18, Apr 2, Mai 1, Jun 3, Jul 1, Aug 5, Sep 15, Okt 26, Nov 39, Dez 100."
+   }
+  ]
+ },
+ "Grus grus": {
+  "gbifKey": 2474950,
+  "tile": "bird",
+  "names": {
+   "de": "Kranich",
+   "en": "Common crane",
+   "ja": "クロヅル"
+  },
+  "regions": [
+   "Mainz-Bingen",
+   "Südwestpfalz"
+  ],
+  "facts": [
+   {
+    "id": "F1",
+    "source": "GBIF",
+    "text": "Scientific name Grus grus; rank species; class Aves, order Gruiformes; tile bird.",
+    "url": "https://www.gbif.org/species/2474950"
+   },
+   {
+    "id": "F2",
+    "source": "Wikidata",
+    "text": "German name: Kranich."
+   },
+   {
+    "id": "F3",
+    "source": "Wikidata",
+    "text": "English name: Common crane."
+   },
+   {
+    "id": "F4",
+    "source": "IUCN Red List via Wikidata P141",
+    "text": "IUCN status: LC."
+   },
+   {
+    "id": "F5",
+    "source": "AnAge",
+    "text": "lifespan: 43 years (wild).",
+    "url": "https://genomics.senescence.info/species/entry.php?species=Grus_grus"
+   },
+   {
+    "id": "F6",
+    "source": "AVONET (Tobias et al. 2022, CC BY 4.0)",
+    "text": "Body mass 5500.0 g; wing length 540.6 mm; tail 193.4 mm; beak (culmen) 108.1 mm; habitat Wetland (density 3: 1 dense, 3 open); migration 3 (1 sedentary, 2 partial, 3 migratory); trophic niche Omnivore; primary lifestyle Terrestrial."
+   },
+   {
+    "id": "F7",
+    "source": "EltonTraits (Wilman et al. 2014, CC0)",
+    "text": "Diet shares (%): invertebrates 10, vertebrates 20, scavenging 0, fruit 10, nectar 0, seeds 20, other plant 40; dominant PlantSeed; foraging on the ground 50 %, understory 0 %, canopy 0 %; nocturnal no."
+   },
+   {
+    "id": "F8",
+    "source": "Wikidata",
+    "text": "wingspan: 2.22 (unit as entered: cm or m).",
+    "url": "https://www.wikidata.org/wiki/Q4764"
+   },
+   {
+    "id": "F9",
+    "source": "Wikidata",
+    "text": "main food: Allesfresser.",
+    "url": "https://www.wikidata.org/wiki/Q4764"
+   },
+   {
+    "id": "F10",
+    "source": "GloBI",
+    "text": "eats: Telescopus fallax, Phalaropus fulicarius, Meriones tamariscinus, Sorex antinorii, Eirenis medus, Platyceps ventromaculatus, Eirenis punctatolineatus, Grasfrosch (Rana temporaria), Alpenstrandläufer (Calidris alpina), Microtus bavaricus, Galerida cristata, Chionomys nivalis and 185 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Grus%20grus"
+   },
+   {
+    "id": "F11",
+    "source": "GloBI",
+    "text": "eatenBy: Rabenkrähe (Corvus corone).",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Grus%20grus"
+   },
+   {
+    "id": "F12",
+    "source": "GBIF occurrences",
+    "text": "Region Mainz-Bingen: 977 observations in ten years; main time \"Feb · Okt–Dez\"; month profile as % of the peak month: Jan 19, Feb 100, Mär 6, Apr 1, Mai 0, Jun 0, Jul 0, Aug 0, Sep 0, Okt 70, Nov 88, Dez 30."
+   },
+   {
+    "id": "F13",
+    "source": "GBIF occurrences",
+    "text": "Region Südwestpfalz: 142 observations in ten years; main time \"Feb · Okt–Dez\"; month profile as % of the peak month: Jan 7, Feb 100, Mär 4, Apr 0, Mai 0, Jun 0, Jul 0, Aug 0, Sep 0, Okt 28, Nov 74, Dez 52."
+   }
+  ]
+ },
+ "Lucanus cervus": {
+  "gbifKey": 5743122,
+  "tile": "insect",
+  "names": {
+   "de": "Hirschkäfer",
+   "ja": "ヨーロッパミヤマクワガタ"
+  },
+  "regions": [
+   "Mainz-Bingen",
+   "Südwestpfalz"
+  ],
+  "facts": [
+   {
+    "id": "F1",
+    "source": "GBIF",
+    "text": "Scientific name Lucanus cervus; rank species; class Insecta, order Coleoptera; tile insect.",
+    "url": "https://www.gbif.org/species/5743122"
+   },
+   {
+    "id": "F2",
+    "source": "Wikidata",
+    "text": "German name: Hirschkäfer."
+   },
+   {
+    "id": "F3",
+    "source": "IUCN Red List via Wikidata P141",
+    "text": "IUCN status: LC."
+   },
+   {
+    "id": "F4",
+    "source": "GloBI",
+    "text": "eatenBy: Aves, Turmfalke (Falco tinnunculus), Bubulcus ibis, Carabus sibiricus.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lucanus%20cervus"
+   },
+   {
+    "id": "F5",
+    "source": "GloBI",
+    "text": "eats: Rotbuche (Fagus sylvatica), Prunus domestica, Fagus, Vogelkirsche (Prunus avium), Ulmus laevis, Prunus cerasus, Gemeine Esche (Fraxinus excelsior), Quercus, Tilia cordata, Quercus rubra, Betula pubescens, Ulmus pumila and 27 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lucanus%20cervus"
+   },
+   {
+    "id": "F6",
+    "source": "GBIF occurrences",
+    "text": "Region Mainz-Bingen: 63 observations in ten years; main time \"Jun–Jul\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 0, Apr 0, Mai 19, Jun 100, Jul 51, Aug 4, Sep 0, Okt 5, Nov 0, Dez 0."
+   },
+   {
+    "id": "F7",
+    "source": "GBIF occurrences",
+    "text": "Region Südwestpfalz: 196 observations in ten years; main time \"Mai–Jul\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 4, Apr 0, Mai 47, Jun 100, Jul 56, Aug 9, Sep 6, Okt 5, Nov 0, Dez 0."
+   }
+  ]
+ },
+ "Rana temporaria": {
+  "gbifKey": 2426805,
+  "tile": "amphibian",
+  "names": {
+   "de": "Grasfrosch",
+   "en": "Common frog",
+   "ja": "ヨーロッパアカガエル"
+  },
+  "regions": [
+   "Mainz-Bingen",
+   "Schagen",
+   "Südwestpfalz"
+  ],
+  "facts": [
+   {
+    "id": "F1",
+    "source": "GBIF",
+    "text": "Scientific name Rana temporaria; rank species; class Amphibia, order Anura; tile amphibian.",
+    "url": "https://www.gbif.org/species/2426805"
+   },
+   {
+    "id": "F2",
+    "source": "Wikidata",
+    "text": "German name: Grasfrosch."
+   },
+   {
+    "id": "F3",
+    "source": "Wikidata",
+    "text": "English name: Common frog."
+   },
+   {
+    "id": "F4",
+    "source": "IUCN Red List via Wikidata P141",
+    "text": "IUCN status: LC."
+   },
+   {
+    "id": "F5",
+    "source": "AmphiBIO (Oliveira et al. 2017, CC BY 4.0)",
+    "text": "max body size 110 mm; max longevity 27 years; clutch 265–4000 eggs; maturity from 2 years; habitat: terrestrial, aquatic, arboreal; activity: diurnal, nocturnal; diet: arthro; larval development."
+   },
+   {
+    "id": "F6",
+    "source": "Wikidata",
+    "text": "main food: Larve, Tipuloidea.",
+    "url": "https://www.wikidata.org/wiki/Q27465"
+   },
+   {
+    "id": "F7",
+    "source": "GloBI",
+    "text": "eatenBy: Mergus serrator, Rotfuchs (Vulpes vulpes), Pelophylax bedriagae, Plegadis falcinellus, Saatkrähe (Corvus frugilegus), Erinaceus roumanicus, Kranich (Grus grus), Martes foina, Desmana moschata, Crex crex, Falco rusticolus, Hemorrhois hippocrepis and 176 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Rana%20temporaria"
+   },
+   {
+    "id": "F8",
+    "source": "GloBI",
+    "text": "eats: Bellardia pubicornis, Trichoptera, Calliphoridae, Garten-Bänderschnecke (Cepaea hortensis), Bellardia stricta, Limoniidae, Salamandrella keyserlingii, Lumbricidae, Bellardia vulgaris.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Rana%20temporaria"
+   },
+   {
+    "id": "F9",
+    "source": "GloBI",
+    "text": "parasiteOf: Nematoda.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Rana%20temporaria"
+   },
+   {
+    "id": "F10",
+    "source": "GBIF occurrences",
+    "text": "Region Mainz-Bingen: 71 observations in ten years; main time \"Feb–Apr\"; month profile as % of the peak month: Jan 0, Feb 31, Mär 100, Apr 29, Mai 10, Jun 15, Jul 12, Aug 7, Sep 9, Okt 22, Nov 7, Dez 0."
+   },
+   {
+    "id": "F11",
+    "source": "GBIF occurrences",
+    "text": "Region Schagen: 177 observations in ten years; main time \"Mär–Nov\"; month profile as % of the peak month: Jan 5, Feb 0, Mär 100, Apr 64, Mai 49, Jun 45, Jul 48, Aug 63, Sep 70, Okt 37, Nov 27, Dez 0."
+   },
+   {
+    "id": "F12",
+    "source": "GBIF occurrences",
+    "text": "Region Südwestpfalz: 82 observations in ten years; main time \"Mär · Sep–Okt\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 100, Apr 24, Mai 4, Jun 15, Jul 11, Aug 22, Sep 31, Okt 43, Nov 0, Dez 0."
+   }
+  ]
+ },
+ "Alnus glutinosa": {
+  "gbifKey": 2876213,
+  "tile": "plant",
+  "names": {
+   "de": "Schwarz-Erle",
+   "ja": "ヨーロッパハンノキ"
+  },
+  "regions": [
+   "Mainz-Bingen",
+   "Schagen"
+  ],
+  "facts": [
+   {
+    "id": "F1",
+    "source": "GBIF",
+    "text": "Scientific name Alnus glutinosa; rank species; class Magnoliopsida, order Fagales; tile plant.",
+    "url": "https://www.gbif.org/species/2876213"
+   },
+   {
+    "id": "F2",
+    "source": "Wikidata",
+    "text": "German name: Schwarz-Erle."
+   },
+   {
+    "id": "F3",
+    "source": "IUCN Red List via Wikidata P141",
+    "text": "IUCN status: LC."
+   },
+   {
+    "id": "F4",
+    "source": "GIFT (Weigelt et al. 2020)",
+    "text": "height max (m): 25; growth form: tree; lifecycle: perennial; flowering start: Apr; flowering end: Apr; pollination: wind; dispersal: anemochorous; habitat: lakes, rivers, shores, swamps.",
+    "url": "https://gift.uni-goettingen.de"
+   },
+   {
+    "id": "F5",
+    "source": "GloBI",
+    "text": "eatenBy: Compsidolon salicellum, Moschusbock (Aromia moschata), Oxymirus cursor, Epuraea pallescens, Anoplophora chinensis, Angerona prunaria, Sabra harpagula, Halsbandsittich (Psittacula krameri), Saatkrähe (Corvus frugilegus), Brauner Bär (Arctia caja), Neolygus viridis, Otiorhynchus desertus and 174 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Alnus%20glutinosa"
+   },
+   {
+    "id": "F6",
+    "source": "GloBI",
+    "text": "hostOf: Schneespanner (Phigalia pilosaria), Archips xylosteana, Schmetterlings-Tramete (Trametes versicolor), Graugelber Breitflügelspanner (Agriopis marginaria), Rotrandiger Baumschwamm (Fomitopsis pinicola), Gemeiner Schwefelporling (Laetiporus sulphureus), Lindenschwärmer (Mimas tiliae), Geweihförmige Holzkeule (Xylaria hypoxylon), Variable Kätzcheneule (Orthosia incerta), Furchen-Schüsselflechte (Parmelia sulcata), Liguster-Rindeneule (Craniophora ligustri), Buchen-Streckfuß (Calliteara pudibunda) and 2 more.",
+    "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Alnus%20glutinosa"
+   },
+   {
+    "id": "F7",
+    "source": "GBIF occurrences",
+    "text": "Region Mainz-Bingen: 27 observations in ten years; main time \"Ganzes Jahr\"; month profile as % of the peak month: Jan 59, Feb 28, Mär 16, Apr 13, Mai 31, Jun 38, Jul 28, Aug 47, Sep 41, Okt 38, Nov 31, Dez 100."
+   },
+   {
+    "id": "F8",
+    "source": "GBIF occurrences",
+    "text": "Region Schagen: 79 observations in ten years; main time \"Jan–Mär · Mai–Nov\"; month profile as % of the peak month: Jan 41, Feb 92, Mär 84, Apr 6, Mai 41, Jun 92, Jul 39, Aug 100, Sep 90, Okt 65, Nov 37, Dez 0."
+   }
+  ]
+ }
+}

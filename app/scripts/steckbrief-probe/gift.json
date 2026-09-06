@@ -1,0 +1,152 @@
+{
+ "at": "2026-09-06T21:40:45.625Z",
+ "matched": 588,
+ "plants": 643,
+ "rows": [
+  [
+   "height max (m)",
+   421,
+   "65 %"
+  ],
+  [
+   "growth form",
+   222,
+   "35 %"
+  ],
+  [
+   "lifecycle",
+   280,
+   "44 %"
+  ],
+  [
+   "life form",
+   297,
+   "46 %"
+  ],
+  [
+   "flowering start",
+   540,
+   "84 %"
+  ],
+  [
+   "flowering end",
+   535,
+   "83 %"
+  ],
+  [
+   "flower colour",
+   135,
+   "21 %"
+  ],
+  [
+   "pollination",
+   524,
+   "81 %"
+  ],
+  [
+   "dispersal",
+   475,
+   "74 %"
+  ],
+  [
+   "habitat",
+   444,
+   "69 %"
+  ],
+  [
+   "aquatic",
+   272,
+   "42 %"
+  ],
+  [
+   "**any trait**",
+   575,
+   "89 %"
+  ]
+ ],
+ "examples": [
+  {
+   "name": "Lygodium japonicum",
+   "traits": {
+    "height max (m)": "10",
+    "growth form": null,
+    "lifecycle": null,
+    "life form": null,
+    "flowering start": null,
+    "flowering end": null,
+    "flower colour": null,
+    "pollination": null,
+    "dispersal": null,
+    "habitat": null,
+    "aquatic": null
+   }
+  },
+  {
+   "name": "Lepisorus thunbergianus",
+   "traits": {
+    "height max (m)": null,
+    "growth form": null,
+    "lifecycle": "perennial",
+    "life form": null,
+    "flowering start": "Jun",
+    "flowering end": "Sep",
+    "flower colour": null,
+    "pollination": null,
+    "dispersal": null,
+    "habitat": "rock fissures, tree branches",
+    "aquatic": null
+   }
+  },
+  {
+   "name": "Asplenium adiantum-nigrum",
+   "traits": {
+    "height max (m)": "0.45",
+    "growth form": "herb",
+    "lifecycle": "perennial",
+    "life form": "hemicryptophyte",
+    "flowering start": "Jun",
+    "flowering end": "Oct",
+    "flower colour": null,
+    "pollination": "wind",
+    "dispersal": "anemochorous",
+    "habitat": "mountains",
+    "aquatic": "terrestrial"
+   }
+  },
+  {
+   "name": "Asplenium ruta-muraria",
+   "traits": {
+    "height max (m)": "0.25",
+    "growth form": "herb",
+    "lifecycle": "perennial",
+    "life form": "hemicryptophyte",
+    "flowering start": "Jun",
+    "flowering end": "Aug",
+    "flower colour": null,
+    "pollination": "wind",
+    "dispersal": "anemochorous",
+    "habitat": "limestone, mountains, stony places",
+    "aquatic": "terrestrial"
+   }
+  },
+  {
+   "name": "Gymnocarpium dryopteris",
+   "traits": {
+    "height max (m)": "0.45",
+    "growth form": null,
+    "lifecycle": "perennial",
+    "life form": "cryptophyte",
+    "flowering start": "Jul",
+    "flowering end": "Sep",
+    "flower colour": null,
+    "pollination": "wind",
+    "dispersal": "anemochorous",
+    "habitat": "forest",
+    "aquatic": "terrestrial"
+   }
+  }
+ ],
+ "requests": {
+  "gift.uni-goettingen.de": 12
+ }
+}
