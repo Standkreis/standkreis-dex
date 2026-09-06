@@ -243,6 +243,7 @@
     "placePlaceholder": "Place or district",
     "orUseLocation": "or use my location",
     "noPlace": "No district found for that.",
+    "searchFailed": "The search failed. Keep typing and it runs again.",
     "noLocation": "No location. Type the place instead.",
     "working": "One moment …",
     "error": "That did not work.",

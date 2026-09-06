@@ -243,6 +243,7 @@
     "placePlaceholder": "Ort oder Landkreis",
     "orUseLocation": "oder meinen Standort nutzen",
     "noPlace": "Keinen Landkreis dazu gefunden.",
+    "searchFailed": "Die Suche ist fehlgeschlagen. Tipp weiter, dann läuft sie erneut.",
     "noLocation": "Kein Standort. Gib den Ort ein.",
     "working": "Einen Moment …",
     "error": "Das hat nicht geklappt.",

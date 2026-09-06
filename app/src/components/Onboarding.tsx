@@ -68,7 +68,10 @@ function RegionScreen({ change, onChosen }: { change: boolean; onChosen: (r: Reg
   const [error, setError] = useState<string | null>(null)
   useEffect(() => { const h = setTimeout(() => setDebounced(query.trim()), 300); return () => clearTimeout(h) }, [query])
 
-  const results = useQuery(trpc.dex.lookupRegion.queryOptions({ q: debounced }, { enabled: mode === 'search' && debounced.length >= 2 }))
+  // No retry (handoff 0012 F1): three retries with backoff kept "Einen Moment" up for seven seconds and the error never
+  // showed. A failed search shows its error at once; the next keystroke is a new key and a new request.
+  const results = useQuery(trpc.dex.lookupRegion.queryOptions({ q: debounced }, { enabled: mode === 'search' && debounced.length >= 2, retry: false }))
+  const failedWith = results.error ? (results.error.message.split('\n').map((l) => l.trim()).find(Boolean) ?? 'error') : null
   type Unit = NonNullable<typeof results.data>[number]
   const available = (u: Unit) => u.region?.status === 'ready'
   const choose = (u: Unit) => onChosen({ id: u.region!.id, name: u.name, status: 'ready' })
@@ -130,6 +133,7 @@ function RegionScreen({ change, onChosen }: { change: boolean; onChosen: (r: Reg
             {debounced.length >= 2 && (
               <ul className="mt-2 overflow-hidden rounded-2xl bg-white text-night" data-testid="places">
                 {results.isLoading && <li className="px-4 py-3 text-[15px] text-night/60">{t('working')}</li>}
+                {failedWith && <li className="px-4 py-3 text-[15px] text-amber" data-testid="place-error">{t('searchFailed')} <span className="text-night/50">· {failedWith}</span></li>}
                 {results.data?.length === 0 && <li className="px-4 py-3 text-[15px] text-night/60">{t('noPlace')}</li>}
                 {results.data?.map((u, i) => {
                   const ok = available(u)

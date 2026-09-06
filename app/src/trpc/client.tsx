@@ -23,8 +23,13 @@ const apiUrl = `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/trpc`
 // blank. localStorage is synchronous and cannot hang; the store is ~1 MB (`dex.set` 900 KB) under Safari's 5 MB.
 const PERSIST_KEY = 'dex.queries'
 const PERSIST_MAX_AGE = 30 * 24 * 60 * 60 * 1000
-const PERSISTED: [string, string][] = [['dex', 'set'], ['identity', 'progress'], ['identity', 'me'], ['sighting', 'photos'], ['sighting', 'outside'], ['journal', 'days'], ['taxon', 'page'], ['taxon', 'mapCentre']]
+// Cache time of a persisted query in memory: as long as the store, capped at the longest setTimeout a browser takes
+// (2^31-1 ms, 24.8 days); past that the timer overflows and fires at once, and every query nobody looks at is gone
+// within the second (seen in C2: the prefetched `journal.get` and every hydrated query vanished from the store).
+const PERSIST_GC_TIME = Math.min(PERSIST_MAX_AGE, 2 ** 31 - 1)
+const PERSISTED: [string, string][] = [['dex', 'set'], ['identity', 'progress'], ['identity', 'me'], ['sighting', 'photos'], ['sighting', 'outside'], ['journal', 'days'], ['journal', 'get'], ['taxon', 'page'], ['taxon', 'mapCentre']]
 const PAGE_CAP = 10 // `taxon.page` entries kept, newest first: ~59 KB each
+const SIGHTING_CAP = 30 // `journal.get` entries kept, newest first (handoff 0012 F2): the walk's sightings open offline; ~1 KB each
 const isPath = (key: readonly unknown[], path: [string, string]) => Array.isArray(key[0]) && key[0][0] === path[0] && key[0][1] === path[1]
 
 let lastWritten = ''
@@ -66,11 +71,12 @@ const withoutPages = (client: PersistedClient): PersistedClient => ({ ...client,
 // A query whose refetch failed without network keeps its data but turns `error`: it is written back as the success it
 // was, so a walk of failed refetches never empties the store (found in the Simulator: the second offline page load
 // showed an empty Profil). Errors never go in (a TRPCClientError carries the Response). `journal.days` is an infinite
-// query: only its first page is kept. `taxon.page` keeps the newest PAGE_CAP.
+// query: only its first page is kept. `taxon.page` keeps the newest PAGE_CAP, `journal.get` the newest SIGHTING_CAP.
 function sanitize(client: PersistedClient): PersistedClient {
-  let pages = 0
+  let pages = 0, sightings = 0
   const queries = [...client.clientState.queries].sort((a, b) => b.state.dataUpdatedAt - a.state.dataUpdatedAt).flatMap((q) => {
     if (isPath(q.queryKey, ['taxon', 'page']) && ++pages > PAGE_CAP) return []
+    if (isPath(q.queryKey, ['journal', 'get']) && ++sightings > SIGHTING_CAP) return []
     let state = { ...q.state, error: null, fetchFailureReason: null, fetchMeta: null }
     if (state.status === 'error') state = { ...state, status: 'success' as const, errorUpdateCount: 0, errorUpdatedAt: 0 }
     const data = state.data as { pages?: unknown[]; pageParams?: unknown[] } | undefined
@@ -87,7 +93,10 @@ export const isNetworkError = (err: unknown): boolean =>
 
 function makeQueryClient() {
   const qc = new QueryClient({ defaultOptions: { queries: { staleTime: 60_000, retry: (n, err) => n < (isNetworkError(err) ? 1 : 3) } } })
-  for (const path of PERSISTED) qc.setQueryDefaults([path], { meta: { persist: true } })
+  // gcTime as long as the store lives (handoff 0012 Track 0): the default five minutes removed every persisted query
+  // nobody was looking at from the cache, and the next write dropped it from the store too. A sighting logged at the
+  // start of a walk was gone from the store before the walk ended; the persistQueryClient docs ask for this line.
+  for (const path of PERSISTED) qc.setQueryDefaults([path], { meta: { persist: true }, gcTime: PERSIST_GC_TIME })
   return qc
 }
 

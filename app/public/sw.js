@@ -1,6 +1,6 @@
 // The atlas without signal (handoff 0009 Track A). Hand-written, no Workbox. Three routes:
 //   navigations        network-first, 3 s timeout; offline: the page under its own path, then (species) the "wartet
-//                      aufs Netz" page, then the shell of the same locale
+//                      aufs Netz" page, then (sighting) the precached placeholder shell, then the shell of the same locale
 //   /_next/static/**   cache-first (hashed in a build; a new build is a new worker and a new cache)
 //   reference images   cache-first in one cache capped at 2,000 entries: the three image hosts, /api/photo/ and /api/tiles/
 // Everything else (tRPC, RSC payloads, GBIF, OSM tiles, HMR) passes through untouched. An RSC payload that fails offline
@@ -18,7 +18,9 @@ const NAV_TIMEOUT = 3000
 const IMAGE_HOSTS = ['inaturalist-open-data.s3.amazonaws.com', 'thumb.wikimedia.org', 'upload.wikimedia.org']
 // The shell: the client-rendered pages the walk needs, in both locales, plus `/`, which picks the locale on the client
 // (the manifest's start_url). Precached with and without the trailing slash: the export has it, `next dev` has not.
-const PAGES = ['/', '/de', '/en', '/de/log', '/de/journal', '/de/you', '/en/log', '/en/journal', '/en/you']
+// `sighting/_` (handoff 0012 Track 0): the placeholder the static export ships too (findings 0008 B2); offline it answers
+// a sighting page never opened online, and the page reads the id from the URL (SightingPage) and `journal.get` from the store.
+const PAGES = ['/', '/de', '/en', '/de/log', '/de/journal', '/de/you', '/de/sighting/_', '/en/log', '/en/journal', '/en/you', '/en/sighting/_']
 const ASSETS = ['/manifest.webmanifest', '/icon.svg']
 // Every client file of this build, written by scripts/m8a/sw-manifest.mjs after `next build`. Missing in `next dev`.
 const MANIFEST = `/_next/static/${VERSION}/sw-manifest.json`
@@ -95,7 +97,7 @@ async function navigate(req, url) {
     return res
   } catch {
     const c = await caches.open(SHELL)
-    return (await c.match(pageKey(url))) ?? (await c.match(`${pageKey(url)}/`)) ?? speciesWaits(url) ?? (await shellOf(url, c)) ?? Response.error()
+    return (await c.match(pageKey(url))) ?? (await c.match(`${pageKey(url)}/`)) ?? speciesWaits(url) ?? (await sightingShell(url, c)) ?? (await shellOf(url, c)) ?? Response.error()
   }
 }
 
@@ -114,6 +116,12 @@ async function trimPages(c) {
   const keys = (await c.keys()).filter((k) => !fixed.has(k.url))
   if (keys.length <= PAGE_CAP) return
   await Promise.all(keys.slice(0, keys.length - PAGE_CAP).map((k) => c.delete(k)))
+}
+
+// A sighting page never opened online: the placeholder shell of the same locale (precached), hydrated under the real URL.
+async function sightingShell(url, cache) {
+  const m = url.pathname.match(/^\/(de|en)\/sighting\/[^/]+\/?$/)
+  return m ? (await cache.match(`/${m[1]}/sighting/_`)) ?? null : null
 }
 
 async function shellOf(url, cache) {

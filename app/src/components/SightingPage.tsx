@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import { useFormatter, useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
@@ -34,7 +34,10 @@ export function SightingPage() {
   const qc = useQueryClient()
   const router = useRouter()
   const params = useParams<{ id: string }>()
-  const id = params.id
+  const pathname = usePathname()
+  // `_` is the placeholder shell (the static export's, and the worker's answer for a sighting never opened online, handoff
+  // 0012 Track 0): the router's params carry the placeholder, the URL carries the id.
+  const id = params.id === '_' ? (pathname.split('/').filter(Boolean).pop() ?? '_') : params.id
   const valid = UUID.test(id)
 
   const s = useQuery(trpc.journal.get.queryOptions({ id }, { enabled: valid }))
