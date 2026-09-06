@@ -251,13 +251,15 @@ function Cell({ s, name, own, isSeen, isStudied, badge, fill, onOpen }: { s: Row
   return (
     <li className="min-w-0" data-taxon={s.taxonId} data-fill={fill ?? undefined} data-outside={s.outside || undefined} data-own={own ? 'true' : undefined}>
       <Link href={`/species/${s.gbifKey}`} className="block" onClick={onOpen}>
-        <div className={`relative aspect-square overflow-hidden rounded-2xl bg-tile ${fill === 'done' ? 'ring-[3px] ring-moss' : isSeen ? 'ring-2 ring-moss ring-inset' : isStudied ? 'ring-2 ring-amber ring-inset' : ''}`}>
+        <div className={`relative aspect-square overflow-hidden rounded-2xl bg-tile ${fill === 'done' ? 'ring-[3px] ring-moss' : ''}`}>
           {src ? (
             // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser
             <img src={src} alt="" loading="lazy" onError={() => { if (src === s.leadSmall && s.lead?.url && s.lead.url !== src) setBroken(true) }} className={`h-full w-full object-cover ${fill ? 'transition-[filter,opacity] duration-[400ms] ease-out' : ''} ${isSeen ? '' : isStudied ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />
           ) : (
             <OnboardingSilhouette tile={s.tile} className="h-full w-full p-6 text-ink-faint opacity-60" />
           )}
+          {/* The state ring is an overlay, not an inset box-shadow on the container: inset shadows paint under the image (handoff 0014 G4). */}
+          {(isSeen || isStudied) && fill !== 'done' && <span className={`pointer-events-none absolute inset-0 rounded-2xl ring-2 ring-inset ${isSeen ? 'ring-moss' : 'ring-amber'}`} />}
           {isSeen && <span className="absolute right-1.5 bottom-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-moss text-[12px] font-bold text-white">✓</span>}
           {isStudied && <span className="absolute bottom-1.5 left-1.5 text-[12px]" aria-label={badge}>📖</span>}
         </div>

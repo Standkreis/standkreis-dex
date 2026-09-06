@@ -326,13 +326,14 @@ type DemoSpecies = { tile: Tile; lead: { url: string } | null; leadSmall: string
 function DemoCell({ demo, state }: { demo: DemoSpecies | null; state: 'new' | 'studied' | 'seen' }) {
   const src = demo?.leadSmall ?? demo?.lead?.url ?? null
   return (
-    <div className={`relative h-16 w-16 overflow-hidden rounded-xl bg-tile ${state === 'seen' ? 'ring-2 ring-moss ring-inset' : state === 'studied' ? 'ring-2 ring-amber ring-inset' : ''}`}>
+    <div className="relative h-16 w-16 overflow-hidden rounded-xl bg-tile">
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts
         <img src={src} alt="" className={`h-full w-full object-cover ${state === 'seen' ? '' : state === 'studied' ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />
       ) : (
         <OnboardingSilhouette tile={demo?.tile ?? 'bird'} className="h-full w-full p-3 text-night/40" />
       )}
+      {state !== 'new' && <span className={`pointer-events-none absolute inset-0 rounded-xl ring-2 ring-inset ${state === 'seen' ? 'ring-moss' : 'ring-amber'}`} />}
       {state === 'seen' && <span className="absolute right-1 bottom-1 flex h-4 w-4 items-center justify-center rounded-full bg-moss text-[10px] font-bold text-white">✓</span>}
       {state === 'studied' && <span className="absolute bottom-1 left-1 text-[11px]" aria-hidden>📖</span>}
     </div>

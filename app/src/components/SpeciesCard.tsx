@@ -18,13 +18,14 @@ export function useName() {
 export function Thumb({ card, state, size, inSet = true }: { card: Card; state: DexState; size: number; inSet?: boolean }) {
   const cls = state === 'seen' ? '' : state === 'studied' ? 'opacity-70 grayscale' : 'opacity-45 grayscale'
   return (
-    <span className={`relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-tile ${state === 'seen' ? 'ring-2 ring-moss ring-inset' : state === 'studied' ? 'ring-2 ring-amber ring-inset' : ''}`} style={{ width: size, height: size }} aria-hidden>
+    <span className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-tile" style={{ width: size, height: size }} aria-hidden>
       {card.lead && inSet ? (
         // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser
         <img src={card.lead} alt="" loading="lazy" className={`h-full w-full object-cover ${cls}`} />
       ) : (
         <span className="text-ink-faint" style={{ fontSize: size * 0.45 }}>{inSet ? tileIcon[card.tile] ?? '?' : '?'}</span>
       )}
+      {state !== 'none' && <span className={`pointer-events-none absolute inset-0 rounded-xl ring-2 ring-inset ${state === 'seen' ? 'ring-moss' : 'ring-amber'}`} />}
     </span>
   )
 }
