@@ -15,8 +15,9 @@ for (let attempt = 1; ; attempt++) {
   try {
     await client.connect()
     await client.query('select 1')
-    await client.end()
     console.log(`migrate: database awake after ${attempt} attempt${attempt === 1 ? '' : 's'}`)
+    await clearStaleLock(client)
+    await client.end()
     break
   } catch (e) {
     await client.end().catch(() => {})
@@ -24,6 +25,24 @@ for (let attempt = 1; ; attempt++) {
     console.log(`migrate: attempt ${attempt} failed (${e.code ?? e.message}), retrying`)
     await new Promise((r) => setTimeout(r, 3000))
   }
+}
+
+// Prisma's migrate lock (pg_advisory_lock(72707369)) is session-level. A build that took it over Neon's PgBouncer left it
+// on a pooled server connection that nobody closes (2026-09-06: four builds in a row failed with the database awake).
+// A holder that sits idle is such a leftover: end it. A holder that is active is a running migration: leave it and let
+// Prisma wait. Production builds on Vercel do not overlap.
+async function clearStaleLock(client) {
+  const { rows } = await client.query(
+    `select l.pid, a.state, a.application_name, now() - a.state_change as idle_for
+       from pg_locks l join pg_stat_activity a on a.pid = l.pid
+      where l.locktype = 'advisory' and l.objid = 72707369 and l.pid <> pg_backend_pid()`,
+  )
+  for (const r of rows) {
+    if (r.state === 'active') { console.log(`migrate: lock held by an active session (pid ${r.pid}), waiting for it`); continue }
+    const { rows: [k] } = await client.query('select pg_terminate_backend($1) as ok', [r.pid])
+    console.log(`migrate: ended stale lock holder pid ${r.pid} (${r.state ?? 'unknown'}, ${r.application_name || 'no app name'}, idle ${r.idle_for}): ${k.ok}`)
+  }
+  if (!rows.length) console.log('migrate: lock is free')
 }
 
 for (let attempt = 1; attempt <= 3; attempt++) {
