@@ -9,6 +9,7 @@ import { useRouter } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { Icon } from './Marks'
 import { OnboardingSilhouette } from './OnboardingSilhouette'
+import { SourceInfo, useImageSource, type ImageCredit } from './SourceInfo'
 
 // Spec §🎨 1, second pass (handoff 0013): four screens, one action each. Region (the ready regions as buttons, the
 // location button as the shortcut), groups as tiles all on, a ready screen with the whole set and this month's count,
@@ -219,15 +220,18 @@ function RegionScreen({ change, onChosen }: { change: boolean; onChosen: (r: Reg
 function TilesScreen({ of, region, tiles, setTiles, onNext }: { of: number; region: Region; tiles: Set<Tile>; setTiles: (s: Set<Tile>) => void; onNext: () => void }) {
   const t = useTranslations('onboarding')
   const tt = useTranslations('dex.tile')
+  const ts = useTranslations('species')
+  const imageSource = useImageSource()
   const trpc = useTRPC()
   const qc = useQueryClient()
   const ready = region.status === 'ready'
   const set = useQuery(trpc.dex.set.queryOptions({ regionId: region.id, tiles: allTiles, nowOnly: false }, { enabled: ready }))
   const counts = new Map(set.data?.tiles.map((x) => [x.tile, x.count]) ?? [])
   // O8a: the thumb is the set's lead image of the tile's first species ("jetzt wahrscheinlich" first, the grid's order),
-  // the small variant the grid uses; the silhouette only before the set exists or when no member has an image.
-  const thumbs = new Map<Tile, string>()
-  for (const s of set.data?.species ?? []) if (!thumbs.has(s.tile) && s.leadSmall) thumbs.set(s.tile, s.leadSmall)
+  // the small variant the grid uses; the silhouette only before the set exists or when no member has an image. Its credit
+  // sits behind the ⓘ on the card (handoff 0014 D3), a sibling of the checkbox so the tap does not toggle it.
+  const thumbs = new Map<Tile, { src: string; credit: ImageCredit; name: string }>()
+  for (const s of set.data?.species ?? []) if (!thumbs.has(s.tile) && s.leadSmall && s.lead) thumbs.set(s.tile, { src: s.leadSmall, credit: s.lead, name: s.names.de ?? s.names.en ?? s.sciName })
   // Fish is shown only when the region's set has some (E12). Before the set exists we cannot know: the seven land tiles.
   const shown = tileOrder.filter((x) => x !== 'fish' || (counts.get('fish') ?? 0) > 0)
   const setFilter = useMutation(trpc.identity.setFilter.mutationOptions({ onSuccess: () => { qc.invalidateQueries({ queryKey: trpc.identity.pathKey() }); onNext() } }))
@@ -243,7 +247,7 @@ function TilesScreen({ of, region, tiles, setTiles, onNext }: { of: number; regi
           const n = counts.get(x)
           const thumb = thumbs.get(x)
           return (
-            <li key={x}>
+            <li key={x} className="relative">
               {/* The grid's cell language (spec §🎨 2), theme-stable over the splash: on = white card, the photo in colour, a check on it in
                   sky (handoff 0014 G5: selection is blue, moss means "entdeckt"); off = glass, greyscale at 45 %, no check. Stacked so the German group names never truncate at 360 px. */}
               <button type="button" role="checkbox" aria-checked={on} onClick={() => toggle(x)} data-tile={x}
@@ -252,7 +256,7 @@ function TilesScreen({ of, region, tiles, setTiles, onNext }: { of: number; regi
                   <span className={`flex h-full w-full items-center justify-center overflow-hidden rounded-full ${on ? 'bg-tile' : 'bg-white/10'}`}>
                     {thumb ? (
                       // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser
-                      <img src={thumb} alt="" loading="lazy" decoding="async" className={`h-full w-full object-cover ${on ? '' : 'opacity-45 grayscale'}`} />
+                      <img src={thumb.src} alt="" loading="lazy" decoding="async" className={`h-full w-full object-cover ${on ? '' : 'opacity-45 grayscale'}`} />
                     ) : (
                       <OnboardingSilhouette tile={x} className={`h-7 w-7 ${on ? 'text-ink-soft' : 'text-white/40'}`} />
                     )}
@@ -262,6 +266,7 @@ function TilesScreen({ of, region, tiles, setTiles, onNext }: { of: number; regi
                 <span className="mt-auto block w-full truncate text-[15px] leading-tight font-bold">{tt(x)}</span>
                 <span className={`mt-0.5 block text-[13px] leading-tight ${on ? 'text-ink-soft' : ''}`}>{n === undefined ? (ready ? '' : t('countsPending')) : t('speciesHere', { n })}</span>
               </button>
+              {thumb && <SourceInfo title={ts('attribution.title')} sources={[imageSource(thumb.credit, thumb.name)]} tone={on ? 'plain' : 'glass'} size={26} className="absolute top-2 right-2" testId={`tile-info-${x}`} />}
             </li>
           )
         })}

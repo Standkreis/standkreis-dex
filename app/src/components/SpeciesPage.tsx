@@ -8,14 +8,21 @@ import { Link, useRouter } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { Toast } from './Fill'
 import { Icon, SeenMark, StudiedMark } from './Marks'
-import { EcologyChip, LookalikeCard, type Card, type DexState } from './SpeciesCard'
+import { ChipGrid, EcologyChip, LookalikeCard, useName, type Card, type DexState } from './SpeciesCard'
+import { SourceInfo, useImageSource, type Source } from './SourceInfo'
 import { SpeciesMap } from './SpeciesMap'
 import { SpeciesSlider } from './SpeciesSlider'
 import { enqueue, flush, type Lead } from './Queue'
 
 const FACT_KEYS = ['size', 'lifespan', 'reproduction', 'migration', 'status', 'sound'] as const
 const KINDS = ['eats', 'eatenBy', 'pollinates', 'visitsFlowersOf', 'hostOf', 'parasiteOf'] as const
-const CHIP_CAP = 24
+/** The deed behind a licence string, for the ⓘ sheets (handoff 0014 D3): "CC BY-SA 4.0" → creativecommons.org; anything else has no link. */
+export const licenceUrl = (l: string | null | undefined) => {
+  const m = l?.match(/^CC[ -]?(BY(?:-[A-Z]{2})*|0)\s?(\d\.\d)?$/i)
+  if (!m) return null
+  return m[1] === '0' ? 'https://creativecommons.org/publicdomain/zero/1.0/' : `https://creativecommons.org/licenses/${m[1]!.toLowerCase()}/${m[2] ?? '4.0'}/`
+}
+const HOME: Record<string, string> = { GBIF: 'https://www.gbif.org', Wikidata: 'https://www.wikidata.org', AnAge: 'https://genomics.senescence.info/species/', GloBI: 'https://www.globalbioticinteractions.org', iNaturalist: 'https://www.inaturalist.org', 'Wikimedia Commons': 'https://commons.wikimedia.org' }
 // The ETL writes the year strip's words in German (record 0002 E3, schema comment); en swaps the four abbreviations that differ.
 const MONTHS_EN: Record<string, string> = { Mär: 'Mar', Mai: 'May', Okt: 'Oct', Dez: 'Dec' }
 
@@ -23,7 +30,9 @@ const MONTHS_EN: Record<string, string> = { Mär: 'Mar', Mai: 'May', Okt: 'Oct',
  * The species page (spec §🎨 3, handoff 0007 Track B): slider, three names, the two-axis state row, intro, Steckbrief,
  * Vorkommen, Verwechslungsgefahr, Ökologie, one Quellen line, the sticky "Entdeckt" and "Studiert". Dex state is the client's
  * join of `identity.progress`. Empty Steckbrief and Vorkommen show one grey line (absence is a fact worth reading); empty
- * lookalikes and ecology are left out (handoff 0014 D5). No emoji on the page (D2), seen before studied (D1).
+ * lookalikes and ecology are left out (handoff 0014 D5). No emoji on the page (D2), seen before studied (D1). Every photo
+ * and source reference carries a ⓘ (D3, `SourceInfo`); the ecology categories are wrapping chip grids with the total on
+ * the right and a fold after three rows (D4, `ChipGrid`).
  */
 export function SpeciesPage() {
   const t = useTranslations('species')
@@ -32,6 +41,8 @@ export function SpeciesPage() {
   const tl = useTranslations('log')
   const locale = useLocale()
   const format = useFormatter()
+  const name = useName()
+  const imageSource = useImageSource()
   const trpc = useTRPC()
   const qc = useQueryClient()
   const router = useRouter()
@@ -55,7 +66,6 @@ export function SpeciesPage() {
     } finally { setMarking(false) }
   }
   const unmark = useMutation(trpc.study.unmark.mutationOptions({ onSuccess: invalidate }))
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 
   if (!Number.isInteger(gbifKey) || (page.isSuccess && !page.data)) return <Empty text={t('notFound')} link={t('toAtlas')} />
   if (page.isError && !page.data) return <Empty text={to('speciesWaits')} link={t('toAtlas')} />
@@ -75,12 +85,14 @@ export function SpeciesPage() {
   const other = s.names[locale === 'de' ? 'en' : 'de']
   const sub = [title !== s.sciName ? <i key="sci">{s.sciName}</i> : null, other && other !== title ? <span key="other">{other}</span> : null].filter(Boolean)
 
-  // Steckbrief: six cells, Status always (tile and IUCN), the rest from `facts`; the missing ones in one grey line.
+  // Steckbrief: six cells, Status always (tile and IUCN), the rest from `facts`; the missing ones in one grey line. Each cell's source sits behind its ⓘ (D3).
   const facts = (s.facts ?? {}) as Record<string, { value: string; source: string } | undefined>
+  const gbifPage = `https://www.gbif.org/species/${s.gbifKey}`
+  const dataSource = (o: string, url?: string): Source => ({ origin: o, sourceUrl: url ?? HOME[o] ?? null })
   const cells = FACT_KEYS.map((k) => {
-    if (k === 'status') return { k, value: `${t(`tile.${s.tile}`)}`, sub: s.iucn ? `${s.iucn} · ${t.has(`iucn.${s.iucn}`) ? t(`iucn.${s.iucn}`) : ''}`.trim() : null }
+    if (k === 'status') return { k, value: `${t(`tile.${s.tile}`)}`, sub: s.iucn ? `${s.iucn} · ${t.has(`iucn.${s.iucn}`) ? t(`iucn.${s.iucn}`) : ''}`.trim() : null, sources: [dataSource('GBIF', gbifPage), ...(s.iucn ? [dataSource('IUCN Red List', `https://www.iucnredlist.org/search?query=${encodeURIComponent(s.sciName)}`)] : [])] }
     const f = facts[k]
-    return f ? { k, value: f.value, sub: f.source } : null
+    return f ? { k, value: f.value, sub: null, sources: [dataSource(f.source)] } : null
   }).filter((c): c is NonNullable<typeof c> => !!c)
   const missing = FACT_KEYS.filter((k) => !cells.some((c) => c.k === k)).map((k) => t(`facts.${k}`))
 
@@ -92,7 +104,7 @@ export function SpeciesPage() {
 
   const kinds = KINDS.filter((k) => s.interactions[k]?.length)
   const imageOrigins = [...new Set(s.assets.map((a) => a.origin))].map((o) => (o === 'inat' || o === 'commons' || o === 'user' ? t(`origin.${o}`) : o))
-  const dataSources = ['GBIF', s.wikidataId ? 'Wikidata' : null, Object.values(facts).some((f) => f?.source === 'AnAge') ? 'AnAge' : null].filter(Boolean)
+  const dataSources = ['GBIF', s.wikidataId ? 'Wikidata' : null, Object.values(facts).some((f) => f?.source === 'AnAge') ? 'AnAge' : null].filter((x): x is string => !!x)
   const sources = [
     s.intro ? t('sources.text', { licence: s.intro.licence }) : null,
     t('sources.data', { list: dataSources.join(', ') }),
@@ -100,6 +112,20 @@ export function SpeciesPage() {
     kinds.length ? t('sources.ecology') : null,
     imageOrigins.length ? t('sources.images', { list: imageOrigins.join(', ') }) : null,
   ].filter(Boolean)
+  // The ⓘ sheets (D3): the intro's page, the occurrence records, the genus rule, GloBI, and the credit of every thumb in a section.
+  const introSource: Source[] = s.intro ? [{ origin: 'Wikipedia', licence: s.intro.licence, licenceUrl: licenceUrl(s.intro.licence), sourceUrl: s.intro.source }] : []
+  const occurrenceSources: Source[] = [{ origin: 'GBIF', sourceUrl: `https://www.gbif.org/occurrence/search?taxon_key=${s.gbifKey}`, note: t('sourceInfo.occurrence') }]
+  const credits = (cards: Card[]): Source[] => cards.flatMap((c) => (c.leadInfo ? [imageSource(c.leadInfo, name(c))] : []))
+  const lookalikeSources: Source[] = [{ origin: 'GBIF', sourceUrl: gbifPage, note: t('sourceInfo.lookalikes') }, ...credits(s.lookalikes)]
+  const ecologyCards = [...new Map(kinds.flatMap((k) => s.interactions[k]!.filter((c) => c.inSet)).map((c) => [c.id, c])).values()]
+  const ecologySources: Source[] = [{ origin: 'GloBI', sourceUrl: `https://www.globalbioticinteractions.org/?sourceTaxon=${encodeURIComponent(s.sciName)}`, note: t('sourceInfo.ecology') }, ...credits(ecologyCards)]
+  const allSources: Source[] = [
+    ...introSource.map((x) => ({ ...x, label: t('sourceInfo.text') })),
+    ...dataSources.map((o) => ({ label: t('sourceInfo.data'), ...dataSource(o, o === 'GBIF' ? gbifPage : o === 'Wikidata' && s.wikidataId ? `https://www.wikidata.org/wiki/${s.wikidataId}` : undefined) })),
+    ...(p ? occurrenceSources.map((x) => ({ ...x, label: t('occurrence.title'), note: null })) : []),
+    ...(kinds.length ? [{ ...ecologySources[0]!, label: t('ecology.title'), note: null }] : []),
+    ...credits(s.assets.map((a) => ({ id: a.id, gbifKey: s.gbifKey, sciName: s.sciName, names: s.names, tile: s.tile, lead: a.url, leadInfo: a }))).map((x, i) => ({ ...x, label: `${t('sourceInfo.image')} ${i + 1}` })),
+  ]
 
   return (
     <main className="mx-auto min-h-full max-w-[520px] pb-28 [&~nav]:hidden" data-testid="species">
@@ -130,7 +156,9 @@ export function SpeciesPage() {
         {s.intro ? (
           <>
             {s.intro.lang !== locale && <p className="mt-4 text-[13px] text-ink-faint" data-testid="intro-lang">{t('introOtherLang', { lang: t.has(`lang.${s.intro.lang}`) ? t(`lang.${s.intro.lang}`) : s.intro.lang.toUpperCase() })}</p>}
-            <p className={`${s.intro.lang !== locale ? 'mt-1' : 'mt-4'} text-[17px] leading-[1.45]`} lang={s.intro.lang}>{s.intro.text}</p>
+            <p className={`${s.intro.lang !== locale ? 'mt-1' : 'mt-4'} text-[17px] leading-[1.45]`} lang={s.intro.lang}>
+              {s.intro.text} <SourceInfo title={t('sourceInfo.text')} sources={introSource} size={22} className="-mb-1 align-baseline" testId="intro-info" />
+            </p>
           </>
         ) : (
           <p className="mt-4 text-[15px] text-ink-faint">{t('noIntro')}</p>
@@ -139,8 +167,8 @@ export function SpeciesPage() {
         <Section title={t('facts.title')} testId="facts">
           <div className="grid grid-cols-2 gap-3">
             {cells.map((c, i) => (
-              <div key={c.k} className={`rounded-2xl bg-card px-4 py-3 shadow-[0_2px_12px_rgba(30,42,35,0.06)] ${i === cells.length - 1 && cells.length % 2 ? 'col-span-2' : ''}`}>
-                <div className="text-[13px] text-ink-soft">{t(`facts.${c.k}`)}</div>
+              <div key={c.k} className={`rounded-2xl bg-card px-4 py-3 shadow-[0_2px_12px_rgba(30,42,35,0.06)] ${i === cells.length - 1 && cells.length % 2 ? 'col-span-2' : ''}`} data-testid={`fact-${c.k}`}>
+                <div className="flex items-center justify-between gap-2 text-[13px] text-ink-soft">{t(`facts.${c.k}`)} <SourceInfo title={t(`facts.${c.k}`)} sources={c.sources} size={22} className="-my-1 -mr-2" testId="fact-info" /></div>
                 <div className="mt-1 text-[17px] leading-tight font-bold">{c.value}</div>
                 {c.sub && <div className="mt-1 text-[13px] text-ink-soft">{c.sub}</div>}
               </div>
@@ -149,7 +177,7 @@ export function SpeciesPage() {
           {missing.length > 0 && <p className="mt-3 text-[13px] text-ink-faint">{t('facts.missing', { list: missing.join(' · ') })}</p>}
         </Section>
 
-        <Section title={t('occurrence.title')} aside={region?.name ?? null} testId="occurrence">
+        <Section title={t('occurrence.title')} aside={region?.name ?? null} testId="occurrence" info={p ? <SourceInfo title={t('occurrence.title')} sources={occurrenceSources} testId="occurrence-info" /> : null}>
           {!region ? (
             <p className="text-[15px] text-ink-faint">{t('occurrence.noRegion')}</p>
           ) : !p ? (
@@ -177,27 +205,26 @@ export function SpeciesPage() {
         </Section>
 
         {s.lookalikes.length > 0 && (
-          <Section title={t('lookalikes.title')} testId="lookalikes">
+          <Section title={t('lookalikes.title')} testId="lookalikes" info={<SourceInfo title={t('lookalikes.title')} sources={lookalikeSources} testId="lookalikes-info" />}>
             <Row>{s.lookalikes.map((c: Card) => <LookalikeCard key={c.id} card={c} state={stateOf(c.id)} />)}</Row>
           </Section>
         )}
 
         {kinds.length > 0 && (
-          <Section title={t('ecology.title')} testId="ecology">
+          <Section title={t('ecology.title')} testId="ecology" info={<SourceInfo title={t('ecology.title')} sources={ecologySources} testId="ecology-info" />}>
             {kinds.map((k) => {
               const all = s.interactions[k]!
-              const shown = expanded[k] ? all : all.slice(0, CHIP_CAP)
               return (
-                <div key={k} className="mt-3 first:mt-0">
-                  <h3 className="text-[15px] font-semibold text-ink-soft">{t(`ecology.kind.${k}`)}</h3>
-                  <Row className="mt-2">
-                    {shown.map((c) => <EcologyChip key={c.id} card={c} state={stateOf(c.id)} inSet={c.inSet} />)}
-                    {all.length > shown.length && (
-                      <button type="button" onClick={() => setExpanded((e) => ({ ...e, [k]: true }))} className="shrink-0 rounded-2xl bg-tile px-3 py-2 text-[15px] font-semibold text-ink-soft">
-                        {t('ecology.more', { n: all.length - shown.length })}
-                      </button>
-                    )}
-                  </Row>
+                <div key={k} className="mt-4 first:mt-0" data-testid={`kind-${k}`}>
+                  {/* D4: "frisst ———— (6)", the leader fills the line, the total sits on the right. */}
+                  <h3 className="flex items-baseline gap-2 text-[15px] font-semibold text-ink-soft">
+                    <span>{t(`ecology.kind.${k}`)}</span>
+                    <span aria-hidden className="mb-1 flex-1 border-b border-dotted border-ink-faint/60" />
+                    <span className="tabular-nums" data-testid="kind-count">({all.length})</span>
+                  </h3>
+                  <div className="mt-2">
+                    <ChipGrid key={all.length} items={all.map((c) => <EcologyChip key={c.id} card={c} state={stateOf(c.id)} inSet={c.inSet} />)} more={(n) => t('ecology.showMore', { n })} less={t('ecology.showLess')} testId={`chips-${k}`} />
+                  </div>
                 </div>
               )
             })}
@@ -205,7 +232,7 @@ export function SpeciesPage() {
         )}
 
         <p className="mt-8 text-[13px] leading-snug text-ink-faint" data-testid="sources">
-          <span className="font-semibold">{t('sources.label')}</span> · {sources.join(' · ')}
+          <span className="font-semibold">{t('sources.label')}</span> · {sources.join(' · ')} <SourceInfo title={t('sources.label')} sources={allSources} size={22} className="-mb-1 align-baseline" testId="sources-info" />
         </p>
       </div>
 
@@ -242,11 +269,11 @@ function AgainToast({ name }: { name: string }) {
 
 const Grey = ({ children }: { children: ReactNode }) => <span className="flex h-[22px] w-[22px] items-center justify-center rounded-full bg-tile text-ink-faint">{children}</span>
 
-function Section({ title, aside, testId, children }: { title: string; aside?: string | null; testId: string; children: ReactNode }) {
+function Section({ title, aside, info, testId, children }: { title: string; aside?: string | null; info?: ReactNode; testId: string; children: ReactNode }) {
   return (
     <section className="mt-8" data-testid={testId}>
       <div className="mb-3 flex items-baseline justify-between gap-3">
-        <h2 className="text-[22px] leading-tight font-bold tracking-tight">{title}</h2>
+        <h2 className="flex items-center gap-1.5 text-[22px] leading-tight font-bold tracking-tight">{title}{info}</h2>
         {aside && <span className="shrink truncate text-[13px] text-ink-faint">{aside}</span>}
       </div>
       {children}

@@ -79,3 +79,66 @@ Files Track A changed that B and C also touch:
 | locale JSONs | **untouched** | B, C add keys |
 
 New files: `useDragDismiss.ts`, `SpeciesOrigin.ts`, `scripts/m14/ui.mjs`. `QueueRows.ts` `KINDS` order changed; `mergeQueued` does not depend on it.
+
+## 🅱️ Track B
+
+| 🗓️ | 👤 | 🌿 Where | 🧪 |
+| --- | --- | --- | --- |
+| 2026-09-06 | agent (Claude Fable 5.1) | worktree `../standkreis-dex-b`, branch `0014-b` on A's `b61bb64`, working tree, not committed | `npm run check` green (one pre-existing warning, `scripts/m8b/queue.mjs:39`) · `scripts/m14/track-b.mjs` on `next build` + `next start -p 3003`, Mainz-Bingen, dev DB |
+
+### 🛠️ The rows
+
+| Row | Done | Where |
+| --- | --- | --- |
+| D3 | One `SourceInfo` (ⓘ button, `tone` card · plain · glass) and one `SourceSheet` (title, rows of author · licence · source with links, drag-to-dismiss via A's hook, `z-50` so it sits over the sighting drawer). `useImageSource` turns any asset row into a sheet row; user photos say "Dein Foto" and carry no link. `licenceUrl()` maps a CC string to its deed | `SourceInfo.tsx:25,36,53`, `SpeciesPage.tsx:20` |
+| D3 · spots | Slider image (ⓘ over the image; long-press and the caption open the same sheet) · intro (after the text: Wikipedia page, licence deed) · every Steckbrief cell (cell label row; AnAge, GBIF and the IUCN search) · Vorkommen (section title: GBIF occurrence search) · Verwechslungsgefahr (section title: the genus rule, then **one credit row per thumb**) · Ökologie (section title: GloBI query, then one credit row per in-set chip, deduplicated across categories) · Quellen line (every source with a link, then one row per slider image) | `SpeciesSlider.tsx:65,78`, `SpeciesPage.tsx:116-131,160,171,180,208,214,235` |
+| D3 · cards | Look-alike cards and ecology chips have **no ⓘ of their own**: a button inside a link is invalid, and forty ⓘ on 36 px thumbs are noise. Their credits are the rows of the section's sheet. The router sends the lead's attribution as `leadInfo` on every card | `taxon.ts:14-15,30`, `SpeciesCard.tsx:9` |
+| D3 · onboarding | Tiles screen: ⓘ on every tile card with a thumb (sibling of the checkbox, `absolute top-2 right-2`, plain on the white card, glass on the off card). The sheet names the species behind the thumb. The tile's checked state does not flip on the tap (checked 8 before and after) | `Onboarding.tsx:233,269` |
+| D4 | `ChipGrid`: two columns at phone width, three from 480 px; rows are **measured** (`offsetTop`, `useLayoutEffect`, re-measured on a width change), three rows shown, the rest behind "mehr anzeigen (n)" / "weniger anzeigen" (a toggle, `aria-expanded`). Category title `frisst ······ (49)`: dotted leader, the count flush right. `SpeciesSlider` untouched, the horizontal `Row` stays for look-alikes only. `ecology.more`, `ecology.empty` and `lookalikes.empty` removed from both JSONs | `SpeciesCard.tsx:75-118`, `SpeciesPage.tsx:218-230` |
+| T1 | `SightingDetail` (shared) + `SightingDrawer` (from the diary) + `SightingRoute` (the `/sighting/<id>` page, back link on top). Hero: own photo in colour with ⓘ "Dein Foto"; else the reference image with the `Referenzfoto` tag (top-left), `Foto hinzufügen` (bottom-left, camera icon) and the credit ⓘ (bottom-right). One meta line `Sa 5. Sep 2026 · 16:37 · Ingelheim am Rhein · Insekt oder Spinne`; the date is a dotted-underlined button that opens the `datetime-local` field under the line: no "Wann" label anywhere. "Zur Art ›" a full-width moss button (358 px), `rememberSpeciesOrigin` kept (page: `/sighting/<id>`, drawer: the diary's path). Then Notiz · Wo (exact map) · Wild oder gehalten · Löschen. Save bar `fixed` on the page, `sticky` inside the drawer | `SightingDetail.tsx:30,98,104,127-128,147,153,210,238`, `SightingPage.tsx` (28 lines, the id from the URL) |
+| T1 · diary | A sighting row keeps its `href` (long-press, pasted link, no JS) and opens the drawer on tap (`preventDefault`); Escape, drag, tap outside and Schließen close it. Study rows unchanged | `Journal.tsx:97,152` |
+| T1 · photo | `Foto hinzufügen`: `shrinkToJpeg` → online `POST /api/photo` + `sighting.attachPhoto`; without signal an outbox `photo` row with `forSighting` (the flush already handles this kind, `Queue.ts:147`) and the local blob stands in as the hero. Not exercised by the driver (headless Chrome has no file picker); the online path is the log flow's upload plus an existing mutation | `SightingDetail.tsx:57-80` |
+| icon | `camera` added to the stroke set | `Marks.tsx:14` |
+
+### 🧪 Checks C6–C7
+
+Numbers from `scripts/m14/track-b.mjs` (390 × 844, light). A fresh identity, two sightings of *Idaea bilinearia*: one with a JPEG uploaded through `/api/photo` and bound at `sighting.create`, one without.
+
+| # | What | Result | Shot |
+| --- | --- | --- | --- |
+| C6 | *Pieris brassicae*, "wird gefressen von" 40 items: heading `wird gefressen von (40)`, count's right edge = heading's right edge (0 px). Folded: 6 chips in **3 rows**, toggle `mehr anzeigen (34)`, `aria-expanded=false`. Open: 40 chips, 20 rows, `weniger anzeigen`. Refolded: 6 / 3 again. The other categories read `frisst (49)`, `bestäubt (11)`, `besucht Blüten von (100)`. No `overflow-x-auto` left in the section | ✅ | `b-c6-ecology-folded`, `b-c6-ecology-open` |
+| C7 · drawer | Diary → row with photo: `[data-own-photo=true]`, hero `/api/photo/<id>`, no tag, no add button, ⓘ present; URL stays `/de/journal`; dialog 390 × 776 at y 68. Row without photo: `[data-own-photo=false]`, tag `Referenzfoto`, button `Foto hinzufügen`, ⓘ present. Both: meta line as above, `Zur Art ›` 358 px moss, "Wann" occurs 0 times, `h2`s NOTIZ · WO · WILD ODER GEHALTEN. Tap on the date → the `at` field appears with `2026-09-05T16:36`. Drag 360 px on the handle → closed | ✅ | `b-c7-drawer-own-photo`, `b-c7-drawer-reference` |
+| C7 · route | `/de/sighting/<id>` as a pasted link: the same detail under `‹ Tagebuch` | ✅ | `b-c7-route-reference` |
+| C7 · offline | Network off on the page and the worker sessions (`offline.mjs` pattern): diary → row → drawer in 0 ms from the persisted `journal.get`; then `Page.navigate` to the other sighting's route → detail in 60 ms from the worker's shell and the cache. Both with hero, tag/ⓘ and meta line as online | ✅ | `b-c7-route-offline` |
+| D3 | Species page: six ⓘ (`slider-info, fact-info, occurrence-info, lookalikes-info, ecology-info, sources-info`; the intro's is absent because this species has no intro). Slider sheet: `Autor Baranyi Tamás · Lizenz CC BY-NC-ND 4.0 (creativecommons.org) · Quelle iNaturalist`. Status cell: `Quelle GBIF`. Look-alikes: 9 rows = the genus rule + 8 thumb credits (gbif, creativecommons, inaturalist, commons). Quellen: 5 rows, links to gbif, wikidata, globalbioticinteractions, creativecommons, inaturalist. Onboarding tiles: 8 ⓘ, the bird tile's sheet `Dschungelkrähe · Joe Bourget · CC BY-NC 4.0 · iNaturalist`; still 8 tiles checked after the tap | ✅ | `b-d3-slider-sheet`, `b-d3-lookalikes-sheet`, `b-d3-sources-sheet`, `b-d3-species-bottom`, `b-d3-onboarding-tiles-sheet` |
+
+**Not verified**: the file picker (`Foto hinzufügen`) in any browser; the Simulator; the dark theme (the sheet uses tokens only); en copy on screen (keys exist, parity test green).
+
+### ❓ Doubts for the owner
+
+1. **D4 · "9 chips at 390 px" became 6.** A chip with a 36 px thumb and a readable name needs ~175 px; three per row would truncate every second German name ("Gartenkreuzspinne" already clips in two columns at 14 px). Three rows are still three rows; the fold shows 6. If 9 matters more than the names, `grid-cols-3` and `text-[13px]` in `SpeciesCard.tsx:107` do it.
+2. **D3 · no ⓘ per card.** Look-alike cards and ecology chips are links; their credits live in the section's sheet, one row per thumb (the 100-item "besucht Blüten von" makes a long sheet: it scrolls). If the owner wants a glyph on each thumb, it needs a wrapper per card and an absolute ⓘ, ~10 lines in `SpeciesCard.tsx`.
+3. **T1 · "Landkreis" in the meta line is the Gemeinde.** The sighting stores `place` (Gemeinde, spec §⚖️ ladder); the region is not on the row and a sighting can be logged outside it. The line reads `date · time · Gemeinde · Gruppe`. To show the Landkreis instead, `identity.me.region.name` is one hook away, but it would be wrong for sightings outside the region.
+4. **T1 · the drawer has no URL.** Back does not close it (Escape, drag, tap outside and Schließen do); a refresh on the diary loses it. `pushState` to `/sighting/<id>` would make the App Router render the route. Acceptable for a transient sheet; say so if not.
+5. **T1 · the tab bar** is hidden on the route (`[&~nav]:hidden`, as before) and covered by the drawer in the diary. Same question as A's doubt 5.
+6. **D3 · the intro's ⓘ** sits after the last sentence, inline. The owner named facts, occurrence, look-alikes, ecology and the Quellen line; the intro is the one CC BY-SA text on the page, so it got one too. Easy to drop (`SpeciesPage.tsx:160`).
+7. **Facts cells lost their source line** ("AnAge" under the value): the ⓘ replaces it. If the owner wants both, restore `sub: f.source` in `SpeciesPage.tsx:95`.
+8. **Removed keys**: `species.ecology.more`, `species.ecology.empty`, `species.lookalikes.empty`, `sighting.reference`, `sighting.photoCaption`, `sighting.when` (all unused after A and B). Track C must not reference them.
+
+### 🔀 For the merge
+
+Files Track B changed that A changed or C is likely to touch:
+
+| File | B's change | Who else |
+| --- | --- | --- |
+| `SpeciesPage.tsx` | imports, `licenceUrl` + `HOME`, `name`/`imageSource` hooks, `expanded` state and `CHIP_CAP` gone, cells carry `sources`, the six ⓘ, ecology block rewritten on `ChipGrid`, `Section` takes `info`. A's D1/D2/D5 lines untouched | A (merged already, B is on top); C: unlikely |
+| `SpeciesSlider.tsx` | `tc` and the inline sheet gone, `SourceSheet` + `slider-info`, `useOriginName`. A's `back` and silhouette untouched | A |
+| `SpeciesCard.tsx` | `Card.leadInfo`, chips `min-w-0` / `line-clamp-2` instead of `shrink-0 snap-start`, `ChipGrid` appended. A's `Thumb` ring untouched | A |
+| `Journal.tsx` | `useState`, `SightingDrawer` import, `open` state, `onOpen` threaded through `DayCard` → `JournalRow`, sighting link `preventDefault`. A's pills and origin calls untouched | A |
+| `SightingPage.tsx` | reduced to the route wrapper (id from the URL); everything else moved to `SightingDetail.tsx`. A's `rememberSpeciesOrigin` on "Zur Art" lives at `SightingDetail.tsx:153` | A |
+| `Onboarding.tsx` | `SourceInfo` import, `ts`/`imageSource` hooks in `TilesScreen`, `thumbs` map carries the credit, `li` relative + ⓘ | A (G4/G5 lines untouched); C: no |
+| `Marks.tsx` | `camera` path appended to `paths` | A (`FilledIcon`, `check`) |
+| `taxon.ts` | `leadSelect`, `LeadRow`, `card()` adds `leadInfo` | nobody planned |
+| `de.json`, `en.json` | new: `species.ecology.showMore/showLess`, `species.sourceInfo.*` (6 keys, end of the `species` block), `sighting.referenceTag/addPhoto` (end of `sighting`), top-level `sourceInfo.open/title` (end of file). Removed: see doubt 8 | C adds its own keys at the end of its blocks; merge by hand |
+
+New files: `SourceInfo.tsx`, `SightingDetail.tsx`, `scripts/m14/track-b.mjs`, eleven `b-*` shots. `journal.ts` untouched (the diary's cards carry no `leadInfo`; `Card.leadInfo` is optional).

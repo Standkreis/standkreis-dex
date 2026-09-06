@@ -90,14 +90,11 @@
     "toJournal": "To the journal",
     "toSpecies": "To the species ›",
     "dateTime": "{day} · {time}",
-    "reference": "Reference image, no own photo",
-    "photoCaption": "Photo: {author} · {licence} · {origin}",
     "where": "Where",
     "noPlace": "No place stored.",
     "exact": "Exact place · only you see it",
     "mapCredit": "© OpenStreetMap contributors",
     "mapAlt": "Map with the exact place of the sighting",
-    "when": "When",
     "note": "Note",
     "notePlaceholder": "What did you notice?",
     "wildness": "Wild or kept",
@@ -111,7 +108,9 @@
     "delete": "Delete",
     "deleteConfirm": "Delete this sighting? This cannot be undone.",
     "deleteYes": "Yes, delete",
-    "deleteNo": "Keep"
+    "deleteNo": "Keep",
+    "referenceTag": "Reference photo",
+    "addPhoto": "Add photo"
   },
   "you": {
     "title": "Profile",
@@ -357,7 +356,6 @@
     },
     "lookalikes": {
       "title": "Easily confused",
-      "empty": "No species of the same genus in your Atlas.",
       "sameGenus": "same genus"
     },
     "ecology": {
@@ -370,8 +368,8 @@
         "hostOf": "host of",
         "parasiteOf": "parasite of"
       },
-      "empty": "GloBI knows no relationships for {name} yet. That does not mean there are none.",
-      "more": "+{n} more"
+      "showMore": "show more ({n})",
+      "showLess": "show less"
     },
     "notInAtlas": "not in your Atlas",
     "sources": {
@@ -386,6 +384,14 @@
       "mark": "Studied",
       "marked": "Studied ✓",
       "working": "…"
+    },
+    "sourceInfo": {
+      "text": "Text",
+      "data": "Data",
+      "image": "Image",
+      "occurrence": "Records from GBIF, the last ten years, cut to your district.",
+      "lookalikes": "Species of the same genus in your Atlas, genus after GBIF.",
+      "ecology": "Relationships from Global Biotic Interactions (GloBI). The images belong to the species shown."
     }
   },
   "fill": {
@@ -428,5 +434,9 @@
     "retry": "retry",
     "full": "Get back online first, then save.",
     "searchCapped": "Wait a moment · too many searches at once."
+  },
+  "sourceInfo": {
+    "open": "Show source",
+    "title": "Source"
   }
 }

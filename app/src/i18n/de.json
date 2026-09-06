@@ -90,14 +90,11 @@
     "toJournal": "Zum Tagebuch",
     "toSpecies": "Zur Art ›",
     "dateTime": "{day} · {time}",
-    "reference": "Referenzbild, kein eigenes Foto",
-    "photoCaption": "Foto: {author} · {licence} · {origin}",
     "where": "Wo",
     "noPlace": "Kein Ort gespeichert.",
     "exact": "Genauer Ort · nur du siehst ihn",
     "mapCredit": "© OpenStreetMap-Mitwirkende",
     "mapAlt": "Karte mit dem genauen Ort der Sichtung",
-    "when": "Wann",
     "note": "Notiz",
     "notePlaceholder": "Was ist dir aufgefallen?",
     "wildness": "Wild oder gehalten",
@@ -111,7 +108,9 @@
     "delete": "Löschen",
     "deleteConfirm": "Diese Sichtung löschen? Das lässt sich nicht rückgängig machen.",
     "deleteYes": "Ja, löschen",
-    "deleteNo": "Behalten"
+    "deleteNo": "Behalten",
+    "referenceTag": "Referenzfoto",
+    "addPhoto": "Foto hinzufügen"
   },
   "you": {
     "title": "Profil",
@@ -357,7 +356,6 @@
     },
     "lookalikes": {
       "title": "Verwechslungsgefahr",
-      "empty": "Keine Art derselben Gattung in deinem Atlas.",
       "sameGenus": "gleiche Gattung"
     },
     "ecology": {
@@ -370,8 +368,8 @@
         "hostOf": "Wirt von",
         "parasiteOf": "Parasit von"
       },
-      "empty": "Für {name} kennt GloBI noch keine Beziehungen. Das heißt nicht, dass es keine gibt.",
-      "more": "+{n} weitere"
+      "showMore": "mehr anzeigen ({n})",
+      "showLess": "weniger anzeigen"
     },
     "notInAtlas": "nicht in deinem Atlas",
     "sources": {
@@ -386,6 +384,14 @@
       "mark": "Studiert",
       "marked": "Studiert ✓",
       "working": "…"
+    },
+    "sourceInfo": {
+      "text": "Text",
+      "data": "Daten",
+      "image": "Bild",
+      "occurrence": "Meldungen aus GBIF, die letzten zehn Jahre, auf deinen Landkreis zugeschnitten.",
+      "lookalikes": "Arten derselben Gattung in deinem Atlas, Gattung nach GBIF.",
+      "ecology": "Beziehungen aus Global Biotic Interactions (GloBI). Die Bilder gehören zu den gezeigten Arten."
     }
   },
   "fill": {
@@ -428,5 +434,9 @@
     "retry": "erneut",
     "full": "Erst wieder ins Netz, dann speichern.",
     "searchCapped": "Kurz warten · zu viele Suchen auf einmal."
+  },
+  "sourceInfo": {
+    "open": "Quelle anzeigen",
+    "title": "Quelle"
   }
 }

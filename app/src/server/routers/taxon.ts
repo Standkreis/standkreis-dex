@@ -9,8 +9,10 @@ import { takeSearchToken } from '../searchCap'
 import { publicProcedure, router } from '../trpc'
 
 const thisMonth = () => new Date().getMonth() + 1
-// A card on the species page (look-alike, ecology chip) carries its first image, greyscaled by dex state (handoff 0007 Track B).
-const taxonCard = { id: true, gbifKey: true, sciName: true, commonNames: true, tile: true, contentAt: true, assets: { where: { kind: 'image' }, orderBy: { createdAt: 'asc' }, take: 1, select: { url: true } } } as const
+// A card on the species page (look-alike, ecology chip) carries its first image, greyscaled by dex state (handoff 0007 Track B),
+// with its attribution for the section's ⓘ sheet (handoff 0014 D3: attribution per image view, spec §⚖️).
+const leadSelect = { url: true, author: true, licence: true, licenceUrl: true, sourceUrl: true, origin: true } as const
+const taxonCard = { id: true, gbifKey: true, sciName: true, commonNames: true, tile: true, contentAt: true, assets: { where: { kind: 'image' }, orderBy: { createdAt: 'asc' }, take: 1, select: leadSelect } } as const
 const ensureSelect = { id: true, gbifKey: true, sciName: true, commonNames: true, tile: true, contentAt: true, assets: { where: { kind: 'image', sightingId: null }, orderBy: { createdAt: 'asc' }, take: 1, select: { url: true } } } as const
 const BACKBONE = 'd7dddbf4-2cf0-4f39-9b2a-bb099caae36c'
 type SearchHit = { key: number; nubKey?: number; canonicalName?: string; rank?: string; vernacularNames?: { vernacularName: string; language?: string }[] }
@@ -23,8 +25,9 @@ const gbifSearch = async (params: Record<string, string | number>) => {
     return []
   }
 }
-type Card = { id: string; gbifKey: number; sciName: string; commonNames: unknown; tile: string; assets: { url: string }[] }
-const card = (t: Card) => ({ id: t.id, gbifKey: t.gbifKey, sciName: t.sciName, names: t.commonNames as Record<string, string>, tile: t.tile, lead: t.assets[0]?.url ?? null })
+type LeadRow = { url: string; author: string; licence: string; licenceUrl: string | null; sourceUrl: string; origin: string }
+type Card = { id: string; gbifKey: number; sciName: string; commonNames: unknown; tile: string; assets: LeadRow[] }
+const card = (t: Card) => ({ id: t.id, gbifKey: t.gbifKey, sciName: t.sciName, names: t.commonNames as Record<string, string>, tile: t.tile, lead: t.assets[0]?.url ?? null, leadInfo: t.assets[0] ? { author: t.assets[0].author, licence: t.assets[0].licence, licenceUrl: t.assets[0].licenceUrl, sourceUrl: t.assets[0].sourceUrl, origin: t.assets[0].origin } : null })
 
 type Occurrences = { results: { decimalLatitude?: number; decimalLongitude?: number }[] }
 /** A stand-in centroid for a GADM unit (no geometry column, record 0002 E1): the midpoint of the bbox of 300 GBIF records inside it. Cached on disk by the fetch layer. */

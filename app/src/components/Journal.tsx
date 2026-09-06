@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'next/navigation'
 import { useFormatter, useTranslations } from 'next-intl'
@@ -9,6 +9,7 @@ import { useTRPC } from '@/trpc/client'
 import { useDayLabel } from './JournalDate'
 import { retry, useOutbox } from './Queue'
 import { mergeQueued, type JournalRow as Row, type Kind, KINDS } from './QueueRows'
+import { SightingDrawer } from './SightingDetail'
 import { Thumb, useName, type DexState } from './SpeciesCard'
 import { rememberSpeciesOrigin, restoreSpeciesOrigin } from './SpeciesOrigin'
 
@@ -16,6 +17,7 @@ import { rememberSpeciesOrigin, restoreSpeciesOrigin } from './SpeciesOrigin'
  * The Tagebuch (spec §🎨 8, findings 0002 §8 T1, handoff 0008 Track B): one card per day, newest first, the day's places
  * on the right, rows with a mini tile, the name, one chip and the meta line. Pills Alle · Entdeckt · Studiert (handoff 0014
  * D1: seen before studied; G5: the selected pill is sky). Studies are rows too. Infinite scroll by day, 30 days per page. The pill lives in the URL so back restores it.
+ * A sighting row opens the detail as a drawer over the list (0014 T1); the row's href stays the route, for a long-press or a pasted link.
  */
 export function Journal({ title }: { title: string }) {
   const t = useTranslations('journal')
@@ -55,6 +57,8 @@ export function Journal({ title }: { title: string }) {
   const pathname = usePathname()
   const listUp = all.length > 0
   useEffect(() => { if (listUp) restoreSpeciesOrigin(pathname) }, [listUp, pathname])
+  const [open, setOpen] = useState<string | null>(null)
+  const close = useCallback(() => setOpen(null), [])
 
   return (
     <main className="mx-auto min-h-full max-w-[520px] px-4 pt-3 pb-24">
@@ -77,7 +81,7 @@ export function Journal({ title }: { title: string }) {
 
           {days.isSuccess && all.length === 0 && <p className="mt-6 text-center text-[15px] text-ink-soft" data-testid="empty">{t('emptyFilter')}</p>}
 
-          {all.map((day) => <DayCard key={day.day} day={day.day} places={day.places} rows={day.rows} stateOf={stateOf} />)}
+          {all.map((day) => <DayCard key={day.day} day={day.day} places={day.places} rows={day.rows} stateOf={stateOf} onOpen={setOpen} />)}
 
           <div ref={sentinel} />
           {hasNextPage && (
@@ -90,11 +94,12 @@ export function Journal({ title }: { title: string }) {
           {all.length > 0 && <p className="mt-5 text-[12px] text-ink-faint">{t('footer')}</p>}
         </>
       )}
+      {open && <SightingDrawer id={open} origin={pathname} onClose={close} />}
     </main>
   )
 }
 
-function DayCard({ day, places, rows, stateOf }: { day: string; places: string[]; rows: Row[]; stateOf: (id: string) => DexState }) {
+function DayCard({ day, places, rows, stateOf, onOpen }: { day: string; places: string[]; rows: Row[]; stateOf: (id: string) => DexState; onOpen?: (id: string) => void }) {
   const { label } = useDayLabel()
   return (
     <section className="mt-5" data-testid="day" data-day={day}>
@@ -103,14 +108,14 @@ function DayCard({ day, places, rows, stateOf }: { day: string; places: string[]
         {places.length > 0 && <span className="min-w-0 truncate text-[13px] text-ink-faint" data-testid="day-places">{places.join(', ')}</span>}
       </div>
       <ul className="rounded-3xl bg-card px-3 shadow-[0_2px_12px_rgba(30,42,35,0.06)]">
-        {rows.map((r) => <JournalRow key={r.id} row={r} state={stateOf(r.taxon.id)} />)}
+        {rows.map((r) => <JournalRow key={r.id} row={r} state={stateOf(r.taxon.id)} onOpen={onOpen} />)}
       </ul>
     </section>
   )
 }
 
 /** One row: mini tile without badges (the image tells the state), name, one chip or none, `time · Gemeinde · gehalten · 📷 · note`. */
-export function JournalRow({ row, state }: { row: Row; state: DexState }) {
+export function JournalRow({ row, state, onOpen }: { row: Row; state: DexState; onOpen?: (id: string) => void }) {
   const t = useTranslations('journal')
   const tq = useTranslations('queue')
   const format = useFormatter()
@@ -144,7 +149,7 @@ export function JournalRow({ row, state }: { row: Row; state: DexState }) {
   const cls = 'flex items-center gap-3 py-2.5'
   return (
     <li className="border-b border-tile last:border-b-0" data-testid="row" data-kind={row.kind} data-queued={row.queued}>
-      {row.kind === 'sighting' && row.queued ? <div className={cls}>{inner}</div> : row.kind === 'sighting' ? <Link href={`/sighting/${row.id}`} className={cls}>{inner}</Link> : <Link href={`/species/${row.taxon.gbifKey}`} className={cls} onClick={() => rememberSpeciesOrigin(pathname)}>{inner}</Link>}
+      {row.kind === 'sighting' && row.queued ? <div className={cls}>{inner}</div> : row.kind === 'sighting' ? <Link href={`/sighting/${row.id}`} className={cls} onClick={onOpen ? (e) => { e.preventDefault(); onOpen(row.id) } : undefined}>{inner}</Link> : <Link href={`/species/${row.taxon.gbifKey}`} className={cls} onClick={() => rememberSpeciesOrigin(pathname)}>{inner}</Link>}
     </li>
   )
 }
