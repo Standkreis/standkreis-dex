@@ -7,7 +7,10 @@ import { useFormatter, useTranslations } from 'next-intl'
 import { Link, usePathname } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { useDayLabel } from './JournalDate'
-import { retry, useOutbox } from './Queue'
+import { LadderSheet, type ScanState } from './LadderSheet'
+import { useRouter } from '@/i18n/navigation'
+import { retry, rowOf, update, useOutbox } from './Queue'
+import { scanRow } from './Scan'
 import { mergeQueued, type JournalRow as Row, type Kind, KINDS } from './QueueRows'
 import { SightingDrawer } from './SightingDetail'
 import { Thumb, useName, type DexState } from './SpeciesCard'
@@ -59,6 +62,9 @@ export function Journal({ title }: { title: string }) {
   useEffect(() => { if (listUp) restoreSpeciesOrigin(pathname) }, [listUp, pathname])
   const [open, setOpen] = useState<string | null>(null)
   const close = useCallback(() => setOpen(null), [])
+  // An offline snap's row (0016 B5): opening it shows the ladder sheet with the same two buttons; the badge goes on the first opening.
+  const [scanOpen, setScanOpen] = useState<string | null>(null)
+  const openScan = useCallback((id: string) => { setScanOpen(id); void update(id, (r) => (r.kind === 'scan' ? { ...r, payload: { ...r.payload, opened: true } } : r)) }, [])
 
   return (
     <main className="mx-auto min-h-full max-w-[520px] px-4 pt-3 pb-24">
@@ -81,7 +87,7 @@ export function Journal({ title }: { title: string }) {
 
           {days.isSuccess && all.length === 0 && <p className="mt-6 text-center text-[15px] text-ink-soft" data-testid="empty">{t('emptyFilter')}</p>}
 
-          {all.map((day) => <DayCard key={day.day} day={day.day} places={day.places} rows={day.rows} stateOf={stateOf} onOpen={setOpen} />)}
+          {all.map((day) => <DayCard key={day.day} day={day.day} places={day.places} rows={day.rows} stateOf={stateOf} onOpen={setOpen} onOpenScan={openScan} />)}
 
           <div ref={sentinel} />
           {hasNextPage && (
@@ -95,11 +101,34 @@ export function Journal({ title }: { title: string }) {
         </>
       )}
       {open && <SightingDrawer id={open} origin={pathname} onClose={close} />}
+      {scanOpen && <ScanDrawer id={scanOpen} onClose={() => setScanOpen(null)} />}
     </main>
   )
 }
 
-function DayCard({ day, places, rows, stateOf, onOpen }: { day: string; places: string[]; rows: Row[]; stateOf: (id: string) => DexState; onOpen?: (id: string) => void }) {
+/** The ladder over the diary for a scan row: the row's photo and ladder, "Das ist es" and "Nein, suchen" go to `/log` with the uploaded Asset. */
+function ScanDrawer({ id, onClose }: { id: string; onClose: () => void }) {
+  const router = useRouter()
+  const trpc = useTRPC()
+  const outbox = useOutbox()
+  const row = useMemo(() => scanRow(id), [id, outbox]) // eslint-disable-line react-hooks/exhaustive-deps -- outbox makes rowOf() fresh
+  const me = useQuery(trpc.identity.me.queryOptions())
+  const blob = row?.payload.photoRow ? rowOf(row.payload.photoRow) : undefined
+  const localUrl = useMemo(() => (blob?.kind === 'photo' ? URL.createObjectURL(blob.blob) : null), [blob])
+  useEffect(() => () => { if (localUrl) URL.revokeObjectURL(localUrl) }, [localUrl])
+  if (!row) return null
+  const p = row.payload
+  const state: ScanState = p.ladder ? { status: 'done', result: p.ladder, code: null } : row.dead ? { status: 'error', result: null, code: row.lastError?.includes('415') || row.lastError?.includes('image') ? 'UNSUPPORTED_MEDIA_TYPE' : null } : { status: 'offline', result: null, code: null }
+  const photo = p.photoId ?? p.photoRow ?? null
+  return (
+    <LadderSheet state={state} photoUrl={p.photoId ? `${process.env.NEXT_PUBLIC_API_URL ?? ''}/api/photo/${p.photoId}` : localUrl} region={me.data?.region?.name ?? null}
+      onTake={(gbifKey) => router.push(`/log?taxon=${gbifKey}&photo=${photo}`)}
+      onSearch={(q) => router.push(`/log?photo=${photo}${q ? `&q=${encodeURIComponent(q)}` : ''}`)}
+      onClose={onClose} />
+  )
+}
+
+function DayCard({ day, places, rows, stateOf, onOpen, onOpenScan }: { day: string; places: string[]; rows: Row[]; stateOf: (id: string) => DexState; onOpen?: (id: string) => void; onOpenScan?: (id: string) => void }) {
   const { label } = useDayLabel()
   return (
     <section className="mt-5" data-testid="day" data-day={day}>
@@ -108,22 +137,31 @@ function DayCard({ day, places, rows, stateOf, onOpen }: { day: string; places: 
         {places.length > 0 && <span className="min-w-0 truncate text-[13px] text-ink-faint" data-testid="day-places">{places.join(', ')}</span>}
       </div>
       <ul className="rounded-3xl bg-card px-3 shadow-[0_2px_12px_rgba(30,42,35,0.06)]">
-        {rows.map((r) => <JournalRow key={r.id} row={r} state={stateOf(r.taxon.id)} onOpen={onOpen} />)}
+        {rows.map((r) => <JournalRow key={r.id} row={r} state={stateOf(r.taxon.id)} onOpen={onOpen} onOpenScan={onOpenScan} />)}
       </ul>
     </section>
   )
 }
 
 /** One row: mini tile without badges (the image tells the state), name, one chip or none, `time · Gemeinde · gehalten · 📷 · note`. */
-export function JournalRow({ row, state, onOpen }: { row: Row; state: DexState; onOpen?: (id: string) => void }) {
+export function JournalRow({ row, state, onOpen, onOpenScan }: { row: Row; state: DexState; onOpen?: (id: string) => void; onOpenScan?: (id: string) => void }) {
   const t = useTranslations('journal')
   const tq = useTranslations('queue')
+  const tsc = useTranslations('scan')
   const format = useFormatter()
   const name = useName()
   const pathname = usePathname()
   const chip = row.kind === 'study' ? { text: t('studiedChip'), cls: 'bg-amber-soft text-amber' } : row.first ? { text: t('newlySeen'), cls: 'bg-moss-soft text-moss-deep' } : null
   // The queue chip (handoff 0009 Track B): grey while the row waits for the signal; amber with "erneut" when the server refused it.
-  const queued = row.queued === 'dead'
+  // The scan badge (0016 B5): grey while the answer waits for the signal, moss once the ladder is on the row, until opened.
+  const scan = row.scan
+  const scanBlob = scan?.photoRow ? rowOf(scan.photoRow) : undefined
+  const scanUrl = useMemo(() => (scanBlob?.kind === 'photo' ? URL.createObjectURL(scanBlob.blob) : null), [scanBlob])
+  useEffect(() => () => { if (scanUrl) URL.revokeObjectURL(scanUrl) }, [scanUrl])
+  const badge = scan?.state === 'answered' && !scan.opened
+    ? <span className="motion-badge shrink-0 rounded-full bg-moss-soft px-2 py-0.5 text-[12px] font-semibold text-moss-deep" data-testid="chip-scan" data-state="answered">{tsc('badgeAnswered')}</span>
+    : scan?.state === 'pending' ? <span className="shrink-0 rounded-full bg-tile px-2 py-0.5 text-[12px] font-semibold text-ink-soft" data-testid="chip-scan" data-state="pending">{tsc('badgePending')}</span> : null
+  const queued = scan && scan.state !== 'dead' ? null : row.queued === 'dead'
     ? <button type="button" onClick={() => retry(row.id)} className="shrink-0 rounded-full bg-amber-soft px-2 py-0.5 text-[12px] font-semibold text-amber" data-testid="chip-queued" data-state="dead">{tq('failed')} · {tq('retry')}</button>
     : row.queued ? <span className="shrink-0 rounded-full bg-tile px-2 py-0.5 text-[12px] font-semibold text-ink-soft" data-testid="chip-queued" data-state="waiting">{tq('waiting')}</span> : null
   const meta: React.ReactNode[] = [format.dateTime(row.at, { hour: '2-digit', minute: '2-digit' })]
@@ -131,13 +169,22 @@ export function JournalRow({ row, state, onOpen }: { row: Row; state: DexState; 
   if (row.wildness && row.wildness !== 'wild') meta.push(t(row.wildness))
   if (row.photo) meta.push(<span key="photo" aria-label={t('withPhoto')} role="img">📷</span>)
   if (row.note) meta.push(<i key="note">{row.note}</i>)
+  if (scan?.name) meta.push(<i key="scan">{scan.name}</i>)
   const inner = (
     <>
-      <Thumb card={{ ...row.taxon, lead: row.photo ?? row.taxon.lead }} state={state} size={56} />
+      {scan ? (
+        <span className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-tile text-[24px] text-ink-faint" aria-hidden>
+          {/* eslint-disable-next-line @next/next/no-img-element -- the identity's own upload, or its local blob */}
+          {row.photo || scanUrl ? <img src={row.photo ?? scanUrl ?? ''} alt="" className="h-full w-full object-cover" /> : '📷'}
+        </span>
+      ) : (
+        <Thumb card={{ ...row.taxon, lead: row.photo ?? row.taxon.lead }} state={state} size={56} />
+      )}
       <span className="min-w-0 flex-1">
         <span className="flex min-w-0 items-center gap-2">
-          <span className="truncate text-[17px] leading-tight font-semibold">{name(row.taxon)}</span>
+          <span className="truncate text-[17px] leading-tight font-semibold">{scan ? tsc('unidentified') : name(row.taxon)}</span>
           {chip && <span className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] font-semibold ${chip.cls}`} data-testid="chip">{chip.text}</span>}
+          {badge}
           {queued}
         </span>
         <span className="mt-1 block truncate text-[14px] text-ink-soft" data-testid="meta">
@@ -148,8 +195,8 @@ export function JournalRow({ row, state, onOpen }: { row: Row; state: DexState; 
   )
   const cls = 'flex items-center gap-3 py-2.5'
   return (
-    <li className="border-b border-tile last:border-b-0" data-testid="row" data-kind={row.kind} data-queued={row.queued}>
-      {row.kind === 'sighting' && row.queued ? <div className={cls}>{inner}</div> : row.kind === 'sighting' ? <Link href={`/sighting/${row.id}`} className={cls} onClick={onOpen ? (e) => { e.preventDefault(); onOpen(row.id) } : undefined}>{inner}</Link> : <Link href={`/species/${row.taxon.gbifKey}`} className={cls} onClick={() => rememberSpeciesOrigin(pathname)}>{inner}</Link>}
+    <li className="border-b border-tile last:border-b-0" data-testid="row" data-kind={row.kind} data-queued={row.queued} data-scan={scan?.state}>
+      {scan ? <button type="button" onClick={() => onOpenScan?.(row.id)} className={`${cls} w-full text-left`} data-testid="scan-row">{inner}</button> : row.kind === 'sighting' && row.queued ? <div className={cls}>{inner}</div> : row.kind === 'sighting' ? <Link href={`/sighting/${row.id}`} className={cls} onClick={onOpen ? (e) => { e.preventDefault(); onOpen(row.id) } : undefined}>{inner}</Link> : <Link href={`/species/${row.taxon.gbifKey}`} className={cls} onClick={() => rememberSpeciesOrigin(pathname)}>{inner}</Link>}
     </li>
   )
 }

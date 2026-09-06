@@ -1,10 +1,10 @@
 # 📷 [0016] Findings — Snap-and-send
 
-> What was built for [0016](0016-snap-and-send.md), with evidence. Track A on `main`; Track B follows in the worktree.
+> What was built for [0016](0016-snap-and-send.md), with evidence. Track A on `main`; Track B on `m12-scan` (worktree `../standkreis-dex-scan`).
 
 | 🗓️ Done | 👤 Agent | ⬆️ Handoff | 🧪 Checks |
 | --- | --- | --- | --- |
-| 2026-09-06 | Claude | [0016](0016-snap-and-send.md) | A-C1–A-C4 ✅ · Track B open |
+| 2026-09-06 | Claude | [0016](0016-snap-and-send.md) | A-C1–A-C4 ✅ · B-C1–B-C5 ✅ |
 
 ## 🅰️ Track A
 
@@ -196,3 +196,72 @@ Typecheck, lint, 46 tests (32 before + 14 in `identify.test.ts`: the JSON valida
 - Not committed: `app/scripts/m12/.cache/identify-<n>.json` (raw answers, git-ignored), `/tmp/m12-photos`.
 - Owner: `ANTHROPIC_API_KEY` in Vercel (Production + Preview) **before** the next push, or production refuses to start (A1).
 - No schema change, no migration, nothing at Neon.
+
+## 🅱️ Track B
+
+The snap on the client: the chooser's "Foto" line and the once-only terms sentence (B1), the ladder sheet on `Sheet` (B3/B4), the offline "unbestimmt" row in the existing outbox (B5), the ⓘ on a scanned sighting (B6). B2 was already there: `shrinkToJpeg` in `LogPhoto.tsx` re-encodes to ≤ 1600 px JPEG 0.85 through a canvas (EXIF dropped) before `POST /api/photo`; nothing changed. Checks on the production build (`next build` + `next start -p 3007`, disk photos under `/tmp/m12b-photos`, the dev DB, Mainz-Bingen with 929 taxa), `app/scripts/m12/scan.mjs`, shots in [`0016-shots/`](0016-shots/).
+
+### 🧭 Where it lives
+
+| Piece | Code |
+| --- | --- |
+| Scan state on the client, no new store | `app/src/components/Scan.ts` — answers in localStorage by photo id (`dex.scan.<photoId>`), the B6 note by sighting id (`dex.scan.s.<id>`), the first-upload flag `dex.scan.noted`, `enqueueScan`, `confidenceWord` |
+| The sheet and the hook | `app/src/components/LadderSheet.tsx` — `useScan(photoId, region, enabled)` derives busy · offline · error · done; `LadderSheet` renders it |
+| Chooser (B1) | `app/src/components/LogSheet.tsx` — `chooser-line`, the terms sentence with ⓘ before the first upload, `ScanInfo` (one ⓘ for B1 and B6) |
+| Search screen | `app/src/components/LogSearch.tsx` — `?scan=1` opens the sheet, `?q=` seeds the query, the photo strip's sub becomes "bestimmen lassen" |
+| Save screen | `app/src/components/LogSave.tsx` — `idAssisted` when the saved key is the engine's answer, the offline snap's `at` and point from the `scan` row, the row removed on save |
+| Outbox (B5) | `app/src/components/Queue.ts` — row kind `scan` (`idPending`, `ladder`, `opened`), the flush uploads the blob then calls `identify` and writes the ladder onto the row; `useOutboxReady()` |
+| Diary | `app/src/components/QueueRows.ts`, `Journal.tsx` — the "Unbestimmt" row with `chip-scan[data-state=pending|answered]`, tap opens the ladder sheet with the same two buttons |
+| Sighting ⓘ (B6) | `app/src/components/SightingDetail.tsx` — "bestimmt mit Claude Sonnet 5" + ⓘ: engine, "Diese Bestimmung: 6 ¢", the terms sentence |
+| Server | `app/src/server/routers/sighting.ts:create` — `idAssisted?: boolean` → `evidence: idAssisted` (the enum already had it) |
+| Motion | `app/src/app/globals.css` — `rung-in` keyframes, `.motion-rung` 220 ms on `--ease-out-soft`, zeroed under reduced motion |
+| Words | `app/src/i18n/{de,en}.json` — namespace `scan`, `log.photoScan`; `log.photoNote` removed |
+
+### 🎯 Decisions the handoff left open
+
+| Question | Decision |
+| --- | --- |
+| Where does the "unbestimmt" sighting live without a taxon row? | It is a `scan` row of the outbox until the user takes or rejects the answer. The server sees a sighting only then, with the snap's `at` and point (`LogSave` seeds both from the row). No placeholder taxon, no schema change. |
+| Evidence under "their rung"? | The server returns a flat list, so all lines sit under the deepest rung. Splitting by rung would need the prompt to tag each line; not worth a second Track A round. |
+| Confidence on screen | Only the word: sicher ≥ 0.7 · wahrscheinlich ≥ 0.4 · unsicher. The number lives in the JSON and nowhere on screen (`percent: false` in every check). |
+| Reload of `/log?photo=…&scan=1` | Free: the answer is in localStorage by photo id; one call per photo. |
+| `none` without an outside name | *"Kein Lebewesen erkannt. Suche selbst."* with the search primary; the handoff only worded the `outside` case. |
+| Which tiles scan | Foto and Galerie both land on `?scan=1`; the search strip's "bestimmen lassen" scans a photo attached the old way. |
+| `idAssisted` | Set when the saved species is the engine's answer, else `photographed`; the B6 note remembers `taken` either way. |
+
+### ✅ Checks
+
+All on `:3007`, one identity with Mainz-Bingen, `node scripts/m12/scan.mjs ../docs/handoffs/0016-shots` (`ONLY=c3` reruns one section).
+
+| Check | Result | Numbers | Shot |
+| --- | --- | --- | --- |
+| **B-C4** first-upload sentence | ✅ | On the chooser before the first upload with `data-first="1"` and the ⓘ; after the upload gone, `dex.scan.noted=1`, the ⓘ stays on the "Foto" line; the sheet lists engine · terms | `b-c4-chooser-first`, `b-c4-chooser-after`, `b-c4-info-sheet` |
+| **B-C1** cherry 15.jpg | ✅ | Sheet up 366 ms after the upload, ladder done 9.9 s; Vogelkirsche · *Prunus avium* · sicher (0.75 in JSON); rungs Rosaceae → Prunus → Prunus avium with `animation-delay` 0 / 0.22 / 0.44 s, 3 evidence lines under the species; "Das ist es" → `/log?taxon=3020791&photo=<asset>` with species and photo → saved, server `evidence: idAssisted`; 6.027 ¢ (cache write 19 740 tokens, the region cold) | `b-c1-ladder`, `b-c1-save`, `b-c1-fill` |
+| **B6** ⓘ on the sighting | ✅ | Line "bestimmt mit Claude Sonnet 5", sheet: Claude Sonnet 5 · Anthropic (USA) · "Diese Bestimmung: 6 ¢ · Das Foto geht ohne Ort und Datum an Anthropic …" | `b-c6-sighting-info` |
+| **B-C2** several 13.jpg | ✅ | *"Mehrere Arten im Bild, welche meinst du?"*, buttons search + again; search lands on `/log?photo=<id>` with an empty query; 1.056 ¢ | `b-c2-several` |
+| **B-C2** outside 10.jpg | ✅ | *"Nicht im Atlas von Mainz-Bingen: vermutlich Schefflera arboricola"*, buttons take + search + again; "Nein, suchen" → `?q=Schefflera arboricola`, 2 backbone rows; 1.126 ¢ | `b-c2-outside`, `b-c2-outside-search` |
+| **B-C3** offline 12.jpg | ✅ | Offline: sheet 408 ms, *"kein Netz · wird beim nächsten Mal bestimmt"*, "Zum Tagebuch"; box = one `scan` row (`idPending`) + one `photo` row (117 051 bytes); diary row "Unbestimmt · wird beim nächsten Mal bestimmt · 22:29 · Mainz-Bingen", badge pending. Online (+`online` event): `POST /api/photo` 201 at +1.5 s, `identify` 200, badge "answered" and "Vorschlag da · *Mantis religiosa*" at 5.7 s; tap → ladder Mantidae → Mantis → *Mantis religiosa* · sicher, 4 evidence lines; "Das ist es" → save screen with species, photo, "Heute · 22:29" → server `idAssisted`, photo, `at` = the snap's time; box empty. 1.06 ¢ | `b-c3-offline`, `b-c3-journal-pending`, `b-c3-badge`, `b-c3-ladder`, `b-c3-save` |
+| **B-C5** `npm run check` | ✅ | Typecheck, lint (0 errors; 3 warnings in `scripts/id-probe` and `scripts/m8b`, not this track), 46 tests, export build 3 757 pages | — |
+
+Spend: 6.0 + 1.1 + 1.1 + 5.6 + 1.1 ¢ on the recorded runs plus one identify of a failed first C3 run, ≈ 21 ¢ at most.
+
+### 🐛 What the first C3 run found
+
+Two `scan` rows for one snap. `useScan` decided on `queuedPhoto()` / `scanRowFor()` before the outbox had been read from IndexedDB (a fresh load of `/log`), so it asked the engine offline, got no answer and enqueued a second row by the photo-row id; the flush then hit that bogus id first. Fix: `useOutboxReady()` in `Queue.ts`, `LogFlow` renders nothing until the box is loaded (a few ms), and the failure path re-checks `queuedPhoto`. Second finding, on the script not the app: CDP's `Network.emulateNetworkConditions` flips `navigator.onLine` but fires no `online` event, so the flush waited for the 60 s tick; the script now dispatches the event as a phone does.
+
+### 🤔 Doubts
+
+1. **The diary's ladder titles with the Latin name.** The sheet opened from the diary has no set to look up "Europäische Gottesanbeterin"; the search screen's sheet does (shot `b-c1-ladder` vs `b-c3-ladder`). One `taxon.byKey` query in `ScanDrawer` would fix it; I did not add a call for a title.
+2. **An offline snap is invisible to other devices** until it is saved: it is a row in this phone's IndexedDB. Same as every queued sighting today; the badge says so.
+3. **Evidence all under the deepest rung** (see decisions). If the owner wants the picture of the handoff, Track A's prompt needs a `rung` per line.
+4. **Two chooser tiles scan, no "Foto ohne Bestimmung" path.** The old attach-without-scan flow is still reachable from the search strip (attach, then ignore "bestimmen lassen"), but the chooser has no tile for it. On purpose: the handoff's "Foto" line promises the scan.
+5. **The engine name is a constant** (`ENGINE` in `Scan.ts`, "Claude Sonnet 5") and the cost line reads `cost.cents` from the response; a model change on the server needs the constant updated, or the server should return the name.
+6. **Reduced motion is untested in the browser**; the rule sits in the same `prefers-reduced-motion` block as the other motion classes (`globals.css`).
+
+### 🔀 For the merge
+
+- New: `app/src/components/Scan.ts`, `LadderSheet.tsx`, `app/scripts/m12/scan.mjs`, `docs/handoffs/0016-shots/` (15 PNG). Changed: `LogSheet.tsx`, `LogSearch.tsx`, `LogSave.tsx`, `LogFlow.tsx`, `Queue.ts`, `QueueFlusher.tsx`, `QueueRows.ts`, `Journal.tsx`, `SightingDetail.tsx`, `globals.css`, `de.json`, `en.json`, `routers/sighting.ts` (`idAssisted` on `create`).
+- The server side of Track A is untouched except `sighting.create`'s optional input.
+- `log.photoNote` is gone from both locales; `log.photoAttachedSub` now reads "gespeichert" / "stored".
+- No schema change, no migration, nothing at Neon. B5 did not need the placeholder taxon.
+- Not committed: `/tmp/m12b-photos`, the fixture copies under `docs/research/walks/01/prep/` (git-ignored).

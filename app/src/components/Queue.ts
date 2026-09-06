@@ -4,6 +4,7 @@ import { useSyncExternalStore } from 'react'
 import { createStore, del, entries, set } from 'idb-keyval'
 import { createTRPCClient, httpBatchLink, TRPCClientError } from '@trpc/client'
 import superjson from 'superjson'
+import type { inferRouterOutputs } from '@trpc/server'
 import type { AppRouter } from '@/server/routers/_app'
 
 // The sightings queue (handoff 0009 Track B). One IndexedDB store `outbox`; every save from the save screen writes a row
@@ -30,14 +31,37 @@ export type SightingPayload = {
   place: string | null
   /** The client's "first" (no seenAt for the taxon); the server's wins after the flush. */
   first: boolean
+  /** The species is the scan's answer (handoff 0016 B4): the server stores `evidence: idAssisted`. */
+  idAssisted?: boolean
 }
 export type PhotoPayload = { forSighting?: string }
 export type StudyPayload = { taxonId: string; taxon: QueueTaxon }
+/**
+ * A snap without signal (handoff 0016 B5): the sighting as "unbestimmt" until the flush has uploaded the photo and asked
+ * `sighting.identify`. `idPending` is true until the ladder is on the row; the row then stays in the box (it is no server
+ * row yet: a Sighting needs a taxon) until the user takes or rejects the answer on the save screen, which removes it.
+ */
+export type ScanPayload = {
+  at: string
+  lat?: number
+  lng?: number
+  place: string | null
+  regionId: string
+  /** The `photo` row of this outbox with the blob; the flush uploads it and moves on to `photoId`. */
+  photoRow?: string
+  /** The Asset on the server (uploaded online, or by the flush). */
+  photoId?: string
+  idPending: boolean
+  ladder?: inferRouterOutputs<AppRouter>['sighting']['identify']
+  /** The diary's badge shows until the row was opened once. */
+  opened?: boolean
+}
 
 export type Row = { id: string; createdAt: number; attempts: number; lastError: string | null; dead?: boolean } & (
   | { kind: 'sighting'; payload: SightingPayload; blob?: undefined }
   | { kind: 'photo'; payload: PhotoPayload; blob: Blob }
   | { kind: 'study'; payload: StudyPayload; blob?: undefined }
+  | { kind: 'scan'; payload: ScanPayload; blob?: undefined }
 )
 export type Kind = Row['kind']
 export type Flushed = { row: Row; result: unknown }
@@ -49,11 +73,13 @@ export class QueueFull extends Error { constructor() { super('queue full') } }
 const api = process.env.NEXT_PUBLIC_API_URL ?? ''
 const store = typeof indexedDB === 'undefined' ? null : createStore('dex-outbox', 'outbox')
 // A vanilla client of its own: the flush runs outside React (timers, the online event) and must not depend on the provider.
-const client = createTRPCClient<AppRouter>({ links: [httpBatchLink({ url: `${api}/api/trpc`, transformer: superjson, fetch: (url, opts) => fetch(url, { ...opts, credentials: 'include' }) })] })
+// `x-dex-locale` (handoff 0016 A5): the flush's `identify` answers in the page's language, as the provider's client does.
+const client = createTRPCClient<AppRouter>({ links: [httpBatchLink({ url: `${api}/api/trpc`, transformer: superjson, headers: () => ({ 'x-dex-locale': document.documentElement.lang }), fetch: (url, opts) => fetch(url, { ...opts, credentials: 'include' }) })] })
 
 // ── The in-memory mirror: every read of the box goes through it, every write updates it and IndexedDB and tells the listeners ──
 let rows: Row[] = []
 let loaded: Promise<void> | null = null
+let isLoaded = typeof indexedDB === 'undefined' // no IndexedDB (SSR, a test): nothing to wait for
 const listeners = new Set<() => void>()
 const flushedListeners = new Set<(f: Flushed) => void>()
 const notify = () => { for (const l of listeners) l() }
@@ -61,7 +87,7 @@ const byAge = (a: Row, b: Row) => a.createdAt - b.createdAt
 
 export function load(): Promise<void> {
   if (!store) return Promise.resolve()
-  return (loaded ??= entries<string, Row>(store).then((all) => { rows = all.map(([, r]) => r).sort(byAge); notify() }).catch(() => undefined))
+  return (loaded ??= entries<string, Row>(store).then((all) => { rows = all.map(([, r]) => r).sort(byAge) }).catch(() => undefined).then(() => { isLoaded = true; notify() }))
 }
 export const rowsNow = () => rows
 export const rowOf = (id: string) => rows.find((r) => r.id === id)
@@ -72,11 +98,20 @@ export function useOutbox(): Row[] {
   return useSyncExternalStore(subscribe, rowsNow, () => empty)
 }
 const empty: Row[] = []
+/** Has the box been read from IndexedDB once? A screen that decides on `rowOf()` at mount (the scan, the save screen's queued photo) waits for this. */
+export function useOutboxReady(): boolean {
+  return useSyncExternalStore(subscribe, () => isLoaded, () => false)
+}
 
 async function write(row: Row) {
   rows = [...rows.filter((r) => r.id !== row.id), row].sort(byAge)
   notify()
   if (store) await set(row.id, row, store)
+}
+/** Change one row in place (a scan row's point, its `opened` flag); a row that is gone stays gone. */
+export async function update(id: string, patch: (r: Row) => Row) {
+  const r = rowOf(id)
+  if (r) await write(patch(r))
 }
 export async function remove(id: string) {
   rows = rows.filter((r) => r.id !== id)
@@ -140,9 +175,26 @@ async function send(row: Row): Promise<unknown> {
         await write({ ...row, payload: { ...p, photoRow: undefined }, lastError: message(e) })
       }
     }
-    return client.sighting.create.mutate({ id: row.id, taxonId: p.taxonId, at: new Date(p.at), lat: p.lat, lng: p.lng, note: p.note, wildness: p.wildness, photoId })
+    return client.sighting.create.mutate({ id: row.id, taxonId: p.taxonId, at: new Date(p.at), lat: p.lat, lng: p.lng, note: p.note, wildness: p.wildness, photoId, idAssisted: p.idAssisted && !!photoId ? true : undefined })
   }
   if (row.kind === 'study') return client.study.mark.mutate({ taxonId: row.payload.taxonId })
+  if (row.kind === 'scan') {
+    // B5: the photo first (a refused file kills the row: there is nothing to identify), then the engine; the ladder lands on the row.
+    const p = row.payload
+    let photoId = p.photoId
+    const photo = p.photoRow ? rowOf(p.photoRow) : undefined
+    if (photo?.kind === 'photo') {
+      photoId = (await upload(photo.blob)).id
+      await remove(photo.id)
+      await write({ ...row, payload: { ...p, photoRow: undefined, photoId } })
+    }
+    if (!photoId) throw new HttpError(410, 'photo gone')
+    const ladder = await client.sighting.identify.mutate({ photoId, regionId: p.regionId, locale: document.documentElement.lang === 'en' ? 'en' : 'de' })
+    const cur = rowOf(row.id) // the point may have landed on the row while the engine worked
+    const base: Row & { kind: 'scan' } = cur?.kind === 'scan' ? cur : row
+    await write({ ...base, payload: { ...base.payload, photoRow: undefined, photoId, idPending: false, ladder }, lastError: null })
+    return ladder
+  }
   // A photo row alone: bound to a sighting that already exists on the server (kind `photo` with forSighting); an unbound one waits for its sighting row.
   if (row.payload.forSighting) {
     const a = await upload(row.blob)
@@ -168,12 +220,13 @@ async function run() {
     if (row.dead) continue
     if (row.kind === 'photo' && !row.payload.forSighting) {
       // Waits for its sighting; if none ever comes (chooser → back), it goes after a day, like the server's abandoned Assets.
-      if (Date.now() - row.createdAt > ORPHAN_AGE && !rows.some((r) => r.kind === 'sighting' && r.payload.photoRow === row.id)) await remove(row.id)
+      if (Date.now() - row.createdAt > ORPHAN_AGE && !rows.some((r) => (r.kind === 'sighting' || r.kind === 'scan') && r.payload.photoRow === row.id)) await remove(row.id)
       continue
     }
+    if (row.kind === 'scan' && !row.payload.idPending) continue // answered: waits for the user, not for the signal
     try {
       const result = await send(row)
-      await remove(row.id)
+      if (row.kind !== 'scan') await remove(row.id) // an answered scan row stays until the save screen takes it
       for (const l of flushedListeners) l({ row, result })
     } catch (e) {
       const current = rowOf(row.id) ?? row

@@ -7,7 +7,8 @@ import { useRouter } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { useAtlasSet } from './AtlasCounters'
 import { search } from './AtlasSearch'
-import { PhotoInput, photoSrc, type PhotoState } from './LogPhoto'
+import { LadderSheet, useScan } from './LadderSheet'
+import { PhotoInput, photoSrc, queuedPhoto, type PhotoState } from './LogPhoto'
 import { Icon } from './Marks'
 import { Thumb, tileIcon, type DexState } from './SpeciesCard'
 
@@ -17,8 +18,10 @@ type Species = NonNullable<ReturnType<typeof useAtlasSet>['set']>['species'][num
  * The search screen (spec §🎨 4, findings 0002 §4 L2). An empty query IS the shortlist: the set in "jetzt wahrscheinlich"
  * order with the seen species removed, eight rows. Typing: set rows first with their state (AtlasSearch), then the GBIF
  * backbone through `taxon.search`, each marked as joining the atlas (record 0002 E13).
+ * `scan` (handoff 0016 B3): the ladder sheet over the search for `photoId`; "Das ist es" goes to the save screen,
+ * "Nein, suchen" stays here with `initialQuery` (B4), closing the sheet keeps the photo attached.
  */
-export function LogSearch({ photoId }: { photoId: string | null }) {
+export function LogSearch({ photoId, scan = false, initialQuery = '' }: { photoId: string | null; scan?: boolean; initialQuery?: string }) {
   const t = useTranslations('log')
   const tq = useTranslations('queue')
   const ts = useTranslations('species')
@@ -28,20 +31,28 @@ export function LogSearch({ photoId }: { photoId: string | null }) {
   const router = useRouter()
   const trpc = useTRPC()
 
-  const [q, setQ] = useState('')
-  const [debounced, setDebounced] = useState('')
+  const [q, setQ] = useState(initialQuery)
+  const [debounced, setDebounced] = useState(initialQuery.trim())
   useEffect(() => { const h = setTimeout(() => setDebounced(q.trim()), 350); return () => clearTimeout(h) }, [q])
   // The photo strip: a photo taken in the chooser rides along as ?photo; the strip can also add one here.
   const picker = useRef<HTMLInputElement>(null)
+  const camera = useRef<HTMLInputElement>(null)
   const [photoState, setPhotoState] = useState<PhotoState>('idle')
   const withPhoto = (path: string) => (photoId ? `${path}&photo=${photoId}` : path)
 
   const me = useQuery(trpc.identity.me.queryOptions())
   const region = me.data?.region ?? null
+  // The scan (0016 B3–B5): one identify per photo, the ladder sheet over this screen while `?scan=1` is in the URL.
+  const scanState = useScan(photoId, region, scan)
+  const queued = queuedPhoto(photoId)
+  const localUrl = useMemo(() => (queued ? URL.createObjectURL(queued.blob) : null), [queued])
+  useEffect(() => () => { if (localUrl) URL.revokeObjectURL(localUrl) }, [localUrl])
+  const scanned = (id: string) => router.replace(`/log?photo=${id}&scan=1`)
   const { set, progress, loading } = useAtlasSet(region)
   const seen = useMemo(() => new Set(progress?.seen ?? []), [progress])
   const studied = useMemo(() => new Set(progress?.studied ?? []), [progress])
   const name = useCallback((s: { names: Record<string, string>; sciName: string }) => s.names[locale] ?? s.names.de ?? s.names.en ?? s.sciName, [locale])
+  const answerName = scanState?.result?.answer ? (() => { const hit = set?.species.find((x) => x.gbifKey === scanState.result!.answer!.gbifKey); return hit ? name(hit) : null })() : null
   const typed = q.trim().length > 0
 
   // The set rows: the shortlist (server order = nowRatio desc) or the folded prefix match of AtlasSearch.
@@ -77,8 +88,8 @@ export function LogSearch({ photoId }: { photoId: string | null }) {
       {photoId ? (
         <div className="mt-3 flex items-center gap-3 rounded-2xl bg-card px-3 py-2.5 text-[15px] shadow-[0_2px_12px_rgba(30,42,35,0.06)]" data-testid="log-photo-strip" data-photo={photoId}>
           {/* eslint-disable-next-line @next/next/no-img-element -- the identity's own upload */}
-          <img src={photoSrc(`/api/photo/${photoId}`)} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
-          <span className="min-w-0 flex-1"><span className="block font-semibold">{t('photoAttached')}</span><span className="block text-[13px] text-ink-soft">{t('photoAttachedSub')}</span></span>
+          <img src={localUrl ?? photoSrc(`/api/photo/${photoId}`)} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
+          <span className="min-w-0 flex-1"><span className="block font-semibold">{t('photoAttached')}</span><button type="button" onClick={() => scanned(photoId)} className="block text-[13px] text-moss-deep underline" data-testid="log-photo-scan">{t('photoScan')}</button></span>
           <button type="button" onClick={() => router.replace('/log')} className="shrink-0 text-[15px] font-semibold text-ink-soft" data-testid="log-photo-drop">{t('removePhoto')}</button>
         </div>
       ) : (
@@ -87,7 +98,16 @@ export function LogSearch({ photoId }: { photoId: string | null }) {
           {photoState === 'busy' ? <span>{t('photoUploading')}</span> : photoState === 'error' ? <span className="text-amber">{tc('error')}</span> : <span>{t('noPhoto')} · <span className="font-semibold text-moss-deep underline">{t('addPhoto')}</span></span>}
         </button>
       )}
-      <PhotoInput ref={picker} source="gallery" onPhoto={(p) => router.replace(`/log?photo=${p.id}`)} onState={setPhotoState} testId="photo-input" />
+      <PhotoInput ref={picker} source="gallery" onPhoto={(p) => scanned(p.id)} onState={setPhotoState} testId="photo-input" />
+      <PhotoInput ref={camera} source="camera" onPhoto={(p) => scanned(p.id)} onState={setPhotoState} testId="photo-input-camera" />
+      {scan && photoId && scanState && (
+        <LadderSheet state={scanState} photoUrl={localUrl ?? photoSrc(`/api/photo/${photoId}`)} region={region?.name ?? null} commonName={answerName}
+          onTake={(gbifKey) => router.replace(`/log?taxon=${gbifKey}&photo=${photoId}`)}
+          onSearch={(query) => { setQ(query); router.replace(`/log?photo=${photoId}${query ? `&q=${encodeURIComponent(query)}` : ''}`) }}
+          onAgain={() => camera.current?.click()}
+          onJournal={() => router.replace('/journal')}
+          onClose={() => router.replace(`/log?photo=${photoId}`)} />
+      )}
 
       {!set && loading && <p className="mt-6 text-[15px] text-ink-soft">{tc('working')}</p>}
       {me.data && !region && <p className="mt-6 text-[15px] text-ink-soft">{t('noRegion')}</p>}

@@ -142,7 +142,6 @@
     "photoSub": "take one",
     "gallery": "Gallery",
     "gallerySub": "pick one",
-    "photoNote": "A photo is stored, not identified. Automatic identification comes later.",
     "back": "Back",
     "searchPlaceholder": "Search species · common or Latin name",
     "clear": "Clear",
@@ -183,10 +182,11 @@
     "noRegion": "Pick a region first.",
     "photoUploading": "Saving the photo …",
     "photoAttached": "Photo attached",
-    "photoAttachedSub": "stored, not identified",
+    "photoAttachedSub": "stored",
     "removePhoto": "remove",
     "logFirst": "Discovered",
-    "logAgain": "Seen again"
+    "logAgain": "Seen again",
+    "photoScan": "identify"
   },
   "settings": {
     "title": "Settings",
@@ -443,5 +443,43 @@
   "sourceInfo": {
     "open": "Show source",
     "title": "Source"
+  },
+  "scan": {
+    "title": "Identification",
+    "photoLine": "Take a photo, we will see what it is",
+    "terms": "The photo goes to Anthropic without place or date (USA, deleted within 30 days, no training).",
+    "termsTitle": "Identification",
+    "engine": "Claude Sonnet 5",
+    "engineOrigin": "Anthropic · terms of use",
+    "busy": "Identifying …",
+    "offline": "no signal · identified next time",
+    "offlineSub": "The sighting is in the journal as “unidentified”, with the photo.",
+    "toJournal": "To the journal",
+    "several": "Several species in the picture, which one do you mean?",
+    "outside": "Not in the {region} atlas: probably {outside}",
+    "none": "No organism recognised. Search yourself.",
+    "genusOnly": "Genus {genus}",
+    "unknownTitle": "Not recognised",
+    "sure": "confident",
+    "likely": "likely",
+    "unsure": "unsure",
+    "rung": {
+      "family": "Family",
+      "genus": "Genus",
+      "species": "Species"
+    },
+    "hint": "Please get close: a leaf, a fruit in your hand, the bark — that is how apple, pear and cherry can be told apart.",
+    "take": "That's it",
+    "search": "No, search",
+    "again": "Another photo",
+    "error": "The identification did not work.",
+    "errorImage": "The image could not be read.",
+    "errorBusy": "Wait a moment · too many identifications at once.",
+    "errorTimeout": "No answer · please try again.",
+    "unidentified": "Unidentified",
+    "badgePending": "identified next time",
+    "badgeAnswered": "Suggestion ready",
+    "identifiedWith": "identified with {engine}",
+    "costLine": "This identification: {cents} ¢"
   }
 }

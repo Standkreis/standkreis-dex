@@ -142,7 +142,6 @@
     "photoSub": "aufnehmen",
     "gallery": "Galerie",
     "gallerySub": "auswählen",
-    "photoNote": "Ein Foto wird gespeichert, nicht bestimmt. Die automatische Bestimmung kommt später.",
     "back": "Zurück",
     "searchPlaceholder": "Art suchen · deutsch oder lateinisch",
     "clear": "Leeren",
@@ -183,10 +182,11 @@
     "noRegion": "Erst eine Region wählen.",
     "photoUploading": "Foto wird gespeichert …",
     "photoAttached": "Foto angehängt",
-    "photoAttachedSub": "gespeichert, nicht bestimmt",
+    "photoAttachedSub": "gespeichert",
     "removePhoto": "entfernen",
     "logFirst": "Entdeckt",
-    "logAgain": "Wieder entdeckt"
+    "logAgain": "Wieder entdeckt",
+    "photoScan": "bestimmen lassen"
   },
   "settings": {
     "title": "Einstellungen",
@@ -443,5 +443,43 @@
   "sourceInfo": {
     "open": "Quelle anzeigen",
     "title": "Quelle"
+  },
+  "scan": {
+    "title": "Bestimmung",
+    "photoLine": "Foto machen, wir schauen, was es ist",
+    "terms": "Das Foto geht ohne Ort und Datum an Anthropic (USA, nach spätestens 30 Tagen gelöscht, kein Training).",
+    "termsTitle": "Bestimmung",
+    "engine": "Claude Sonnet 5",
+    "engineOrigin": "Anthropic · Nutzungsbedingungen",
+    "busy": "Wird bestimmt …",
+    "offline": "kein Netz · wird beim nächsten Mal bestimmt",
+    "offlineSub": "Die Sichtung steht als „unbestimmt“ im Tagebuch, mit dem Foto.",
+    "toJournal": "Zum Tagebuch",
+    "several": "Mehrere Arten im Bild, welche meinst du?",
+    "outside": "Nicht im Atlas von {region}: vermutlich {outside}",
+    "none": "Kein Lebewesen erkannt. Suche selbst.",
+    "genusOnly": "Gattung {genus}",
+    "unknownTitle": "Nicht erkannt",
+    "sure": "sicher",
+    "likely": "wahrscheinlich",
+    "unsure": "unsicher",
+    "rung": {
+      "family": "Familie",
+      "genus": "Gattung",
+      "species": "Art"
+    },
+    "hint": "Bitte einmal nah heran: ein Blatt, eine Frucht in der Hand, die Rinde — daran lassen sich Apfel, Birne und Kirsche unterscheiden.",
+    "take": "Das ist es",
+    "search": "Nein, suchen",
+    "again": "Noch ein Foto",
+    "error": "Die Bestimmung hat nicht geklappt.",
+    "errorImage": "Das Bild konnte nicht gelesen werden.",
+    "errorBusy": "Kurz warten · zu viele Bestimmungen auf einmal.",
+    "errorTimeout": "Keine Antwort · bitte noch einmal.",
+    "unidentified": "Unbestimmt",
+    "badgePending": "wird beim nächsten Mal bestimmt",
+    "badgeAnswered": "Vorschlag da",
+    "identifiedWith": "bestimmt mit {engine}",
+    "costLine": "Diese Bestimmung: {cents} ¢"
   }
 }

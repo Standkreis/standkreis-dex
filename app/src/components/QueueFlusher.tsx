@@ -8,6 +8,8 @@ import { flush, load, onFlushed, rowsNow, subscribe, type Row } from './Queue'
 /**
  * Mounted once in the layout: runs the flush on `online`, on foreground, and every 60 s while rows wait; after a row
  * lands, the queries that show it are invalidated so the server's answer (its `first`, the Gemeinde, the photo) wins.
+ * A `scan` row (handoff 0016 B5) is flushed the same way: the photo goes up, `sighting.identify` runs, the ladder lands
+ * on the row and the diary (which reads the box live) shows the badge; nothing on the server changes until the save.
  * While rows wait, `identity.progress` is overlaid with their taxa, so a reload in the forest keeps the cells filled.
  */
 export function QueueFlusher() {
@@ -19,7 +21,7 @@ export function QueueFlusher() {
     const visible = () => { if (document.visibilityState === 'visible') void flush() }
     window.addEventListener('online', online)
     document.addEventListener('visibilitychange', visible)
-    const timer = setInterval(() => { if (rowsNow().some((r) => !r.dead)) void flush() }, 60_000)
+    const timer = setInterval(() => { if (rowsNow().some((r) => !r.dead && !(r.kind === 'scan' && !r.payload.idPending))) void flush() }, 60_000)
     return () => { window.removeEventListener('online', online); document.removeEventListener('visibilitychange', visible); clearInterval(timer) }
   }, [])
 

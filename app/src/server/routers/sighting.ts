@@ -65,6 +65,8 @@ export const sightingRouter = router({
         note: z.string().trim().max(500).optional(),
         wildness: z.enum(['wild', 'captive', 'cultivated']),
         photoId: z.string().uuid().optional(),
+        /** The species is the scan's answer, taken with "Das ist es" (handoff 0016 B4): `evidence` becomes `idAssisted`. */
+        idAssisted: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -93,7 +95,7 @@ export const sightingRouter = router({
           lng: hasPoint ? input.lng : null,
           place,
           note: input.note || null,
-          evidence: photo ? 'photographed' : 'claimed',
+          evidence: photo && input.idAssisted ? 'idAssisted' : photo ? 'photographed' : 'claimed',
           wildness: input.wildness,
           ...(photo ? { photos: { connect: { id: photo.id } } } : {}),
         },

@@ -10,6 +10,7 @@ import { useTRPC } from '@/trpc/client'
 import { useAtlasSet } from './AtlasCounters'
 import { PhotoInput, photoSrc, queuedPhoto, type PhotoState } from './LogPhoto'
 import { enqueue, flush, landing, queuedWild, QueueFull, remove as removeRow, useOutbox, type Lead } from './Queue'
+import { bindScan, scanOf, scanRowFor } from './Scan'
 import { Thumb, type Card, type DexState } from './SpeciesCard'
 
 type Created = inferRouterOutputs<AppRouter>['sighting']['create']
@@ -53,7 +54,9 @@ export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; ph
   const state: DexState = card && progress ? (progress.seen.includes(card.id) ? 'seen' : progress.studied.includes(card.id) ? 'studied' : 'none') : 'none'
   const name = card ? card.names[locale] ?? card.names.de ?? card.names.en ?? card.sciName : ''
 
-  const [at, setAt] = useState(() => new Date())
+  // An offline snap (0016 B5) is a `scan` row of the outbox behind this photo: its time and point are the sighting's, and the save removes it.
+  const scanRow = useMemo(() => scanRowFor(photoId), [photoId]) // read once: the row is gone after the save
+  const [at, setAt] = useState(() => (scanRow ? new Date(scanRow.payload.at) : new Date()))
   const [note, setNote] = useState('')
   // The photo slot: the id rides in the URL (from the chooser or the search strip), so back and reload keep it.
   const picker = useRef<HTMLInputElement>(null)
@@ -68,7 +71,7 @@ export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; ph
   const dropPhoto = () => { if (local) void removeRow(local.id).then(() => router.replace(here(null))); else if (photoId) removePhoto.mutate({ photoId }) }
 
   // Location: if the browser already granted it, take it silently; if it is still a question, explain first and ask on a tap.
-  const [loc, setLoc] = useState<Loc>({ status: 'idle' })
+  const [loc, setLoc] = useState<Loc>(() => (scanRow?.payload.lat != null && scanRow.payload.lng != null ? { status: 'granted', lat: scanRow.payload.lat, lng: scanRow.payload.lng } : { status: 'idle' }))
   const ask = () => {
     if (!('geolocation' in navigator)) return setLoc({ status: 'denied' })
     setLoc({ status: 'asking' })
@@ -79,8 +82,9 @@ export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; ph
     )
   }
   useEffect(() => {
+    if (scanRow?.payload.lat != null) return // the point of the snap, not of the sofa
     navigator.permissions?.query({ name: 'geolocation' }).then((p) => { if (p.state === 'granted') ask(); else if (p.state === 'denied') setLoc({ status: 'denied' }) }).catch(() => {})
-  }, [])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
   const place = useQuery(trpc.sighting.place.queryOptions({ lat: loc.lat ?? 0, lng: loc.lng ?? 0 }, { enabled: loc.status === 'granted', staleTime: Infinity }))
   const where = loc.status === 'granted' ? (place.isLoading ? t('locating') : place.data?.place ?? region?.name ?? '') : region?.name ?? ''
 
@@ -103,10 +107,16 @@ export function LogSave({ gbifKey, photoId, fromSpecies }: { gbifKey: number; ph
     const placeNow = (loc.status === 'granted' ? place.data?.place : null) ?? region?.name ?? null
     const lead: Lead = inSet?.lead ?? null
     const taxon = { id: card.id, gbifKey, sciName: card.sciName, names: card.names, tile: card.tile, lead }
+    // The scan (0016 B4/B6): the species is the engine's answer → `idAssisted`; the answer's cost line moves under the sighting's id for the ⓘ.
+    const idAssisted = !!photoId && scanOf(photoId)?.answer?.gbifKey === gbifKey
+    const scanNow = scanRowFor(photoId) // fresh: the flush may have uploaded the queued photo meanwhile, then the Asset id is on the row
+    const assetId = photoId && !local ? (scanNow?.payload.photoId ?? photoId) : undefined
     setSaving('busy')
     setProblem(null)
     try {
-      await enqueue({ id, kind: 'sighting', payload: { taxonId: card.id, at: at.toISOString(), lat: loc.lat, lng: loc.lng, note: note.trim() || undefined, wildness, photoId: photoId && !local ? photoId : undefined, photoRow: local?.id, taxon, place: placeNow, first } })
+      await enqueue({ id, kind: 'sighting', payload: { taxonId: card.id, at: at.toISOString(), lat: loc.lat, lng: loc.lng, note: note.trim() || undefined, wildness, photoId: assetId, photoRow: local?.id, taxon, place: placeNow, first, idAssisted: idAssisted || undefined } })
+      bindScan(id, photoId, gbifKey)
+      if (scanNow) await removeRow(scanNow.id) // the "unbestimmt" row is this sighting now
     } catch (e) {
       setProblem(e instanceof QueueFull ? 'full' : 'error')
       setSaving('idle')

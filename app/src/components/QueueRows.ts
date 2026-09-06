@@ -18,15 +18,24 @@ export type JournalRow = {
   first: boolean
   /** Set on outbox rows: waiting for the signal, or refused by the server ("erneut"). */
   queued?: 'waiting' | 'dead'
+  /** An offline snap (handoff 0016 B5): "unbestimmt" until the flush has the ladder, then `answered` with the engine's name until opened. */
+  scan?: { state: 'pending' | 'answered' | 'dead'; opened: boolean; name: string | null; photoId: string | null; photoRow: string | null }
 }
 export type Day = { day: string; places: string[]; rows: JournalRow[] }
 
-/** One outbox row as a diary row; photo rows are not rows of their own. */
+/** One outbox row as a diary row; photo rows are not rows of their own. A scan row is a sighting without a taxon: the diary says "unbestimmt". */
 export function toJournalRow(r: QueueRow): JournalRow | null {
   const queued = r.dead ? 'dead' : 'waiting'
   if (r.kind === 'sighting') {
     const p = r.payload
     return { id: r.id, kind: 'sighting', at: new Date(p.at), taxon: { ...p.taxon, lead: p.taxon.lead?.url ?? null }, place: p.place, photo: null, note: p.note ?? null, wildness: p.wildness, first: p.first, queued }
+  }
+  if (r.kind === 'scan') {
+    const p = r.payload
+    const l = p.ladder
+    const name = l ? l.answer?.sciName ?? l.outside ?? l.ladder.species ?? l.ladder.genus ?? l.ladder.family ?? null : null
+    return { id: r.id, kind: 'sighting', at: new Date(p.at), taxon: { id: r.id, gbifKey: 0, sciName: '', names: {}, tile: '', lead: null }, place: p.place, photo: p.photoId ? `/api/photo/${p.photoId}` : null, note: null, wildness: null, first: false,
+      queued: r.dead ? 'dead' : p.idPending ? 'waiting' : undefined, scan: { state: r.dead ? 'dead' : p.idPending ? 'pending' : 'answered', opened: !!p.opened, name, photoId: p.photoId ?? null, photoRow: p.photoRow ?? null } }
   }
   if (r.kind === 'study') return { id: r.id, kind: 'study', at: new Date(r.createdAt), taxon: { ...r.payload.taxon, lead: r.payload.taxon.lead?.url ?? null }, place: null, photo: null, note: null, wildness: null, first: false, queued }
   return null

@@ -26,6 +26,9 @@ body { background: var(--color-paper); color: var(--color-ink); -webkit-font-smo
 .motion-toggle { transition: background-color var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast), border-color var(--motion-fast), opacity var(--motion-fast), filter var(--motion-base); }
 .motion-badge { animation: badge-in var(--motion-base) var(--ease-overshoot); }
 .motion-ring { animation: ring-in var(--motion-base) ease-out; }
+/* 0016 B3 · the ladder's rungs rise one after another; the delay per rung is inline (220 ms apart). */
+@keyframes rung-in { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+.motion-rung { animation: rung-in var(--motion-base) var(--ease-out-soft) both; }
 
 /* A3 · the tab bar: outline and filled glyph stacked, the filled one fades and scales in; the one moss dot slides. */
 .tab-glyph { transition: opacity var(--motion-fast) ease-out, transform var(--motion-fast) var(--ease-out-soft); }
@@ -35,5 +38,5 @@ body { background: var(--color-paper); color: var(--color-ink); -webkit-font-smo
 
 /* A4 · reduced motion: durations to zero; the scrim's opacity fade may stay. */
 @media (prefers-reduced-motion: reduce) {
-  .sheet-panel, .motion-toggle, .motion-badge, .motion-ring, .tab-glyph, .tab-dot { animation-duration: 0s !important; transition-duration: 0s !important; }
+  .sheet-panel, .motion-toggle, .motion-badge, .motion-ring, .motion-rung, .tab-glyph, .tab-dot { animation-duration: 0s !important; animation-delay: 0s !important; transition-duration: 0s !important; }
 }

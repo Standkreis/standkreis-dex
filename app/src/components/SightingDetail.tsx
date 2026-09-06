@@ -8,7 +8,9 @@ import { useTRPC } from '@/trpc/client'
 import { useDayLabel } from './JournalDate'
 import { photoSrc, shrinkToJpeg, uploadPhoto, type PhotoState } from './LogPhoto'
 import { Icon } from './Marks'
+import { ScanInfo } from './LogSheet'
 import { enqueue, flush } from './Queue'
+import { scanNoteOf } from './Scan'
 import { SourceInfo, useImageSource } from './SourceInfo'
 import { tileIcon, useName } from './SpeciesCard'
 import { SightingMap } from './SightingMap'
@@ -32,6 +34,7 @@ export function SightingDetail({ id, mode, origin, onGone }: { id: string; mode:
   const tj = useTranslations('journal')
   const ts = useTranslations('species')
   const tc = useTranslations('common')
+  const tsc = useTranslations('scan')
   const format = useFormatter()
   const name = useName()
   const imageSource = useImageSource()
@@ -79,6 +82,7 @@ export function SightingDetail({ id, mode, origin, onGone }: { id: string; mode:
     }
   }
   const row = s.data
+  const scanNote = row?.evidence === 'idAssisted' ? scanNoteOf(id) : null
 
   if (s.isSuccess && !row) return <Empty text={t('notFound')} link={mode === 'page' ? t('toJournal') : undefined} />
   if (!row) return <Empty text={tc('working')} />
@@ -145,6 +149,13 @@ export function SightingDetail({ id, mode, origin, onGone }: { id: string; mode:
       </div>
 
       <p className="mt-2 text-[15px] text-ink-soft" data-testid="meta">{meta.map((m, i) => <span key={i}>{i > 0 && ' · '}{m}</span>)}</p>
+      {row.evidence === 'idAssisted' && (
+        // B6: the scan line with its ⓘ: engine, the cost line (from the answer this device kept), the terms sentence.
+        <p className="mt-1 flex items-center gap-1 text-[13px] text-ink-faint" data-testid="scan-line">
+          <span>{tsc('identifiedWith', { engine: scanNote?.engine ?? tsc('engine') })}</span>
+          <ScanInfo size={22} note={scanNote ? tsc('costLine', { cents: format.number(scanNote.cents, { maximumFractionDigits: 1 }) }) : null} testId="sighting-scan-info" />
+        </p>
+      )}
       {editWhen && (
         <input type="datetime-local" value={at} max={toLocalInput(new Date())} onChange={(e) => setAt(e.target.value)} data-testid="at" autoFocus
           className="mt-2 w-full rounded-xl bg-paper px-3 py-2 text-[15px] outline-none ring-1 ring-tile focus:ring-moss" />
