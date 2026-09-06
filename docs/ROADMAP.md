@@ -25,7 +25,8 @@
 | M9b | 📇 Steckbrief | 1–2 | The species page teaches: **data** (Größe, Alter, Nachwuchs, Lebensraum, Zug, Status from keyed open sources: EOL TraitBank, IUCN API, Wikidata, AnAge), **voice** (Xeno-canto clip with recordist and licence on the row), **prose** (an LLM editor writes two or three paragraphs per species from Wikipedia, GloBI and the facts, every sentence cited, cached in the DB once per species). Grill first: sources, licences, cost per species, schema change for facts and prose. Owner 2026-09-06: "as of now it's boring, almost no info to actually learn" | M9, M4 | owner's call 2026-09-06: before quests |
 | M10 | 🔥 Quest + recap grill | 2 | Generator rules, repeat avoidance, the two-question recap, XP curve | M9 | |
 | M11 | 🧭 Quests + recap + XP | 2 | Three weekly quests, recap unlocks studied XP, Du with level, "kommt bald" replaced | M10, M9b (the recap asks about the Steckbrief) | |
-| M12 | 📷 Snap-and-send | 2–3 | Pl@ntNet key, BioCLIP 2 host, taxon ladder prefilling the search. Grill first ([handoff 0015](handoffs/0015-snap-and-send-grill.md)): Pl@ntNet and Claude vision on the owner's 18 walk photos against the region's set of 929 | M6 | ➡️ next (M9's finding, owner 2026-09-06) |
+| M12 | 📷 Snap-and-send | 2–3 | Claude Sonnet 5 held to the region's set with a single/several/none gate, the explaining ladder, the close-shot sentence, outbox when offline ([record 0003](records/0003-id-engines.md), [handoff 0016](handoffs/0016-snap-and-send.md)). Pl@ntNet dropped from v1 | M6 | ➡️ next; grill ✅ 2026-09-06 |
+| M12b | 🧬 BioCLIP 2 fallback | 1 | **Only when Sonnet gets too expensive** (≈ 430 photos/month) or a region needs the photo to stay on own hardware: run C of [findings 0015 §🧬](handoffs/0015-snap-and-send-grill-findings.md) on a Hetzner CX23, record 0003 §🔁 | M12 | parked, owner 2026-09-06 |
 | M13 | 🃏 Share card | 3 | Render route, coarsened location, no XP on the card | M6 | |
 | M14 | 📋 List + map views | when the grid is proven | Toggle already has its place; the 10 km cell lives on the map | M9 | |
 | M15 | 📱 Capacitor wrap + stores | when a second user wants it | Camera, GPS, SQLite, haptics via plugins | M8 | |
@@ -53,6 +54,7 @@ flowchart LR
     M10 --> M11[🧭 M11 Quests + XP]
     M4 -.-> M11
     M6 --> M12[📷 M12 Snap-and-send]
+    M12 -.money.-> M12b[🧬 M12b BioCLIP fallback]
     M6 --> M13[🃏 M13 Share card]
     M9 --> M14[📋 M14 List + map]
     M8 --> M15[📱 M15 Capacitor]
