@@ -287,7 +287,8 @@ function ReadyScreen({ of, region, tiles, onNext }: { of: number; region: Region
   const set = useQuery(trpc.dex.set.queryOptions({ regionId: region.id, tiles: chosen, nowOnly: false }, { enabled: ready }))
   const month = format.dateTime(new Date(), { month: 'long' })
   const now = set.data?.species.filter((s) => s.now) ?? []
-  const nine = now.filter((s) => s.lead).slice(0, 9)
+  // The demo species: the first `now` member with a lead image, so the card shows what the grid will show.
+  const demo = now.find((s) => s.lead) ?? now[0] ?? null
   const last = of === 3
 
   return (
@@ -296,17 +297,44 @@ function ReadyScreen({ of, region, tiles, onNext }: { of: number; region: Region
         ? t.rich('readyBody', { n: now.length, total: set.data.setSize, month, region: region.name, b: (c) => <strong className="text-white" data-testid="number">{c}</strong> })
         : status === 'failed' ? t('readyFailed', { region: region.name }) : t('readyPreparing', { region: region.name })}
       action={<button type="button" data-testid={last ? 'go' : 'ready-next'} onClick={onNext} className="h-14 w-full rounded-2xl bg-moss text-[18px] font-bold text-white">{last ? t('go') : t('next')}</button>}>
-      <ul className="mt-5 grid grid-cols-3 gap-3" data-testid="preview">
-        {Array.from({ length: 9 }, (_, i) => nine[i]).map((s, i) => (
-          <li key={s?.taxonId ?? i} className="aspect-square overflow-hidden rounded-2xl bg-white/10">
-            {/* eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts */}
-            {s?.lead && <img src={s.leadSmall ?? s.lead.url} alt="" loading="lazy" className="h-full w-full object-cover opacity-45 grayscale" />}
-          </li>
-        ))}
-      </ul>
-      <div className="mt-5 rounded-2xl bg-white/10 px-4 py-3 text-[16px] leading-snug text-white/90"><span className="mr-2" aria-hidden>📖</span>{t.rich('axisStudy', { b: (c) => <strong className="text-white">{c}</strong> })}</div>
-      <div className="mt-2 rounded-2xl bg-white/10 px-4 py-3 text-[16px] leading-snug text-white/90"><span className="mr-2" aria-hidden>👁️</span>{t.rich('axisSeen', { b: (c) => <strong className="text-white">{c}</strong> })}</div>
+      <div className="mt-5 flex flex-col gap-3" data-testid="preview">
+        <DemoCard demo={demo} state="studied" text={t.rich('axisStudy', { b: (c) => <strong>{c}</strong> })} />
+        <DemoCard demo={demo} state="seen" text={t.rich('axisSeen', { b: (c) => <strong>{c}</strong> })} />
+      </div>
     </StepFrame>
+  )
+}
+
+// One axis, shown rather than told: the same cell grey, then studied (amber frame, book) or discovered (colour, check),
+// drawn like AtlasGrid's Cell so the grid looks familiar on first open. Cards opaque like the tile cards (step 2).
+function DemoCard({ demo, state, text }: { demo: DemoSpecies | null; state: 'studied' | 'seen'; text: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-4 rounded-2xl bg-white/85 px-4 py-4 text-night" data-testid={`demo-${state}`}>
+      <div className="flex shrink-0 items-center gap-1.5">
+        <DemoCell demo={demo} state="new" />
+        <span className="text-[14px] text-night/40" aria-hidden>→</span>
+        <DemoCell demo={demo} state={state} />
+      </div>
+      <p className="text-[16px] leading-snug">{text}</p>
+    </div>
+  )
+}
+
+type DemoSpecies = { tile: Tile; lead: { url: string } | null; leadSmall: string | null }
+
+function DemoCell({ demo, state }: { demo: DemoSpecies | null; state: 'new' | 'studied' | 'seen' }) {
+  const src = demo?.leadSmall ?? demo?.lead?.url ?? null
+  return (
+    <div className={`relative h-16 w-16 overflow-hidden rounded-xl bg-tile ${state === 'studied' ? 'ring-2 ring-amber ring-inset' : ''}`}>
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts
+        <img src={src} alt="" className={`h-full w-full object-cover ${state === 'seen' ? '' : state === 'studied' ? 'opacity-70 grayscale' : 'opacity-45 grayscale'}`} />
+      ) : (
+        <OnboardingSilhouette tile={demo?.tile ?? 'bird'} className="h-full w-full p-3 text-night/40" />
+      )}
+      {state === 'seen' && <span className="absolute right-1 bottom-1 flex h-4 w-4 items-center justify-center rounded-full bg-moss text-[10px] font-bold text-white">✓</span>}
+      {state === 'studied' && <span className="absolute bottom-1 left-1 text-[11px]" aria-hidden>📖</span>}
+    </div>
   )
 }
 
@@ -317,16 +345,16 @@ function ReadyScreen({ of, region, tiles, onNext }: { of: number; region: Region
 function PromisesScreen({ of, onNext }: { of: number; onNext: () => void }) {
   const t = useTranslations('onboarding')
   return (
-    <StepFrame step={4} of={of} title={t('promisesTitle')} body={null}
+    <StepFrame step={4} of={of} title={t('promisesTitle')} body={t('promisesBody')}
       action={<button type="button" data-testid="go" onClick={onNext} className="h-14 w-full rounded-2xl bg-moss text-[18px] font-bold text-white">{t('promisesGo')}</button>}>
       <div className="mt-5 flex flex-col gap-3" data-testid="promises">
-        <div className="rounded-2xl bg-white/10 px-4 py-4">
-          <div className="text-[13px] font-bold tracking-[0.12em] text-moss uppercase">{t('promisesOurs')}</div>
-          <p className="mt-2 text-[17px] leading-snug text-white/90">{t('promisesOursText')}</p>
+        <div className="rounded-2xl bg-white/85 px-4 py-4 text-night">
+          <div className="text-[13px] font-bold tracking-[0.12em] text-moss-deep uppercase">{t('promisesOurs')}</div>
+          <p className="mt-2 text-[17px] leading-snug">{t('promisesOursText')}</p>
         </div>
-        <div className="rounded-2xl bg-white/10 px-4 py-4">
-          <div className="text-[13px] font-bold tracking-[0.12em] text-moss uppercase">{t('promisesYours')}</div>
-          <p className="mt-2 text-[17px] leading-snug text-white/90">{t('promisesYoursText')}</p>
+        <div className="rounded-2xl bg-white/85 px-4 py-4 text-night">
+          <div className="text-[13px] font-bold tracking-[0.12em] text-moss-deep uppercase">{t('promisesYours')}</div>
+          <p className="mt-2 text-[17px] leading-snug">{t('promisesYoursText')}</p>
         </div>
       </div>
     </StepFrame>
