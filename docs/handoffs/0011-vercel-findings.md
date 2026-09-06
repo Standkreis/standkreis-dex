@@ -81,6 +81,7 @@ Branch `0011-a`, worktree `standkreis-dex-a`. Files: `app/src/server/photos.ts`,
 - `package.json`: `"@vercel/blob": "^2.8.0"` in `dependencies`; B adds `@vercel/functions` next to it. `package-lock.json`: run `npm install` after the merge rather than resolving the lock by hand.
 - Vercel: `PHOTO_DIR` can be removed from the project's variables once this is live (harmless if left).
 - The one lint warning in `npm run check` (`scripts/m8b/queue.mjs:39` `waitGone` unused) predates this track.
+
 ## ⏱️ Track B
 
 Branch `0011-b`, worktree `standkreis-dex-b`. Proven against `npm run build` + `NODE_ENV=production npx next start -p 3003` (build `mtp409du`), the dev DB on 5433, 2026-09-06.

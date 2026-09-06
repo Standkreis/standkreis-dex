@@ -59,4 +59,4 @@ pg_dump postgresql://dex:dex@localhost:5433/dex --data-only \
 psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f set.sql     # DATABASE_URL = the unpooled Neon URL from above
 ```
 
-`Asset` holds the reference images of the content job **and** user photos (`origin = 'user'`): dump it only into an empty production DB, or filter the user rows out first (`DELETE FROM "Asset" WHERE origin = 'user'` on a scratch copy). Afterwards `/api/health` still says `ok` and the phone's region search finds the set. Until 0011 Track B lands, a taxon with `contentAt` null is healed only by the next `content` run from here, not by the restart sweep (it runs per cold start on Vercel).
+`Asset` holds the reference images of the content job **and** user photos (`origin = 'user'`): dump it only into an empty production DB, or filter the user rows out first (`DELETE FROM "Asset" WHERE origin = 'user'` on a scratch copy). Afterwards `/api/health` still says `ok` and the phone's region search finds the set. A taxon with `contentAt` null is healed by the hourly sweep cron (`/api/cron/sweep`, handoff 0011) or the next `content` run from here.
