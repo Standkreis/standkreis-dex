@@ -27,29 +27,29 @@ The bands are not a fixed number per file: the script takes the longest run of n
 
 ## 📊 The 18 rows
 
-Legend: ✅ species in the guess, or the honest answer the guess expects · 🟡 genus in the guess · ⬜ honest "cannot tell" / "several" / "outside the set" / family only · 🔸 wrong but hedged (< 0.5) · ❌ **wrong and confident (≥ 0.5)**. Number = the engine's own score or confidence. "Pl@ntNet ∩ set ≥ 0.1" = the first of Pl@ntNet's top-5 that is a set member with score ≥ 0.1 (what an app filter would do). Opus ran on the ten misty shots only.
+Legend: ✅ species in the guess, or the honest answer the guess expects · 🟡 genus in the guess · ⬜ honest "cannot tell" / "several" / "outside the set" / family only · 🔸 wrong but hedged (< 0.5) · ❌ **wrong and confident (≥ 0.5)**. Number = the engine's own score or confidence. "Pl@ntNet ∩ set ≥ 0.1" = the first of Pl@ntNet's top-5 that is a set member with score ≥ 0.1 (what an app filter would do). Opus ran on the ten misty shots only. **BioCLIP ToL / set / set+distr.** (0015b, §🧬 below): top-1 of BioCLIP 2 over 867 455 Tree-of-Life names / the 929 / the 929 + 149 distractors; a distractor at top-1 is scored as "outside the set" with the distractor in brackets. ⚠️ No photo was taken in Mainz-Bingen (`place` column): every set-constrained column scores against a list the photographer was not standing in.
 
-| # | Photo · agent's guess | Pl@ntNet auto | Pl@ntNet organ | Pl@ntNet ∩ set ≥ 0.1 | Claude free | Claude set | Opus free |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | IMG_3084 · Pyrus communis | ✅ Pyrus communis 0.23 | ✅ Pyrus communis 0.23 | ✅ Pyrus communis 0.23 | ✅ Pyrus communis 0.85 | ✅ Pyrus communis 0.85 | ✅ Pyrus communis 0.88 |
-| 2 | IMG_3085 · fruit tree (Malus/Pyrus) | 🔸 Citrus × aurantium 0.17 | 🔸 Citrus × aurantium 0.17 | 🟡 Malus domestica 0.11 | 🟡 Malus domestica 0.45 | 🟡 Malus domestica 0.55 | 🟡 Malus 0.48 |
-| 3 | IMG_3086 · Malus domestica | 🔸 Prunus amygdalus 0.37 | 🔸 Prunus amygdalus 0.37 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | 🔸 Juglans regia 0.35 | ⬜ cannot tell 0.15 | ⬜ cannot tell 0.5 |
-| 4 | IMG_3087 · Pyrus communis or Juglans regia | 🔸 Betula pendula 0.21 | 🔸 Betula pendula 0.21 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | ⬜ cannot tell 0.15 | ⬜ cannot tell 0.15 | ⬜ cannot tell 0.3 |
-| 5 | IMG_3088 · Juglans regia or Fraxinus excelsior (young) | 🔸 Salix humboldtiana 0.11 | 🔸 Salix humboldtiana 0.11 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | 🔸 Salix sp. 0.45 | ⬜ outside the set 0.3 | ❌ Salix 0.62 |
-| 6 | IMG_3089 · Malus domestica | ❌ Pyrus communis 0.76 | ❌ Pyrus communis 0.76 | ❌ Pyrus communis 0.76 | ❌ Pyrus communis 0.55 | ❌ Pyrus communis 0.55 | ⬜ Rosaceae 0.62 |
-| 7 | IMG_3090 · Prunus avium | 🟡 Prunus amygdalus 0.43 | 🟡 Prunus amygdalus 0.43 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | 🟡 Prunus 0.45 | ✅ Prunus avium 0.35 | 🟡 Prunus 0.4 |
-| 8 | IMG_3091 · old fruit tree (Malus/Pyrus) | ❌ Cydonia oblonga 0.74 | ❌ Cydonia oblonga 0.74 | ❌ Cydonia oblonga 0.74 | 🟡 Malus domestica 0.7 | 🟡 Malus domestica 0.55 | 🟡 Malus domestica 0.72 |
-| 9 | IMG_3092 · bonsai (Olea europaea or Ficus) | 🟡 Ficus microcarpa 0.55 | 🟡 Ficus microcarpa 0.55 | ✅ outside the set (no set member ≥ 0.1 in top-5) | 🟡 Ficus microcarpa 0.55 | ✅ outside the set 0.9 | — |
-| 10 | IMG_3093 · Schefflera arboricola | 🔸 Heptapleurum arboricola 0.35 | 🔸 Heptapleurum arboricola 0.35 | ✅ outside the set (no set member ≥ 0.1 in top-5) | ✅ Schefflera arboricola 0.85 | ✅ outside the set 0.85 | — |
-| 11 | IMG_3094 · Juglans regia (young) | 🔸 Tetradium daniellii 0.47 | 🔸 Tetradium daniellii 0.47 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | ❌ Cornus sanguinea 0.55 | ❌ Cornus sanguinea 0.75 | 🔸 Cornus 0.35 |
-| 12 | IMG_3095 · Mantis religiosa | 🔸 Chondrilla juncea 0.01 | 🔸 Chondrilla juncea 0.01 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | ✅ Mantis religiosa 0.75 | ✅ Mantis religiosa 0.9 | — |
-| 13 | IMG_3096 · several (Quercus, Pinus) | 🟡 Quercus kelloggii 0.44 | 🟡 Quercus kelloggii 0.44 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | ✅ several 0.85 | 🟡 Pinus sylvestris 0.55 | — |
-| 14 | IMG_3097 · Cucurbita pepo | 🟡 Cucurbita maxima 0.67 | 🟡 Cucurbita maxima 0.67 | ✅ outside the set (no set member ≥ 0.1 in top-5) | 🟡 Cucurbita 0.6 | ✅ outside the set 0.9 | — |
-| 15 | PHOTO …-38 · Prunus avium | 🟡 Prunus cerasus 0.6 | 🟡 Prunus cerasus 0.6 | ✅ Prunus avium 0.36 | ✅ Prunus avium 0.85 | ✅ Prunus avium 0.75 | — |
-| 16 | PHOTO …-44 · Prunus spinosa, Prunus avium or Prunus cerasifera | 🔸 Malus spectabilis 0.27 | 🔸 Malus spectabilis 0.27 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | ❌ Malus 0.6 | ❌ Malus domestica 0.55 | — |
-| 17 | PHOTO …-45 · white-flowering tree (Prunus?) | 🔸 Eremophila nivea 0.04 | 🔸 Eremophila nivea 0.04 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | 🟡 Prunus spinosa 0.55 | 🟡 Prunus spinosa 0.65 | — |
-| 18 | PHOTO …-45 2 · several (flowering Prunus?) | 🟡 Prunus spinosa 0.19 | 🟡 Prunus spinosa 0.19 | 🟡 Prunus spinosa 0.19 | 🟡 Prunus spinosa 0.55 | 🟡 Prunus spinosa 0.75 | 🟡 Prunus 0.55 |
-| | **Tally** | ✅1 🟡6 ⬜0 🔸9 ❌2 | ✅1 🟡6 ⬜0 🔸9 ❌2 | ✅5 🟡2 ⬜9 🔸0 ❌2 | ✅5 🟡7 ⬜1 🔸2 ❌3 | ✅7 🟡5 ⬜3 🔸0 ❌3 | ✅1 🟡4 ⬜3 🔸1 ❌1 |
+| # | Photo · agent's guess | Pl@ntNet auto | Pl@ntNet organ | Pl@ntNet ∩ set ≥ 0.1 | Claude free | Claude set | Opus free | BioCLIP ToL | BioCLIP set | BioCLIP set+distr. |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 1 | IMG_3084 · Pyrus communis | ✅ Pyrus communis 0.23 | ✅ Pyrus communis 0.23 | ✅ Pyrus communis 0.23 | ✅ Pyrus communis 0.85 | ✅ Pyrus communis 0.85 | ✅ Pyrus communis 0.88 | ✅ Pyrus communis 0.35 | ✅ Pyrus communis 0.97 | ✅ Pyrus communis 0.97 |
+| 2 | IMG_3085 · fruit tree (Malus/Pyrus) | 🔸 Citrus × aurantium 0.17 | 🔸 Citrus × aurantium 0.17 | 🟡 Malus domestica 0.11 | 🟡 Malus domestica 0.45 | 🟡 Malus domestica 0.55 | 🟡 Malus 0.48 | 🟡 Pyrus calleryana 0.04 | 🟡 Pyrus communis 0.33 | 🟡 Pyrus communis 0.27 |
+| 3 | IMG_3086 · Malus domestica | 🔸 Prunus amygdalus 0.37 | 🔸 Prunus amygdalus 0.37 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | 🔸 Juglans regia 0.35 | ⬜ cannot tell 0.15 | ⬜ cannot tell 0.5 | 🔸 Rusa alfredi 0.07 | 🔸 Prunus mahaleb 0.31 | 🔸 Prunus mahaleb 0.16 |
+| 4 | IMG_3087 · Pyrus communis or Juglans regia | 🔸 Betula pendula 0.21 | 🔸 Betula pendula 0.21 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | ⬜ cannot tell 0.15 | ⬜ cannot tell 0.15 | ⬜ cannot tell 0.3 | 🔸 Terminalia sericea 0.23 | ✅ Pyrus communis 0.4 | ✅ Pyrus communis 0.36 |
+| 5 | IMG_3088 · Juglans regia or Fraxinus excelsior (young) | 🔸 Salix humboldtiana 0.11 | 🔸 Salix humboldtiana 0.11 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | 🔸 Salix sp. 0.45 | ⬜ outside the set 0.3 | ❌ Salix 0.62 | 🔸 Prosopis glandulosa 0.36 | ❌ Robinia pseudoacacia 0.58 | 🔸 Robinia pseudoacacia 0.41 |
+| 6 | IMG_3089 · Malus domestica | ❌ Pyrus communis 0.76 | ❌ Pyrus communis 0.76 | ❌ Pyrus communis 0.76 | ❌ Pyrus communis 0.55 | ❌ Pyrus communis 0.55 | ⬜ Rosaceae 0.62 | 🔸 Bursera cuneata 0.1 | 🔸 Pyrus communis 0.45 | 🔸 Pyrus communis 0.42 |
+| 7 | IMG_3090 · Prunus avium | 🟡 Prunus amygdalus 0.43 | 🟡 Prunus amygdalus 0.43 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | 🟡 Prunus 0.45 | ✅ Prunus avium 0.35 | 🟡 Prunus 0.4 | ❌ Prosopis caldenia 0.83 | 🔸 Pyrus communis 0.47 | 🔸 Pyrus communis 0.39 |
+| 8 | IMG_3091 · old fruit tree (Malus/Pyrus) | ❌ Cydonia oblonga 0.74 | ❌ Cydonia oblonga 0.74 | ❌ Cydonia oblonga 0.74 | 🟡 Malus domestica 0.7 | 🟡 Malus domestica 0.55 | 🟡 Malus domestica 0.72 | 🔸 Panthera pardus 0.09 | 🟡 Pyrus communis 0.31 | 🟡 Pyrus communis 0.27 |
+| 9 | IMG_3092 · bonsai (Olea europaea or Ficus) | 🟡 Ficus microcarpa 0.55 | 🟡 Ficus microcarpa 0.55 | ✅ outside the set (no set member ≥ 0.1 in top-5) | 🟡 Ficus microcarpa 0.55 | ✅ outside the set 0.9 | — | 🔸 Streptopelia decaocto 0.02 | 🔸 Turdus merula 0.21 | 🔸 Turdus merula 0.16 |
+| 10 | IMG_3093 · Schefflera arboricola | 🔸 Heptapleurum arboricola 0.35 | 🔸 Heptapleurum arboricola 0.35 | ✅ outside the set (no set member ≥ 0.1 in top-5) | ✅ Schefflera arboricola 0.85 | ✅ outside the set 0.85 | — | ❌ Heptapleurum arboricola 0.84 | 🔸 Eliomys quercinus 0.25 | ✅ outside the set (Heptapleurum arboricola 0.81) |
+| 11 | IMG_3094 · Juglans regia (young) | 🔸 Tetradium daniellii 0.47 | 🔸 Tetradium daniellii 0.47 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | ❌ Cornus sanguinea 0.55 | ❌ Cornus sanguinea 0.75 | 🔸 Cornus 0.35 | 🔸 Heptacodium miconioides 0.11 | 🔸 Rhus typhina 0.38 | 🔸 Rhus typhina 0.36 |
+| 12 | IMG_3095 · Mantis religiosa | 🔸 Chondrilla juncea 0.01 | 🔸 Chondrilla juncea 0.01 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | ✅ Mantis religiosa 0.75 | ✅ Mantis religiosa 0.9 | — | ✅ Mantis religiosa 0.49 | ✅ Mantis religiosa 1 | ✅ Mantis religiosa 1 |
+| 13 | IMG_3096 · several (Quercus, Pinus) | 🟡 Quercus kelloggii 0.44 | 🟡 Quercus kelloggii 0.44 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | ✅ several 0.85 | 🟡 Pinus sylvestris 0.55 | — | 🔸 Fagus sylvatica 0.3 | ❌ Fagus sylvatica 0.7 | ❌ Fagus sylvatica 0.57 |
+| 14 | IMG_3097 · Cucurbita pepo | 🟡 Cucurbita maxima 0.67 | 🟡 Cucurbita maxima 0.67 | ✅ outside the set (no set member ≥ 0.1 in top-5) | 🟡 Cucurbita 0.6 | ✅ outside the set 0.9 | — | 🟡 Cucurbita melopepo 0.44 | 🔸 Puccinia malvacearum 0.14 | ✅ outside the set (Cucurbita maxima 0.65) |
+| 15 | PHOTO …-38 · Prunus avium | 🟡 Prunus cerasus 0.6 | 🟡 Prunus cerasus 0.6 | ✅ Prunus avium 0.36 | ✅ Prunus avium 0.85 | ✅ Prunus avium 0.75 | — | ✅ Prunus avium 0.12 | ✅ Prunus avium 0.94 | ✅ Prunus avium 0.92 |
+| 16 | PHOTO …-44 · Prunus spinosa, Prunus avium or Prunus cerasifera | 🔸 Malus spectabilis 0.27 | 🔸 Malus spectabilis 0.27 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | ❌ Malus 0.6 | ❌ Malus domestica 0.55 | — | 🔸 Malus domestica 0.4 | ❌ Malus domestica 0.72 | 🔸 Malus domestica 0.42 |
+| 17 | PHOTO …-45 · white-flowering tree (Prunus?) | 🔸 Eremophila nivea 0.04 | 🔸 Eremophila nivea 0.04 | ⬜ outside the set (no set member ≥ 0.1 in top-5) | 🟡 Prunus spinosa 0.55 | 🟡 Prunus spinosa 0.65 | — | 🔸 Discaria toumatou 0.05 | 🟡 Prunus cerasifera 0.59 | 🟡 Prunus cerasifera 0.52 |
+| 18 | PHOTO …-45 2 · several (flowering Prunus?) | 🟡 Prunus spinosa 0.19 | 🟡 Prunus spinosa 0.19 | 🟡 Prunus spinosa 0.19 | 🟡 Prunus spinosa 0.55 | 🟡 Prunus spinosa 0.75 | 🟡 Prunus 0.55 | 🟡 Prunus sativa 0.22 | 🟡 Prunus cerasifera 0.67 | 🟡 Prunus cerasifera 0.67 |
+| | **Tally** | ✅1 🟡6 ⬜0 🔸9 ❌2 | ✅1 🟡6 ⬜0 🔸9 ❌2 | ✅5 🟡2 ⬜9 🔸0 ❌2 | ✅5 🟡7 ⬜1 🔸2 ❌3 | ✅7 🟡5 ⬜3 🔸0 ❌3 | ✅1 🟡4 ⬜3 🔸1 ❌1 | ✅3 🟡3 ⬜0 🔸10 ❌2 | ✅4 🟡4 ⬜0 🔸7 ❌3 | ✅6 🟡4 ⬜0 🔸7 ❌1 |
 
 ### 🔍 What the table says before the owner corrects it
 
@@ -111,10 +111,15 @@ Pl@ntNet's whole top-5 sums to 0.04: the engine is saying "not a plant" in the o
 | Engine · run | Calls | Median s | Max s | Tokens in / cache write / cache read / out | Cost | Per photo |
 | --- | --- | --- | --- | --- | --- | --- |
 | Pl@ntNet auto | 18 | 0.5 | 0.9 | — | 0 ¢ (free tier, 500/day; 499 → 463 left after 36 calls) | 0 ¢ |
-| Pl@ntNet organ | 18 | 0.6 | 0.9 | — | 0 ¢ | 0 ¢ |
-| claude-sonnet-5 free | 18 | 8.1 | 10.3 | 41 168 / 0 / 0 / 8 735 | 17.0 ¢ | 0.94 ¢ |
-| claude-sonnet-5 set | 18 | 5.8 | 9.2 | 34 184 / 19 334 / 328 678 / 6 430 | 24.7 ¢ | 1.37 ¢ |
-| claude-opus-5 free | 10 | 19.0 | 41.0 | 21 658 / 0 / 0 / 11 372 | 39.3 ¢ | 3.93 ¢ |
+| Pl@ntNet organ | 18 | 0.6 | 0.9 | — | 0 ¢ (free tier, 500/day; 499 → 463 left after 36 calls) | 0 ¢ |
+| BioCLIP 2 ToL · MPS | 18 | 0.040 | 0.048 | — (867455 labels, warm load 4.3 s) | 0 ¢ (local, MIT) | 0 ¢ |
+| BioCLIP 2 set · MPS | 18 | 0.033 | 0.041 | — (929 labels, warm load 2.9 s) | 0 ¢ (local, MIT) | 0 ¢ |
+| BioCLIP 2 set+distr. · MPS | 18 | 0.032 | 0.038 | — (1078 labels, warm load 3.6 s) | 0 ¢ (local, MIT) | 0 ¢ |
+| BioCLIP 2 set · CPU 12 threads | 18 | 0.116 | 0.121 | — (929 labels, warm load 2.7 s) | 0 ¢ (local, MIT) | 0 ¢ |
+| BioCLIP 2 set · CPU 2 threads | 18 | 0.132 | 0.143 | — (929 labels, warm load 2.9 s) | 0 ¢ (local, MIT) | 0 ¢ |
+| claude-sonnet-5 free | 18 | 8.1 | 10.3 | 41168 / 0 / 0 / 8735 | 17.0 ¢ | 0.94 ¢ |
+| claude-sonnet-5 set | 18 | 5.8 | 9.2 | 34184 / 19334 / 328678 / 6430 | 24.7 ¢ | 1.37 ¢ |
+| claude-opus-5 free | 10 | 19.0 | 41.0 | 21658 / 0 / 0 / 11372 | 39.3 ¢ | 3.93 ¢ |
 
 Prices: Sonnet 5 $2 / $2.50 / $0.20 / $10 per MTok (input / 5 min cache write / cache read / output), Opus 5 $5 / $6.25 / $0.50 / $25 — [platform.claude.com/docs/en/about-claude/pricing](https://platform.claude.com/docs/en/about-claude/pricing), read 2026-09-06 (the Sonnet 5 introductory price is now permanent). A 1600 px JPEG costs ~1 500–2 500 input tokens. The set prompt is **19 334 tokens**, written once (4.8 ¢) and read 17× at 0.39 ¢ each; without caching it would be 3.9 ¢ per call. Wall-clock for the 18 × 2 Sonnet calls with three in flight: ~2.5 min. Opus's latency is thinking: `output_tokens_details.thinking_tokens` 256 on the pear, **1 760** on the young tree (11), which needed `max_tokens` 4000 after 700 and 1600 came back empty.
 
@@ -172,3 +177,134 @@ Then `node scripts/id-probe/score.mjs` re-scores without a single new API call.
 - New: `app/scripts/id-probe/{lib,prep,set,plantnet,claude,score}.mjs`, `set.json` (929 rows, from the dev DB), `docs/research/walks/01/labels.csv`, `docs/handoffs/0015-shots/contact.jpg`, this file. `sharp` added as a devDependency (was already in `node_modules` through Next).
 - Not committed: `walks/01/*.PNG|jpg`, `walks/01/prep/`, `app/scripts/id-probe/.cache/` (all git-ignored; `.gitignore:8-13`).
 - No app code, no schema, no migration, nothing at Neon. Record 0003 and the roadmap wait for the decisions above.
+- 0015b: `app/scripts/id-probe/bioclip/{README.md,taxonomy.mjs,probe.py,taxonomy.json,distractors.json}`, `score.mjs` extended (three columns, five cost rows, the margin tables), `.gitignore` for the venv. Not committed: `.venv/`, `~/.cache/huggingface` (4.2 GB), `.cache/bioclip-*` and `.cache/gbif-*`.
+
+## 🧬 BioCLIP 2 (0015b)
+
+> Run 2026-09-06 on the same 18 crops, on the Mac (M4 Max, torch 2.14, MPS). `app/scripts/id-probe/bioclip/`: `taxonomy.mjs` (GBIF ranks for the 929 + 149 distractors, 1 112 GBIF requests total, all cached), `probe.py` (runs A, B, C; the CPU timing), results in `.cache/bioclip-<run>-<n>.json`, timings in `.cache/bioclip.json`. Model `hf-hub:imageomics/bioclip-2` (ViT-L/14, MIT, trained on TreeOfLife-200M, 952 K taxa), fetched **without a Hugging Face login** (`hf auth whoami` → "Not logged in"; the public repo needed none). **0 ¢, no key, nothing left the Mac.** The three columns are in the main table above; this section reads them.
+
+| Run | Label space | What it is |
+| --- | --- | --- |
+| **A · ToL** | 867 455 species names shipped with the model (`TreeOfLife-200M/embeddings`, 2.6 GB) | Open set, the honest baseline: no list, no prior |
+| **B · set** | The 929, as `Kingdom Phylum Class Order Family Genus epithet` from GBIF | The constrained model; it must pick one of 929 |
+| **C · set+distr.** | B + 149 distractors: the 5 most-recorded GBIF species of 14 pot, crop and garden genera (Malus, Prunus, Cucurbita, Ficus, Schefflera, Heptapleurum, Olea, Citrus, Pelargonium, Monstera, Dracaena, Hedera, Thuja, Solanum: `occurrence/search?genusKey=…&facet=speciesKey`) plus the 60 plants and 30 animals most recorded in Germany that are not in the set (`occurrence/search?country=DE&kingdomKey=…&facet=speciesKey`) | The honesty test: a distractor at top-1 is scored as "outside the set" |
+
+⚠️ **Caveat for every set-constrained column, 0015's included:** the owner's new `place` column says none of the 18 photos was taken in Mainz-Bingen (Schauerberg, Dahn, Kirrberg, Oestrich-Winkel; `inMainzBingen` = no on all 18). Pl@ntNet ∩ set, Claude set, BioCLIP set and set+distr. all score photos against a list for a Landkreis the photographer was not standing in. The list still fits the trees (*Pyrus*, *Prunus*, *Malus* are in), but "outside the set" is not a fair grade for a species that is merely outside *this* set.
+
+### 📊 B1 · against Pl@ntNet and Claude
+
+| | Pl@ntNet auto | Claude set | BioCLIP ToL (A) | BioCLIP set (B) | BioCLIP set+distr. (C) |
+| --- | --- | --- | --- | --- | --- |
+| All 18 | ✅1 🟡6 🔸9 ❌2 | ✅7 🟡5 ⬜3 ❌3 | ✅3 🟡3 🔸10 ❌2 | ✅4 🟡4 🔸7 ❌3 | **✅6 🟡4 🔸7 ❌1** |
+| Misty trees (1–8, 11, 18) | ✅1 🟡2 🔸5 ❌2 | ✅2 🟡3 ⬜3 ❌2 | ✅1 🟡2 🔸6 ❌1 | ✅2 🟡3 🔸4 ❌1 | ✅2 🟡3 🔸5 |
+| Mantis (12) | 🔸 *Chondrilla* 0.01 | ✅ 0.90 | ✅ 0.49 | ✅ **1.00** | ✅ **1.00** |
+| Cultivated (9, 10, 14) | 🟡🔸🟡 | ✅✅✅ "outside the set" | 🔸 ❌* 🟡 | 🔸🔸🔸 | 🔸 ✅ ✅ |
+| Scene (13) | 🟡 forced | 🟡 forced | 🔸 *Fagus* 0.30 | ❌ *Fagus* 0.70 | ❌ *Fagus* 0.57 |
+| Says "cannot tell" / "several" | never | 3× | never | never | never |
+
+\* Row 10 in A is *Heptapleurum arboricola* 0.84: the current name of *Schefflera arboricola* (same as Pl@ntNet, doubt 8 of 0015). Graded ❌ by string; by biology it is the one confident open-set hit on a plant.
+
+- **Plants:** C matches Claude set on the trees that carry a signal (pear 0.97, cherry 0.94 — Claude 0.85 / 0.75, Pl@ntNet 0.23 / 0.36 with *P. cerasus* ahead) and is the only engine with **no confident error on the ten misty shots** (Pl@ntNet ❌2 at 0.74–0.76, Claude set ❌2 at 0.55–0.75, BioCLIP C: everything wrong sits at 0.16–0.42). The price is that it never says "cannot tell": its five 🔸 on the misty trees are wrong names at low score where Claude writes ⬜.
+- **Mantis:** B and C put **1.000** on *Mantis religiosa* with *Tettigonia viridissima* at 0.000; A gets it at 0.49 among 867 455 names. Claude 0.75/0.9. Pl@ntNet cannot.
+- **Cultivated:** the set alone (B) is grotesque: bonsai → *Turdus merula* 0.21 (a blackbird), *Schefflera* → *Eliomys quercinus* 0.25 (a dormouse), pumpkin → *Puccinia malvacearum* 0.14 (a rust fungus). The 929 contain no pot plant, so the embedding lands on the nearest brown-and-green thing. C repairs two of three: *Heptapleurum arboricola* 0.81, *Cucurbita maxima* 0.65 (guess *C. pepo*; Pl@ntNet said *maxima* too). The bonsai stays a blackbird at 0.16 with *Ficus microcarpa* 0.14 second, margin 0.015: honest by number, wrong by name.
+- **Drone (16–18):** B/C say *Prunus cerasifera* where Claude says *P. spinosa* (17, 18; both 🟡, both *Prunus* in top-2) and *Malus domestica* on 16, like Claude and Pl@ntNet: three engines against the guess, see §🙋.
+
+### 🧭 B2 · open set or the 929
+
+| Photo | A · ToL | B · set | C · set+distr. |
+| --- | --- | --- | --- |
+| 9 bonsai | *Streptopelia decaocto* 0.02, *Pittosporum tobira* 0.02 (all five ≤ 0.023) | *Turdus merula* 0.21 | *Turdus merula* 0.16, *Ficus microcarpa* 0.14 |
+| 10 *Schefflera* | ✅ *Heptapleurum arboricola* **0.84** | *Eliomys quercinus* 0.25 | ✅ *Heptapleurum arboricola* 0.81, *Schefflera arboricola* 0.18 |
+| 14 pumpkin | *Cucurbita melopepo* 0.44 (a *C. pepo* segregate) | *Puccinia malvacearum* 0.14 | ✅ *Cucurbita maxima* 0.65, *C. moschata* 0.19 |
+| 17 drone top-down | *Discaria toumatou* 0.05, *Yponomeuta padella* 0.05 (a moth) | *Prunus cerasifera* 0.59, *P. spinosa* 0.23 | *P. cerasifera* 0.52, *P. spinosa* 0.20 |
+| 18 drone oblique | *Prunus sativa* 0.22 | *P. cerasifera* 0.67, *P. avium* 0.12 | *P. cerasifera* 0.67, *P. avium* 0.12 |
+| 7 misty cherry | ❌ *Prosopis caldenia* **0.83** (an Argentinian mesquite) | *Pyrus communis* 0.47 | *Pyrus communis* 0.39 |
+| 8 old fruit tree | *Panthera pardus* 0.09 | *Pyrus communis* 0.31, *Capreolus capreolus* 0.22 | same |
+
+- **A is unusable as a product** on this fixture: the top-1 is on another continent on 11 of 18 rows (*Prosopis*, *Terminalia*, *Colophospermum*, *Bursera*, a leopard on an orchard tree), and its one confident error is 0.83. Its three ✅ are the pear (0.35), the mantis (0.49) and the cherry (0.12). What it is good for: the two cultivated cases where the set has nothing (*Heptapleurum* 0.84, *Cucurbita* 0.44), i.e. as the source of "what it really is" when B/C say "outside the set".
+- **B answers *Pyrus communis* on 6 of the 10 misty trees** (1, 2, 4, 6, 7, 8): the set holds one pear, and an old orchard silhouette embeds nearest to it. That is the set as a prior, not as knowledge; it produces the one ✅ on row 4 ("*Pyrus* or *Juglans*") by the same mechanism that produces the 🔸 on the cherry (7).
+- **C is the run to keep**: the distractors give the pot plants somewhere true to go (2 of 3), and they **halve B's wrong confidences** (5: 0.58 → 0.41, 16: 0.72 → 0.42, 13: 0.70 → 0.57), which is what turns B's ❌3 into C's ❌1. They cost nothing per call (32 ms vs 33 ms) and 28 s of label embedding once.
+- **What no run can do:** "several". Row 13 is *Fagus sylvatica* at 0.30 / 0.70 / 0.57 in A / B / C, top-2 *Carpinus*, and the drone shots are one species by construction. A classifier has no "none of the above" and no "all of the above"; that stays Claude's (I3's `subject` gate) or the camera screen's job.
+
+### 🌫️ B3 · the misty trees, per run
+
+| # | Guess | A · ToL | B · set | C · set+distr. | Genus hit |
+| --- | --- | --- | --- | --- | --- |
+| 1 | *Pyrus communis* | ✅ 0.35 | ✅ **0.97** | ✅ **0.97** | A B C |
+| 2 | Malus/Pyrus | 🟡 *Pyrus calleryana* 0.04 | 🟡 *Pyrus communis* 0.33 · *Malus* 0.09 | 🟡 0.27 | A B C |
+| 3 | *Malus domestica* | 🔸 *Rusa alfredi* 0.07 (a deer) | 🔸 *Prunus mahaleb* 0.31 · *Pyrus* 0.13 · *Malus* 0.10 | 🔸 0.16 | — |
+| 4 | Pyrus or Juglans | 🔸 *Terminalia sericea* 0.23 | ✅ *Pyrus communis* 0.40 | ✅ 0.36 | B C |
+| 5 | Juglans/Fraxinus (young) | 🔸 *Prosopis glandulosa* 0.36, four *Salix* behind | ❌ *Robinia pseudoacacia* 0.58 | 🔸 0.41 · *Salix alba* 0.19 | — |
+| 6 | *Malus domestica* | 🔸 *Bursera cuneata* 0.10 | 🔸 *Pyrus communis* 0.45 · *Malus* 0.20 | 🔸 0.42 · *Malus* 0.19 | — (all engines say pear) |
+| 7 | *Prunus avium* | ❌ *Prosopis caldenia* 0.83 | 🔸 *Pyrus* 0.47 · *P. mahaleb* 0.21 · *P. avium* 0.09 | 🔸 0.39 | — |
+| 8 | old Malus/Pyrus | 🔸 *Panthera pardus* 0.09 | 🟡 *Pyrus* 0.31 · *Capreolus* 0.22 | 🟡 0.27 | B C |
+| 11 | *Juglans regia* (young) | 🔸 *Heptacodium* 0.11, *Tetradium* 0.06 (Pl@ntNet's answer) | 🔸 *Rhus typhina* 0.38 = *Syringa* 0.38 | 🔸 margin 0.002 | — |
+| 18 | several *Prunus* | 🟡 *Prunus sativa* 0.22 | 🟡 *P. cerasifera* 0.67 · *P. avium* 0.12 · *P. spinosa* 0.11 | 🟡 0.67 | A B C |
+
+Genus hits: A 4, B 6, C 6 of 10; confident misses (≥ 0.5): A 1 (row 7, 0.83), B 1 (row 5, 0.58), C 0. The pattern is the same as 0015 I2: **the fruit carries at 20 m, the silhouette does not.** Row 5 is the one where every engine sees a willow-like young tree (*Salix* × 4 in A's top-5, Pl@ntNet, Claude) and the set turns it into *Robinia*; row 11 is a tie at 0.38/0.38 between sumac and lilac, which the margin catches.
+
+### 📏 The margin · where "unsicher" starts
+
+Softmax top-1 − top-2 per photo, run C, against the grade (the full B and C list is `score.mjs`' last two tables):
+
+| Margin | Rows (C) | Grades |
+| --- | --- | --- |
+| < 0.1 | 11 (0.002), 9 (0.015), 3 (0.051), 8 (0.080) | 🔸🔸🔸🟡 |
+| 0.1 – 0.3 | 2, 16, 7, 4, 6, 5 (0.19 – 0.23) | 🟡🔸🔸✅🔸🔸 |
+| ≥ 0.3 | 17 (0.32), 13 (0.43), 14 (0.46), 18 (0.55), 10 (0.63), 15 (0.89), 1 (0.96), 12 (1.00) | 🟡❌✅🟡✅✅✅✅ |
+
+| Threshold t | Shown (margin ≥ t) | Hidden → "unsicher" |
+| --- | --- | --- |
+| 0.2 | ✅6 🟡2 🔸3 ❌1 | 🟡2 🔸4 |
+| **0.3** | **✅5 🟡2 ❌1** | ✅1 🟡2 🔸7 |
+| 0.4 | ✅5 🟡1 ❌1 | ✅1 🟡3 🔸7 |
+
+**Proposal: three bands on run C.** Margin **≥ 0.3 → show the species** (8 rows: 5 ✅, 2 🟡 with the right genus, 1 ❌ — the scene, which no margin can catch because *Fagus* 0.57 vs *Carpinus* 0.14 is a clear win for the wrong question). **0.1 – 0.3 → "unsicher"**, show the genus only when top-1 and top-2 share it (16: *Malus* / *Malus* ✓; 2, 4, 6, 7: *Pyrus* / *Malus* or *Prunus* ✗ → nothing). **< 0.1 → nothing**, ask for a closer shot (4 rows, all wrong or lucky). At 0.3 the gate hides all seven 🔸 and loses one ✅ (row 4, "*Pyrus* or *Juglans*", a coin that landed right). Two caveats: on **B the margin does not separate ✅ from ❌** (❌ at 0.39, 0.54, 0.58, the row-4 ✅ at 0.25) — the distractors are what makes the number usable, so the gate is a C feature; and 18 photos set the number to one decimal at best.
+
+### 💶 B4 · where it would run
+
+Not Vercel: 1.7 GB of weights, 428 M parameters (304 M image tower + 124 M text tower, counted from the checkpoint), torch. 20 photos/day, prices read 2026-09-06, 1 $ ≈ 0.92 €.
+
+| Option | Price basis | EUR/month at 20 photos/day | Cold start | Notes |
+| --- | --- | --- | --- | --- |
+| **HF Inference Endpoints, CPU 2 vCPU, scale-to-zero** | $0.07/h ("Intel Sapphire Rapids aws", [huggingface.co/pricing](https://huggingface.co/pricing)); scales to 0 replicas "for over 15 minutes" idle, "502 Bad Gateway while the new replica is initializing", "no queueing system" ([docs/inference-endpoints/autoscaling](https://huggingface.co/docs/inference-endpoints/autoscaling)); billed "based on the compute hours of your Running Endpoints" ([FAQ](https://huggingface.co/docs/inference-endpoints/en/faq)) | **1.4 €** if the 20 photos come in 2 walks (2 wakes × ~20 min = 0.7 h/day) … **9.7 €** if they come one at a time (20 wakes × 15 min = 5 h/day). Always-on 2 vCPU: 47 € | Minutes: the container pulls 1.6 GB, the client sees 502 meanwhile and must retry on its own | 1 vCPU at $0.03/h exists but its RAM is not stated; fp32 weights alone are 1.7 GB |
+| HF Inference Endpoints, T4 GPU, scale-to-zero | $0.50/h ("NVIDIA T4 aws", same page) | 10 € (2 wakes) … 69 € (scattered) | as above | Not needed: 20 photos are 3 s of CPU a day |
+| **Hetzner CX23 (2 vCPU shared, 4 GB, 40 GB)** | 5.49 €/month + 0.50 € IPv4 = **5.99 €** ([hetzner.com/pressroom/new-cx-plans](https://www.hetzner.com/pressroom/new-cx-plans/), price after the June 2026 adjustment via [docs.hetzner.com … price-adjustment](https://docs.hetzner.com/general/infrastructure-and-availability/price-adjustment/); the plan table on hetzner.com renders client-side, price confirmed on [comparedge](https://comparedge.com/tools/hetzner/pricing) and [bitdoze](https://www.bitdoze.com/hetzner-cloud-cost-optimized-plans/)) | **5.99 €**, flat | None: the model loads once at boot (2.9 s on the Mac from SSD) | Measured: **0.13 s/photo on 2 M4 threads**; a shared x86 vCPU is 3–5× slower → **≈ 0.5 s/photo, 10 s of compute a day**. RAM 1.7 GB weights + torch ≈ 2.5 GB, fits. The real cost: a second host to run (TLS, updates, a 40-line HTTP wrapper), and the one-off label embedding (216 s on MPS → 30–60 min there, once per set change, cached as 2.7 MB) |
+| On-device, later | Image tower 304 M params → Core ML **fp16 ≈ 610 MB, int8 ≈ 305 MB**; the set's label embeddings 929 × 768 fp32 = **2.7 MB** (the `.pt` on disk); the text tower is not needed on the phone | 0 € | None | Only the set-constrained runs (B/C): the open-set embeddings are 2.6 GB. The app is a PWA — Core ML needs a native shell, the browser route is 300–600 MB of WebGPU/ONNX per device. Not this milestone |
+
+**Recommendation:** the option does **not** close: **Hetzner CX23 at 5.99 €/month** is under the 10 € line and, unlike HF scale-to-zero (1.4–9.7 € depending on how photos arrive, 502s during every cold start, no queue), predictable. But the table above says what 6 €/month buys: run C with the margin gate is **as good as Claude set on hits (6 vs 7 ✅) and better on confident errors (1 vs 3)**, in 0.5 s instead of 6 s, at 0 ¢ per photo instead of 1.4 ¢ — and it has no words, no ladder evidence, no "several", no "next photo" hint. The argument for it is spec §⚖️: **the photo never leaves hardware the owner runs.** If that line is worth a second host to operate, keep C behind the margin gate as the engine and Claude for the words; if not, I8 "skip" stands and 6 €/month is the price of the privacy sentence.
+
+### ⏱️ B5 · speed on the Mac
+
+| | Warm load | Per photo, median | Max | Note |
+| --- | --- | --- | --- | --- |
+| A ToL · MPS | 4.3 s (model + 867 455 embeddings) | **40 ms** | 48 ms | |
+| B set · MPS | 2.9 s | **33 ms** | 41 ms | label embeddings from `.cache/*.pt` |
+| C set+distr. · MPS | 3.6 s | 32 ms | 38 ms | |
+| B set · CPU, 12 threads | 2.7 s | **116 ms** | 121 ms | `--device cpu` |
+| B set · CPU, 4 threads | 2.6 s | 115 ms | 129 ms | `--threads 4` |
+| B set · CPU, 2 threads | 2.9 s | **132 ms** | 143 ms | `--threads 2`: batch 1 is memory-bound, threads barely matter |
+| First run | **535 s** | | | 1.6 GB model + 2.6 GB ToL embeddings, no login |
+| Label embedding, once | 216 s (929) / 244 s (1 078) on MPS | | | 80 prompt templates × labels through the text tower; cached as 2.7 / 3.2 MB |
+
+### ❓ B1–B5 · the agent's proposals
+
+| # | Question | Agent's proposal | Evidence | Decision |
+| --- | --- | --- | --- | --- |
+| B1 | Beats or matches | **Matches Claude set on hits, beats every engine on confident errors, loses on words.** C: ✅6 🟡4 🔸7 ❌1 vs Claude set ✅7 🟡5 ⬜3 ❌3, Pl@ntNet ✅1 🟡6 🔸9 ❌2. Mantis 1.00 | §B1 table | |
+| B2 | Open set or the 929 | **C, never A as the answer, never B alone.** A for the "what is it then" behind "outside the set" | Bonsai → blackbird, *Schefflera* → dormouse in B; C repairs 2 of 3 and halves B's wrong confidences | |
+| B3 | Misty trees | Same verdict as I2: fruit carries, silhouette does not. C: 2 ✅, 3 🟡, 5 🔸, **0 ❌** on the ten | §B3 | |
+| B4 | Where | **Hetzner CX23, 5.99 €/month**, if the privacy sentence is worth a second host. Otherwise I8 "skip" stands | §B4 | |
+| B5 | Speed | 33 ms MPS · 132 ms CPU (2 threads) · 3 s load | §B5 | |
+| — | The margin | Show ≥ 0.3, "unsicher" 0.1–0.3 (genus only on top-2 agreement), nothing < 0.1 — on run C only | §📏 | |
+
+### 🤔 Doubts (0015b)
+
+1. **None of the photos is from Mainz-Bingen** (`place` column). Every set-constrained column, 0015's three and 0015b's two, scores against the wrong Landkreis. The trees happen to be in the set anyway; the pot plants would be "outside" everywhere.
+2. **pybioclip is not the paper's protocol.** It resizes to 224 × 224 without a crop (the portrait crops are squashed) and averages 80 ImageNet prompts ("a tattoo of a Plantae Tracheophyta …", "the plastic …") instead of the card's "a photo of …". Both are package defaults, untouched. A proper center crop and the single template could move rows by a few points either way; not measured (½ session).
+3. **Synonyms split the softmax.** GBIF has both *Schefflera arboricola* and *Heptapleurum arboricola*; C put 0.81 + 0.18 on the same plant under two names, and A's *Heptapleurum* 0.84 is graded ❌ by string. The set's own names are GBIF backbone; ToL names are too, mostly — a `sciName` join will still need the synonym table 0015's doubt 8 asked for.
+4. **149 distractors, not 200**, and the genus list is typed (14 genera), only the species under them are pulled. The 60 DE plants are wild forest and meadow species (*Tilia*, *Picea*, *Betula* …) — good for the misty trees, irrelevant for a windowsill. A distractor list built from a "cultivated in Germany" source (e.g. GBIF `establishmentMeans`) would be the honest version.
+5. **The margin depends on the list.** Softmax over 1 078 labels gives systematically lower scores than over 929 (13: 0.70 → 0.57 with the same top-2 order). The 0.3 is a C number; change the list, re-tune.
+6. **The CPU number is a Mac number.** 132 ms on two M4 performance threads; "0.5 s on a Hetzner vCPU" is a ×3–5 guess, not a measurement. The one-off label embedding on that box is a guess too (30–60 min).
+7. **Scale-to-zero billing at 0 replicas** is implied ("cost savings"), not stated, on the HF pages read; the 15-minute idle window is the billed minimum per wake in my arithmetic.
+8. **Cold start on HF is not measured** (no endpoint was created: no spend). "Minutes" is the size of the pull (1.6 GB) and the docs' wording.

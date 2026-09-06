@@ -42,6 +42,11 @@ const cols = [
   ['Claude free', (n) => { const j = cached(`claude-claude-sonnet-5-free-${n}`)?.json; return j && { a: j.answer, c: j.confidence } }],
   ['Claude set', (n) => { const j = cached(`claude-claude-sonnet-5-set-${n}`)?.json; return j && { a: j.answer, c: j.confidence } }],
   ['Opus free', (n) => { const j = cached(`claude-claude-opus-5-free-${n}`)?.json; return j ? { a: j.answer, c: j.confidence } : null }],
+  // 0015b: BioCLIP 2 on the Mac. A = open set (867 455 ToL names), B = the 929 as labels, C = B + 149 distractors; a distractor at
+  // top-1 in C is the engine saying "outside the set", so it is scored as that honest answer with the distractor in brackets
+  ['BioCLIP ToL', (n) => { const t = cached(`bioclip-A-${n}`)?.top?.[0]; return t && { a: t.sci, c: +t.score.toFixed(2) } }],
+  ['BioCLIP set', (n) => { const t = cached(`bioclip-B-${n}`)?.top?.[0]; return t && { a: t.sci, c: +t.score.toFixed(2) } }],
+  ['BioCLIP set+distr.', (n) => { const t = cached(`bioclip-C-${n}`)?.top?.[0]; return t && (t.inSet ? { a: t.sci, c: +t.score.toFixed(2) } : { a: 'outside the set', c: `(${t.sci} ${t.score.toFixed(2)})` }) }],
 ]
 import { ORGAN as ORGANS } from './lib.mjs'
 
@@ -66,11 +71,17 @@ console.log('\n| Engine · run | Calls | Median s | Max s | Tokens in / cache wr
 const stat = (name, rs, extra) => {
   const ms = rs.map((r) => r.ms).sort((a, b) => a - b)
   const med = ms[Math.floor(ms.length / 2)] / 1000
-  console.log(`| ${name} | ${rs.length} | ${med.toFixed(1)} | ${(ms.at(-1) / 1000).toFixed(1)} | ${extra(rs)} |`)
+  const fmt = (s) => (s < 0.2 ? s.toFixed(3) : s.toFixed(1)) // BioCLIP is 30–130 ms, one decimal would print 0.0
+  console.log(`| ${name} | ${rs.length} | ${fmt(med)} | ${fmt(ms.at(-1) / 1000)} | ${extra(rs)} |`)
 }
 for (const run of ['auto', 'organ']) {
   const rs = labels().map((l) => cached(`plantnet-${run === 'auto' ? 'auto' : ORGANS[l.n]}-${l.n}`))
   stat(`Pl@ntNet ${run}`, rs, () => '— | 0 ¢ (free tier, 500/day; 499 → 463 left after 36 calls) | 0 ¢')
+}
+const bio = cached('bioclip')?.runs ?? {}
+for (const [run, name] of [['A', 'BioCLIP 2 ToL · MPS'], ['B', 'BioCLIP 2 set · MPS'], ['C', 'BioCLIP 2 set+distr. · MPS'], ['Bcpu', 'BioCLIP 2 set · CPU 12 threads'], ['Bcpu2', 'BioCLIP 2 set · CPU 2 threads']]) {
+  const rs = labels().map((l) => cached(`bioclip-${run}-${l.n}`)).filter(Boolean)
+  if (rs.length) stat(name, rs, () => `— (${bio[run]?.labels ?? '?'} labels, warm load ${((bio[run]?.load_ms ?? 0) / 1000).toFixed(1)} s) | 0 ¢ (local, MIT) | 0 ¢`)
 }
 for (const [m, p] of [['claude-sonnet-5', 'free'], ['claude-sonnet-5', 'set'], ['claude-opus-5', 'free']]) {
   const rs = labels().map((l) => cached(`claude-${m}-${p}-${l.n}`)).filter(Boolean)
@@ -79,4 +90,23 @@ for (const [m, p] of [['claude-sonnet-5', 'free'], ['claude-sonnet-5', 'set'], [
     const c = rs.reduce((a, r) => a + cents(m, r.usage), 0)
     return `${s.i} / ${s.cw} / ${s.cr} / ${s.o} | ${c.toFixed(1)} ¢ | ${(c / rs.length).toFixed(2)} ¢`
   })
+}
+
+// 0015b step 5: the softmax margin (top-1 − top-2) against the grade, runs B and C. Which threshold for "unsicher"?
+console.log('\n| Run | Photo | Margin | Grade | Top-1 · top-2 |\n| --- | --- | --- | --- | --- |')
+const margins = {}
+for (const run of ['B', 'C']) {
+  for (const l of labels()) {
+    const r = cached(`bioclip-${run}-${l.n}`); if (!r) continue
+    const t = r.top[0]
+    const { g } = grade(l, t.inSet ? t.sci : 'outside the set', t.score)
+    ;(margins[run] ??= []).push({ n: +l.n, m: r.margin, g, t1: `${t.sci} ${t.score.toFixed(2)}`, t2: `${r.top[1].sci} ${r.top[1].score.toFixed(2)}` })
+  }
+  for (const x of margins[run].sort((a, b) => a.m - b.m)) console.log(`| ${run} | ${x.n} | ${x.m.toFixed(3)} | ${x.g} | ${x.t1} · ${x.t2} |`)
+}
+console.log('\n| Threshold | Run | Shown (margin ≥ t) | Suppressed → "unsicher" |\n| --- | --- | --- | --- |')
+const glyphs = (xs) => ['✅', '🟡', '⬜', '🔸', '❌'].map((g) => `${g}${xs.filter((x) => x.g === g).length}`).filter((s) => !s.endsWith('0')).join(' ') || '—'
+for (const t of [0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5]) for (const run of ['B', 'C']) {
+  const xs = margins[run] ?? []
+  console.log(`| ${t} | ${run} | ${glyphs(xs.filter((x) => x.m >= t))} | ${glyphs(xs.filter((x) => x.m < t))} |`)
 }

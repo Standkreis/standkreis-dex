@@ -11,3 +11,8 @@ docs/research/walks/**/*.jpg
 docs/research/walks/**/*.JPG
 docs/research/walks/**/*.jpeg
 app/scripts/id-probe/.cache/
+
+# 0015b BioCLIP probe: python venv, never the model weights (those live in ~/.cache/huggingface)
+app/scripts/id-probe/bioclip/.venv/
+app/scripts/id-probe/bioclip/.cache/
+app/scripts/id-probe/bioclip/__pycache__/
