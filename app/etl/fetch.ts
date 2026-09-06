@@ -8,6 +8,17 @@ import { fileURLToPath } from 'node:url'
 
 export const UA = 'standkreis-dex/0.1 (https://github.com/svreiser/standkreis-dex; svreiser@gmail.com)'
 export const CACHE = join(dirname(fileURLToPath(import.meta.url)), '.cache')
+/** The disk cache is for the ETL on the Mac. On Vercel the bundle is read-only (`EROFS`/`ENOENT` under /var/task), so it is off; a failed write elsewhere is ignored (handoff 0011). */
+const DISK = !process.env.VERCEL
+function store(dir: string, file: string, body: string) {
+  if (!DISK) return
+  try {
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(file, body)
+  } catch {
+    /* read-only or full disk: the response is still returned */
+  }
+}
 const BUDGET = Number(process.env.ETL_BUDGET ?? 50_000)
 /** Minimum gap between two requests to one host, ms. iNaturalist allows ~1/s; Wikidata and GloBI ~3/s. */
 const MIN_GAP: Record<string, number> = { 'api.inaturalist.org': 1100, 'query.wikidata.org': 300, 'api.globalbioticinteractions.org': 300, 'api.gbif.org': 0 }
@@ -46,7 +57,7 @@ export async function get(url: string, { headers = {}, text = false }: Opts = {}
   const host = new URL(url).hostname
   const dir = join(CACHE, host)
   const file = join(dir, createHash('sha1').update(url).digest('hex') + (text ? '.txt' : '.json'))
-  if (existsSync(file)) {
+  if (DISK && existsSync(file)) {
     stats.hits++
     const raw = readFileSync(file, 'utf8')
     return text ? raw : JSON.parse(raw)
@@ -75,8 +86,7 @@ export async function get(url: string, { headers = {}, text = false }: Opts = {}
       try {
         const r = await fetch(url, { headers: { 'User-Agent': UA, Accept: text ? '*/*' : 'application/json', ...headers } })
         if (r.status === 404) {
-          mkdirSync(dir, { recursive: true })
-          writeFileSync(file, text ? '' : 'null')
+          store(dir, file, text ? '' : 'null')
           return text ? '' : null
         }
         if (r.status === 429 || r.status >= 500) {
@@ -89,8 +99,7 @@ export async function get(url: string, { headers = {}, text = false }: Opts = {}
         if (!r.ok) throw new Error(`${r.status} ${url}`)
         const body = await r.text()
         if (!text) JSON.parse(body)
-        mkdirSync(dir, { recursive: true })
-        writeFileSync(file, body)
+        store(dir, file, body)
         return text ? body : JSON.parse(body)
       } catch (e) {
         lastErr = e as Error
