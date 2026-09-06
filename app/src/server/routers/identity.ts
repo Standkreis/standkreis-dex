@@ -1,3 +1,4 @@
+import { createHash, randomInt, timingSafeEqual } from 'node:crypto'
 import { TRPCError } from '@trpc/server'
 import {
   generateAuthenticationOptions,
@@ -9,6 +10,7 @@ import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simp
 import { z } from 'zod'
 import { Tile } from '@/generated/prisma/enums'
 import { IDENTITY_COOKIE, IDENTITY_COOKIE_MAX_AGE, publicProcedure, router, type Context } from '../trpc'
+import { sendCode } from '../mail'
 import { deletePhoto, photoUrl } from '../photos'
 import { expectedOrigin, issueChallenge, rpID, rpName, takeChallenge } from '../webauthn'
 
@@ -17,6 +19,13 @@ const registrationResponse = z.custom<RegistrationResponseJSON>((v) => typeof v 
 const authenticationResponse = z.custom<AuthenticationResponseJSON>((v) => typeof v === 'object' && v !== null && 'id' in v && 'response' in v)
 
 const deviceSelect = { id: true, deviceName: true, createdAt: true, lastUsedAt: true } as const
+
+// The email code (handoff 0020 E2): six digits, hashed at rest, ten minutes, five tries, one live code per identity.
+const CODE_TTL_MS = 10 * 60 * 1000
+const CODE_MAX_ATTEMPTS = 5
+const CODES_PER_ADDRESS_PER_HOUR = 3
+const CODES_PER_IDENTITY_PER_DAY = 10
+const hashCode = (code: string) => createHash('sha256').update(code).digest('hex')
 
 /// Adoption (handoff 0006 Track B): `from` (this device's anonymous identity) folds into `into` (the identity the passkey belongs to).
 /// Sightings and studies merge by [taxonId, at] resp. [taxonId]; duplicates are dropped; assets owned move along; `from` is deleted.
@@ -72,11 +81,14 @@ export const identityRouter = router({
     const rows = filter?.regionIds.length ? await ctx.db.region.findMany({ where: { id: { in: filter.regionIds } }, select: { id: true, name: true, status: true } }) : []
     const byId = new Map(rows.map((r) => [r.id, r]))
     const regions = (filter?.regionIds ?? []).flatMap((id) => byId.get(id) ?? [])
+    // The verified address only (handoff 0020 E7): `email` is set together with `emailVerifiedAt` and cleared together.
+    const email = ctx.identity.emailVerifiedAt ? ctx.identity.email : null
     return {
       id: ctx.identity.id,
       createdAt: ctx.identity.createdAt,
-      anonymous: devices === 0,
+      anonymous: devices === 0 && !email, // no recovery path at all: neither a passkey nor a verified address
       devices,
+      email,
       displayName: ctx.identity.displayName,
       avatarUrl: ctx.identity.avatarAssetId ? photoUrl(ctx.identity.avatarAssetId) : null,
       region: filter?.region ?? null,
@@ -231,6 +243,63 @@ export const identityRouter = router({
     const merged = await mergeIdentities(ctx.db, ctx.identity.id, passkey.identityId)
     ctx.setCookie(IDENTITY_COOKIE, passkey.identityId, { maxAge: IDENTITY_COOKIE_MAX_AGE })
     return { id: passkey.identityId, adopted: true as const, merged }
+  }),
+
+  // ── Email (handoff 0020) ────────────────────────────────────────────────────
+  // The second recovery path: a code typed into the app, never a link (the installed PWA and Safari do not share cookies).
+  // Starting never says whether the address is known; verifying with an address that belongs to another identity adopts
+  // that identity here, exactly like `authenticateVerify` (the device's identity folds into the address's, never the reverse).
+  emailStart: publicProcedure.input(z.object({ email: z.string().trim().toLowerCase().email().max(254) })).mutation(async ({ ctx, input }) => {
+    const now = Date.now()
+    const [perAddress, perIdentity] = await Promise.all([
+      ctx.db.emailCode.count({ where: { email: input.email, createdAt: { gt: new Date(now - 60 * 60 * 1000) } } }),
+      ctx.db.emailCode.count({ where: { identityId: ctx.identity.id, createdAt: { gt: new Date(now - 24 * 60 * 60 * 1000) } } }),
+    ])
+    if (perAddress >= CODES_PER_ADDRESS_PER_HOUR || perIdentity >= CODES_PER_IDENTITY_PER_DAY) throw new TRPCError({ code: 'TOO_MANY_REQUESTS', message: 'too many codes, try again later' })
+    const code = randomInt(0, 1_000_000).toString().padStart(6, '0')
+    const expiresAt = new Date(now + CODE_TTL_MS)
+    await ctx.db.$transaction([
+      ctx.db.emailCode.updateMany({ where: { identityId: ctx.identity.id, usedAt: null }, data: { usedAt: new Date(now) } }), // one live code per identity
+      ctx.db.emailCode.create({ data: { identityId: ctx.identity.id, email: input.email, codeHash: hashCode(code), expiresAt, locale: ctx.locale } }),
+    ])
+    try { await sendCode(input.email, code, ctx.locale) } catch (e) {
+      console.error('[mail] send failed:', e instanceof Error ? e.message : e) // the provider's message, never the address
+      throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: 'mail not sent' })
+    }
+    return { sentTo: input.email, expiresAt }
+  }),
+
+  emailVerify: publicProcedure.input(z.object({ code: z.string().trim().regex(/^\d{6}$/) })).mutation(async ({ ctx, input }) => {
+    const live = await ctx.db.emailCode.findFirst({ where: { identityId: ctx.identity.id, usedAt: null }, orderBy: { createdAt: 'desc' } })
+    if (!live || live.attempts >= CODE_MAX_ATTEMPTS) throw new TRPCError({ code: 'BAD_REQUEST', message: 'no live code' })
+    if (live.expiresAt.getTime() < Date.now()) throw new TRPCError({ code: 'BAD_REQUEST', message: 'code expired' })
+    const ok = timingSafeEqual(Buffer.from(hashCode(input.code)), Buffer.from(live.codeHash))
+    if (!ok) {
+      const { attempts } = await ctx.db.emailCode.update({ where: { id: live.id }, data: { attempts: { increment: 1 } }, select: { attempts: true } })
+      throw new TRPCError({ code: 'BAD_REQUEST', message: attempts >= CODE_MAX_ATTEMPTS ? 'code dead' : 'wrong code' })
+    }
+    await ctx.db.emailCode.update({ where: { id: live.id }, data: { usedAt: new Date(), attempts: { increment: 1 } } })
+
+    const owner = await ctx.db.identity.findUnique({ where: { email: live.email }, select: { id: true, emailVerifiedAt: true } })
+    if (owner && owner.emailVerifiedAt && owner.id !== ctx.identity.id) {
+      // A verified address is never moved or dropped silently (§🔒): this device's own address would go with the merge.
+      if (ctx.identity.emailVerifiedAt) throw new TRPCError({ code: 'PRECONDITION_FAILED', message: 'remove your address first' })
+      const merged = await mergeIdentities(ctx.db, ctx.identity.id, owner.id)
+      ctx.setCookie(IDENTITY_COOKIE, owner.id, { maxAge: IDENTITY_COOKIE_MAX_AGE })
+      return { id: owner.id, adopted: true as const, merged, email: live.email }
+    }
+    // A reserved-but-unverified `email` on some other row (pre-0020 there was no writer, so this is a guard, not a path).
+    if (owner && owner.id !== ctx.identity.id) await ctx.db.identity.update({ where: { id: owner.id }, data: { email: null } })
+    await ctx.db.identity.update({ where: { id: ctx.identity.id }, data: { email: live.email, emailVerifiedAt: new Date() } })
+    return { id: ctx.identity.id, adopted: false as const, email: live.email }
+  }),
+
+  emailRemove: publicProcedure.mutation(async ({ ctx }) => {
+    await ctx.db.$transaction([
+      ctx.db.identity.update({ where: { id: ctx.identity.id }, data: { email: null, emailVerifiedAt: null } }),
+      ctx.db.emailCode.deleteMany({ where: { identityId: ctx.identity.id } }),
+    ])
+    return { email: null }
   }),
 
   devices: publicProcedure.query(({ ctx }) =>

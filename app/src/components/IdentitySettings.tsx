@@ -7,6 +7,7 @@ import { Link } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { authenticate, guessDeviceName, register } from './IdentityPasskey'
 import { IdentityDeleteSheet } from './IdentityDelete'
+import { EmailForm, SignInSheet, type EmailVerified } from './IdentityEmail'
 import { AppearanceRows } from './Appearance'
 
 const card = 'rounded-3xl bg-card shadow-[0_2px_12px_rgba(30,42,35,0.06)]'
@@ -40,7 +41,9 @@ export function IdentitySettings({ version }: { version: string }) {
   const trpc = useTRPC()
   const qc = useQueryClient()
   const me = useQuery(trpc.identity.me.queryOptions())
-  const synced = !!me.data && !me.data.anonymous
+  const synced = !!me.data && !me.data.anonymous // a passkey or a verified address (handoff 0020 E6)
+  const passkeys = me.data?.devices ?? 0
+  const email = me.data?.email ?? null
   const devices = useQuery(trpc.identity.devices.queryOptions(undefined, { enabled: synced }))
   const refresh = () => qc.invalidateQueries()
 
@@ -48,12 +51,16 @@ export function IdentitySettings({ version }: { version: string }) {
   const [error, setError] = useState<string | null>(null)
   const [showDevices, setShowDevices] = useState(false)
   const [deleting, setDeleting] = useState(false)
+  const [signingIn, setSigningIn] = useState(false)
+  const [attaching, setAttaching] = useState(false)
+  const [removingEmail, setRemovingEmail] = useState(false) // the warning step when the address is the last recovery path
 
   const registerOptions = useMutation(trpc.identity.registerOptions.mutationOptions())
   const registerVerify = useMutation(trpc.identity.registerVerify.mutationOptions({ onSuccess: refresh }))
   const authOptions = useMutation(trpc.identity.authenticateOptions.mutationOptions())
   const authVerify = useMutation(trpc.identity.authenticateVerify.mutationOptions({ onSuccess: refresh }))
   const remove = useMutation(trpc.identity.remove.mutationOptions({ onSuccess: refresh }))
+  const emailRemove = useMutation(trpc.identity.emailRemove.mutationOptions({ onSuccess: refresh }))
   const busy = registerOptions.isPending || registerVerify.isPending || authOptions.isPending || authVerify.isPending
 
   const run = async (fn: () => Promise<void>) => {
@@ -74,6 +81,17 @@ export function IdentitySettings({ version }: { version: string }) {
     const r = await authVerify.mutateAsync({ response })
     if (r.adopted) setNotice(t('identity.adopted', { sightings: r.merged.sightingsMerged }))
   })
+  // The email path ends here, from the row or from the sheet: the same notice as the passkey path when it adopted.
+  const emailVerified = (r: EmailVerified) => {
+    setAttaching(false); setError(null)
+    setNotice(r.adopted && r.merged ? t('identity.adopted', { sightings: r.merged.sightingsMerged }) : t('email.verified', { email: r.email }))
+    refresh()
+  }
+  const removeEmail = () => {
+    if (passkeys === 0 && !removingEmail) return setRemovingEmail(true)
+    setRemovingEmail(false)
+    run(async () => { await emailRemove.mutateAsync() })
+  }
 
   const lastUsed = devices.data?.map((d) => d.lastUsedAt).filter((d): d is Date => !!d).sort((a, b) => b.getTime() - a.getTime())[0]
   const exportData = () => run(async () => {
@@ -98,15 +116,15 @@ export function IdentitySettings({ version }: { version: string }) {
         <div className="flex gap-3">
           <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[20px] ${synced ? 'bg-moss-soft' : 'bg-tile'}`} aria-hidden>{synced ? '☁️' : '📱'}</div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-[17px] font-bold" data-testid="identity-title">{synced ? t('identity.syncedTitle', { n: me.data?.devices ?? 0 }) : t('identity.localTitle')}</h2>
+            <h2 className="text-[17px] font-bold" data-testid="identity-title">{synced ? (passkeys > 0 ? t('identity.syncedTitle', { n: passkeys }) : t('identity.syncedTitleEmail')) : t('identity.localTitle')}</h2>
             <p className="mt-0.5 text-[15px] text-ink-soft">
-              {synced ? (lastUsed ? t('identity.syncedBody', { when: fmt.relativeTime(lastUsed, { now }) }) : t('identity.syncedBodyNever')) : t('identity.localBody')}
+              {!synced ? t('identity.localBody') : passkeys === 0 ? t('identity.syncedBodyEmail') : lastUsed ? t('identity.syncedBody', { when: fmt.relativeTime(lastUsed, { now }) }) : t('identity.syncedBodyNever')}
             </p>
           </div>
         </div>
         {synced ? (
           <div className="mt-4 flex flex-wrap gap-2">
-            <button type="button" onClick={() => setShowDevices((v) => !v)} className="rounded-full bg-tile px-3.5 py-2 text-[14px] font-semibold">{t('identity.removeDevice')}</button>
+            {passkeys > 0 && <button type="button" onClick={() => setShowDevices((v) => !v)} className="rounded-full bg-tile px-3.5 py-2 text-[14px] font-semibold">{t('identity.removeDevice')}</button>}
             <button type="button" onClick={createPasskey} disabled={busy} data-testid="passkey-add" className="rounded-full bg-tile px-3.5 py-2 text-[14px] font-semibold disabled:opacity-50">{t('identity.addDevice')}</button>
           </div>
         ) : (
@@ -116,10 +134,42 @@ export function IdentitySettings({ version }: { version: string }) {
             </button>
             <p className="mt-2 text-center text-[13px] text-ink-soft">
               {t('identity.createHint')}{' '}
-              <button type="button" onClick={signIn} disabled={busy} data-testid="passkey-signin" className="underline">{t('identity.signIn')}</button>
+              <button type="button" onClick={() => setSigningIn(true)} disabled={busy} data-testid="passkey-signin" className="underline">{t('identity.signIn')}</button>
             </p>
           </>
         )}
+        {/* The email row (handoff 0020 E6): none → "E-Mail verknüpfen"; entering and sent inside EmailForm; verified → address + Entfernen. */}
+        <div className="mt-4 border-t border-paper pt-3" data-testid="email-row" data-state={email ? 'verified' : attaching ? 'attaching' : 'none'}>
+          {email ? (
+            <>
+              <div className="flex items-center gap-3">
+                <span aria-hidden>✉️</span>
+                <div className="min-w-0 flex-1 truncate text-[15px]" data-testid="email-value">{email}</div>
+                <button type="button" onClick={removeEmail} disabled={emailRemove.isPending} data-testid="email-remove" className="text-[13px] font-semibold text-amber disabled:opacity-50">{t('email.remove')}</button>
+              </div>
+              {removingEmail && (
+                <div className="mt-2 rounded-2xl bg-paper px-3 py-2.5 text-[13px]" data-testid="email-remove-warning">
+                  <p className="text-amber">{t('email.removeLast')}</p>
+                  <div className="mt-2 flex gap-3">
+                    <button type="button" onClick={removeEmail} data-testid="email-remove-confirm" className="font-semibold text-amber">{t('email.removeConfirm')}</button>
+                    <button type="button" onClick={() => setRemovingEmail(false)} className="text-ink-soft">{t('email.cancel')}</button>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : attaching ? (
+            <EmailForm onVerified={emailVerified} onCancel={() => setAttaching(false)} />
+          ) : (
+            <button type="button" onClick={() => { setAttaching(true); setNotice(null); setError(null) }} data-testid="email-attach" className="flex w-full items-center gap-3 text-left">
+              <span aria-hidden>✉️</span>
+              <div className="min-w-0 flex-1">
+                <div className="text-[15px] font-semibold">{t('email.attach')}</div>
+                <div className="text-[13px] text-ink-soft">{t('email.attachHint')}</div>
+              </div>
+              <span className="text-ink-faint" aria-hidden>›</span>
+            </button>
+          )}
+        </div>
         {showDevices && synced && (
           <ul className="mt-3 divide-y divide-paper rounded-2xl bg-paper" data-testid="devices">
             {devices.data?.map((d) => (
@@ -151,6 +201,7 @@ export function IdentitySettings({ version }: { version: string }) {
         <Row title={t('about.version')} value={version} />
       </Group>
 
+      {signingIn && <SignInSheet onClose={() => setSigningIn(false)} onPasskey={signIn} onVerified={emailVerified} />}
       {deleting && <IdentityDeleteSheet onClose={(done) => { setDeleting(false); if (done) setNotice(t('data.deleted')) }} />}
     </main>
   )

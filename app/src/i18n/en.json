@@ -205,10 +205,10 @@
     "back": "Profile",
     "identity": {
       "localTitle": "Only on this phone",
-      "localBody": "No account. A new phone starts from zero as long as you link nothing.",
+      "localBody": "No account. A new phone starts from zero as long as you link neither a passkey nor an email.",
       "create": "🔑 Create a passkey",
       "createHint": "Face ID or fingerprint, no password.",
-      "signIn": "Already have a passkey? Sign in here.",
+      "signIn": "Already have a passkey or an email? Sign in here.",
       "syncedTitle": "On {n, plural, one {one device} other {# devices}}",
       "syncedBody": "Passkey, no password. Last used {when}.",
       "syncedBodyNever": "Passkey, no password.",
@@ -219,7 +219,13 @@
       "remove": "Remove",
       "done": "Done",
       "adopted": "Linked. {sightings, plural, =0 {No sightings} one {One sighting} other {# sightings}} from here carried over.",
-      "unknownPasskey": "We do not know this passkey."
+      "unknownPasskey": "We do not know this passkey.",
+      "syncedTitleEmail": "Linked by email",
+      "syncedBodyEmail": "No passkey. The code from the mail brings your sightings to a new device.",
+      "signInTitle": "Sign in",
+      "signInHint": "Either one brings your sightings from there to this device.",
+      "signInPasskey": "🔑 With a passkey",
+      "signInEmail": "✉️ With an email"
     },
     "data": {
       "title": "Your data",
@@ -247,6 +253,31 @@
       "sources": "Sources",
       "sourcesHint": "GBIF · Wikidata · Wikipedia · Wikimedia Commons · iNaturalist · GloBI",
       "version": "Version"
+    },
+    "email": {
+      "attach": "Link an email",
+      "attachHint": "A second way back to your sightings, next to the passkey.",
+      "address": "Email address",
+      "send": "Send a code",
+      "sent": "Code sent to {email}.",
+      "code": "6-digit code",
+      "verify": "Confirm",
+      "resend": "New code",
+      "resendIn": "New code in {s} s",
+      "changeAddress": "Other address",
+      "cancel": "Cancel",
+      "verified": "Linked to {email}.",
+      "remove": "Remove",
+      "removeLast": "This is your only way back. Without an email or a passkey everything stays on this device only.",
+      "removeConfirm": "Remove anyway",
+      "invalidAddress": "That does not look like an email address.",
+      "wrongCode": "Wrong code.",
+      "codeDead": "Too many wrong tries. Ask for a new code.",
+      "codeExpired": "The code has expired. Ask for a new one.",
+      "noCode": "No valid code. Ask for a new one.",
+      "tooMany": "Too many codes in a short time. Try again in an hour.",
+      "notSent": "The mail could not be sent.",
+      "removeFirst": "Remove the email on this device first."
     }
   },
   "onboarding": {
@@ -424,7 +455,7 @@
   },
   "nudge": {
     "title": "On your laptop too?",
-    "body": "A passkey takes your sightings along to other devices. No account, no email.",
+    "body": "A passkey or an email takes your sightings along to other devices. No account, no password.",
     "later": "Later",
     "create": "Create a passkey"
   },

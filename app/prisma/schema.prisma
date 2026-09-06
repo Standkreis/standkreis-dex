@@ -17,8 +17,10 @@ datasource db {
 model Identity {
   id            String     @id @default(uuid())
   createdAt     DateTime   @default(now())
-  /// Reserved for a magic-link attach; unused in M7 (no mail provider).
-  email         String?    @unique
+  /// The verified address (handoff 0020): the second recovery path next to passkeys. Set only by `identity.emailVerify`,
+  /// together with `emailVerifiedAt`; PII (spec §⚖️), on the identity, in the export and in the mail, nowhere else.
+  email           String?    @unique
+  emailVerifiedAt DateTime?
   /// Name and photo are optional, local only, never on a share card (spec §⚖️).
   displayName   String?
   /// The profile photo (handoff 0014 P2): one user Asset per identity, square, ≤ 256 px, served by /api/photo/<id>.
@@ -26,10 +28,31 @@ model Identity {
   avatar        Asset?     @relation("avatar", fields: [avatarAssetId], references: [id], onDelete: SetNull)
   avatarAssetId String?    @unique
   passkeys      Passkey[]
+  emailCodes    EmailCode[]
   filter        Filter?
   sightings     Sighting[]
   studies       Study[]
   assets        Asset[]
+}
+
+/// One six-digit code per attach attempt (handoff 0020 E1), hashed at rest (SHA-256), 10 minutes, 5 tries.
+/// One live code per identity: a new `emailStart` marks the old one used. Gone with the identity.
+model EmailCode {
+  id         String    @id @default(uuid())
+  identity   Identity  @relation(fields: [identityId], references: [id], onDelete: Cascade)
+  identityId String
+  /// Lower-cased, trimmed; the address the code went to.
+  email      String
+  codeHash   String
+  attempts   Int       @default(0)
+  expiresAt  DateTime
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+  /// de | en: the language the mail was written in.
+  locale     String
+
+  @@index([identityId])
+  @@index([email, createdAt])
 }
 
 /// One WebAuthn credential per device. Anonymous = zero rows; "Auf N Geräten" = N rows.

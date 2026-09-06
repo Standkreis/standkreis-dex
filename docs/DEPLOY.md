@@ -1,10 +1,10 @@
 # ▲ Deploy — the live stack
 
-> How the app runs in production as of 2026-09-06. Decisions: [handoff 0011](handoffs/0011-vercel.md) and its findings. The one-VM deploy of [handoff 0010](handoffs/0010-deploy.md) was removed, see §🗑️.
+> How the app runs in production as of 2026-09-07. Decisions: [handoff 0011](handoffs/0011-vercel.md) and its findings. The one-VM deploy of [handoff 0010](handoffs/0010-deploy.md) was removed, see §🗑️.
 
 | 🗓️ Updated | 👤 Owner | 🌐 Live | 🔁 Fallback |
 | --- | --- | --- | --- |
-| 2026-09-06 | Sven Reiser | https://atlas.standkreis.de | https://standkreis-dex.vercel.app |
+| 2026-09-07 | Sven Reiser | https://atlas.standkreis.de | https://standkreis-dex.vercel.app |
 
 ## 🧱 Stack
 
@@ -13,7 +13,7 @@
 | App | **Vercel** (team "Standkreis", Pro), project `standkreis-dex` | functions in `fra1`, Node.js 24 | root directory `app`; build command from `app/vercel.json`: `node scripts/deploy/migrate.mjs && npm run build` (overrides the dashboard) |
 | Database | **Neon Postgres** (Free), store `standkreis-atlas` | Frankfurt `eu-central-1` | via the Vercel marketplace; connected to Production and Preview only, so local dev keeps the Docker Postgres on `:5433` |
 | Photos | **Vercel Blob**, private store `standkreis-dex-blob` | `iad1` | connected to all three environments; user photos live at `photos/<assetId>.jpg`, streamed by `/api/photo/<id>` (0011 Track A) |
-| Mail | **Resend** (EU region) | — | for M7b; the domain is not yet added at Resend |
+| Mail | **Resend** (EU region) | — | the email code (0020): one transactional mail from `atlas@standkreis.de`, no tracking. The domain `standkreis.de` must be verified at Resend (DKIM, return path) before the first real mail |
 | DNS | united-domains | — | `atlas` CNAME → Vercel; the apex `standkreis.de` is reserved for a later landing page |
 
 Hosting decision: Hetzner refused the owner's card on 2026-09-05, one day after the VM deploy was merged. Vercel took its place.
@@ -35,6 +35,8 @@ No values here. Set in Vercel → Settings → Environment Variables unless the 
 | `CRON_SECRET` | project, Prod + Preview | Guards `GET /api/cron/sweep`; Vercel's cron sends it as `Authorization: Bearer …` (0011 Track B). Unset: the route answers 401 to everyone | yes |
 | `ANTHROPIC_API_KEY` | project, Prod + Preview; also `app/.env.local` on the Mac | The scan (0016 Track A): `sighting.identify` proxies the photo to Claude Sonnet 5, the key never leaves the server. **Required**: the server refuses to start without it, like the others | yes |
 | `ANTHROPIC_BASE_URL` | never on Vercel | Checks only: points `identify` at a stub (`app/scripts/m12/identify.mjs errors`) | no |
+| `RESEND_API_KEY` | project, Prod + Preview; also `app/.env.local` on the Mac | The email attach (0020 E4): `identity.emailStart` sends the code through Resend. **Required**: the server refuses to start without it; unset in dev the code goes to the server log | yes |
+| `RESEND_BASE_URL` | never on Vercel | Checks only: points the Resend SDK at a stub (`app/scripts/m7b/email.mjs`) | no |
 
 `next.config.ts` picks `output` by environment: `'export'` for the static export, `undefined` otherwise (Vercel's tracer fails on `standalone`: `ENOENT next-server.js.nft.json`).
 
@@ -92,7 +94,7 @@ First fill on 2026-09-06: the region job took 111 s (1,617 GBIF requests), set o
 | Photos persist | ✅ private Blob behind the `photos.ts` seam, streamed with an immutable cache header (0011 A, C1–C3); owner's C6 on the phone | A, done |
 | Region job, content kick outlive the response | ✅ `waitUntil` via `server/jobs.ts`, `maxDuration = 300` on the tRPC route (0011 B, C4); proven on Vercel itself by the owner's C6 | B, done |
 | Restart sweep | ✅ hourly `GET /api/cron/sweep` with `CRON_SECRET`, `register()` skips the sweep on Vercel (0011 B, C5) | B, done |
-| Resend domain, magic link | not added | M7b |
+| Resend domain, email attach | code built and checked against a stub ([0020](handoffs/0020-email-attach-findings.md)); the domain at Resend and the first real mail (C8) are the owner's | M7b |
 
 ## 🗑️ Removed: the VM deploy
 

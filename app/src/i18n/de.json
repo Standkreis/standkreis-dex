@@ -205,10 +205,10 @@
     "back": "Profil",
     "identity": {
       "localTitle": "Nur auf diesem Handy",
-      "localBody": "Kein Konto. Ein neues Handy fängt bei Null an, solange du nichts verknüpfst.",
+      "localBody": "Kein Konto. Ein neues Handy fängt bei Null an, solange du keinen Passkey und keine E-Mail verknüpfst.",
       "create": "🔑 Passkey anlegen",
       "createHint": "Face ID oder Fingerabdruck, kein Passwort.",
-      "signIn": "Schon einen Passkey? Hier anmelden.",
+      "signIn": "Schon einen Passkey oder eine E-Mail? Hier anmelden.",
       "syncedTitle": "Auf {n, plural, one {einem Gerät} other {# Geräten}}",
       "syncedBody": "Passkey, kein Passwort. Zuletzt {when}.",
       "syncedBodyNever": "Passkey, kein Passwort.",
@@ -219,7 +219,13 @@
       "remove": "Entfernen",
       "done": "Fertig",
       "adopted": "Verknüpft. {sightings, plural, =0 {Keine Sichtung} one {Eine Sichtung} other {# Sichtungen}} von hier übernommen.",
-      "unknownPasskey": "Diesen Passkey kennen wir nicht."
+      "unknownPasskey": "Diesen Passkey kennen wir nicht.",
+      "syncedTitleEmail": "Per E-Mail verknüpft",
+      "syncedBodyEmail": "Kein Passkey. Der Code aus der Mail holt deine Sichtungen auf ein neues Gerät.",
+      "signInTitle": "Anmelden",
+      "signInHint": "Beides holt deine Sichtungen von dort auf dieses Gerät.",
+      "signInPasskey": "🔑 Mit Passkey",
+      "signInEmail": "✉️ Mit E-Mail"
     },
     "data": {
       "title": "Deine Daten",
@@ -247,6 +253,31 @@
       "sources": "Quellen",
       "sourcesHint": "GBIF · Wikidata · Wikipedia · Wikimedia Commons · iNaturalist · GloBI",
       "version": "Version"
+    },
+    "email": {
+      "attach": "E-Mail verknüpfen",
+      "attachHint": "Zweiter Weg zurück zu deinen Sichtungen, neben dem Passkey.",
+      "address": "E-Mail-Adresse",
+      "send": "Code schicken",
+      "sent": "Code geschickt an {email}.",
+      "code": "6-stelliger Code",
+      "verify": "Bestätigen",
+      "resend": "Neuen Code",
+      "resendIn": "Neuer Code in {s} s",
+      "changeAddress": "Andere Adresse",
+      "cancel": "Abbrechen",
+      "verified": "Verknüpft mit {email}.",
+      "remove": "Entfernen",
+      "removeLast": "Das ist dein einziger Weg zurück. Ohne E-Mail und Passkey bleibt alles nur auf diesem Gerät.",
+      "removeConfirm": "Trotzdem entfernen",
+      "invalidAddress": "Das sieht nicht nach einer E-Mail-Adresse aus.",
+      "wrongCode": "Falscher Code.",
+      "codeDead": "Zu oft falsch. Fordere einen neuen Code an.",
+      "codeExpired": "Der Code ist abgelaufen. Fordere einen neuen an.",
+      "noCode": "Kein gültiger Code. Fordere einen neuen an.",
+      "tooMany": "Zu viele Codes in kurzer Zeit. Versuch es in einer Stunde noch einmal.",
+      "notSent": "Die Mail konnte nicht verschickt werden.",
+      "removeFirst": "Entferne erst die E-Mail auf diesem Gerät."
     }
   },
   "onboarding": {
@@ -424,7 +455,7 @@
   },
   "nudge": {
     "title": "Auch auf dem Laptop?",
-    "body": "Ein Passkey nimmt deine Sichtungen mit auf andere Geräte. Kein Konto, keine E-Mail.",
+    "body": "Ein Passkey oder eine E-Mail nimmt deine Sichtungen mit auf andere Geräte. Kein Konto, kein Passwort.",
     "later": "Später",
     "create": "Passkey anlegen"
   },

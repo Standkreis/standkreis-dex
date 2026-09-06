@@ -19,6 +19,8 @@ const strict = z.object({
   CRON_SECRET: z.string().trim().min(1).optional(), // guards /api/cron/sweep (handoff 0011 Track B); unset: the route refuses
   ANTHROPIC_API_KEY: required, // the scan (handoff 0016 Track A): `sighting.identify` proxies to the Messages API; never in the client bundle
   ANTHROPIC_BASE_URL: z.string().trim().transform((s) => s || undefined).optional(), // checks only: a stub in place of api.anthropic.com
+  RESEND_API_KEY: required, // the email attach (handoff 0020 E4): the code mail goes out through Resend; never in the client bundle
+  RESEND_BASE_URL: z.string().trim().transform((s) => s || undefined).optional(), // checks only: a stub in place of api.resend.com (the SDK reads it itself)
 }).superRefine((e, ctx) => {
   if (!e.PHOTO_DIR && !e.BLOB_READ_WRITE_TOKEN) ctx.addIssue({ code: 'custom', path: ['PHOTO_DIR'], message: 'not set (or set BLOB_READ_WRITE_TOKEN to store photos in Vercel Blob)' })
 })
@@ -32,6 +34,8 @@ const lenient = z.object({
   CRON_SECRET: z.string().trim().min(1).optional(),
   ANTHROPIC_API_KEY: z.string().trim().transform((s) => s || undefined).optional(), // unset in dev: identify answers PRECONDITION_FAILED
   ANTHROPIC_BASE_URL: z.string().trim().transform((s) => s || undefined).optional(),
+  RESEND_API_KEY: z.string().trim().transform((s) => s || undefined).optional(), // unset in dev: the code lands in the server log, nothing is sent
+  RESEND_BASE_URL: z.string().trim().transform((s) => s || undefined).optional(),
 })
 
 export type Env = z.infer<typeof strict> & z.infer<typeof lenient>
@@ -47,6 +51,8 @@ function read(): Env {
     CRON_SECRET: process.env.CRON_SECRET,
     ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
     ANTHROPIC_BASE_URL: process.env.ANTHROPIC_BASE_URL,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    RESEND_BASE_URL: process.env.RESEND_BASE_URL,
   }
   const parsed = (isProduction ? strict : lenient).safeParse(source)
   if (parsed.success) return parsed.data as Env

@@ -25,7 +25,13 @@ export const dataRouter = router({
     return {
       format: 'standkreis-dex/1',
       exportedAt: new Date(),
-      identity: { id, createdAt: ctx.identity.createdAt, devices, ...(devices > 0 ? { displayName: ctx.identity.displayName } : {}) },
+      identity: {
+        id,
+        createdAt: ctx.identity.createdAt,
+        devices,
+        email: ctx.identity.emailVerifiedAt ? ctx.identity.email : null, // the verified address (handoff 0020 E7); PII, yours to take along
+        ...(devices > 0 || ctx.identity.emailVerifiedAt ? { displayName: ctx.identity.displayName } : {}),
+      },
       filter: filter ? { region: filter.region, tiles: filter.tiles, nowOnly: filter.nowOnly } : null,
       sightings: sightings.map((s) => ({
         id: s.id,
@@ -53,7 +59,7 @@ export const dataRouter = router({
     const payload = verifyToken<DeleteToken>(input.token)
     if (!payload || payload.purpose !== 'delete' || payload.identityId !== id) throw new TRPCError({ code: 'BAD_REQUEST', message: 'token invalid or expired' })
     await deletePhotoFilesOfIdentity(id) // the files first: the cascade below drops the Asset rows the file names come from
-    await ctx.db.identity.delete({ where: { id } }) // cascade: passkeys, filter, sightings (and their photos), studies, assets owned
+    await ctx.db.identity.delete({ where: { id } }) // cascade: passkeys, email codes, filter, sightings (and their photos), studies, assets owned
     ctx.setCookie(IDENTITY_COOKIE, '', { maxAge: 0 })
     return { step: 'done' as const }
   }),
