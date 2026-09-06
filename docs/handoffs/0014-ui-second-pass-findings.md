@@ -196,3 +196,71 @@ Fresh identity, Mainz-Bingen, one sighting (Idaea bilinearia) and one study (Bom
 | `Journal.tsx`, `SightingPage.tsx`, `SpeciesPage.tsx` | **untouched** | B |
 
 New files: `IdentityAvatar.tsx`, `IdentityGroups.tsx`, `GroupRows.ts`, `GroupRows.test.ts`, `scripts/m14/track-c.mjs`, `prisma/migrations/20260906140000_identity_avatar/`, four `c-*` shots. `data/photos/` is git-ignored and empty after the run.
+
+## 🅳 Track D
+
+| 🗓️ | 👤 | 🌿 Where | 🧪 |
+| --- | --- | --- | --- |
+| 2026-09-06 | agent (Claude Fable 5.1) | worktree `../standkreis-dex-d`, branch `0014-d` on `a5dec93`; `tokens.css` unchanged on merge: **the owner kept moss and amber** (2026-09-06) | `npm run check` green with the proposal (32 tests, one pre-existing warning in `scripts/m8b/queue.mjs`) · `scripts/m14/track-d.mjs` twice on `next build` + `next start -p 3004`, Mainz-Bingen |
+
+G2 is the owner's call: `git merge --ff-only 0014-d` takes the proposal, dropping the branch keeps today. Nothing but `tokens.css` differs.
+
+### 🎨 Tokens, light (contrast on white `#ffffff` / on paper `#f5f2ea`)
+
+| Token | Today | ⚪ | 📄 | Proposal | ⚪ | 📄 | Role |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `--color-moss` | `#16a34a` | 3.30 | 2.95 | `#0d9488` | 3.74 | 3.35 | buttons, rings, badges, FAB; white text on it has the same ratio |
+| `--color-moss-deep` | `#15803d` | 5.02 | 4.48 | `#0f766e` | 5.47 | 4.89 | text on paper ("entdeckt", Ändern): AA both |
+| `--color-moss-soft` | `#dcf5e3` | 1.15 | 1.03 | `#d3f2ec` | 1.19 | 1.06 | filter button, avatar disc |
+| `--color-amber` | `#c4620f` | 4.12 | 3.68 | `#9333ea` | 5.38 | 4.81 | "studiert" text, ring, button, bar: **AA on white only with the proposal** |
+| `--color-amber-soft` | `#f4e4c8` | 1.25 | 1.12 | `#efe4fc` | 1.22 | 1.09 | |
+| `--color-sky` | `#2563eb` | 5.17 | 4.62 | unchanged | | | selection |
+
+### 🌙 Tokens, dark (contrast on the dark paper `#121b16` / on the dark card `#1b2621`)
+
+| Token | Today | 📄 | 🃏 | Proposal | 📄 | 🃏 |
+| --- | --- | --- | --- | --- | --- | --- |
+| `--color-moss` | `#22c55e` | 7.72 | 6.85 | `#14b8a6` | 7.07 | 6.27 |
+| `--color-moss-deep` | `#4ade80` | 10.09 | 8.95 | `#2dd4bf` | 9.45 | 8.38 |
+| `--color-moss-soft` | `#17402a` | 1.51 | 1.34 | `#12403b` | 1.53 | 1.35 |
+| `--color-amber` | `#f0a030` | 8.19 | 7.26 | `#c084fc` | 6.66 | 5.91 |
+| `--color-amber-soft` | `#3b2a12` | 1.28 | 1.13 | `#33204d` | 1.22 | 1.08 |
+| `--color-sky` | `#3b82f6` | 3.40 | 3.02 | unchanged | | |
+
+Picks: Tailwind teal-600/700/500/400 and purple-600/400; the softs are mixed to the lightness of today's softs. Ratios computed (WCAG 2), not seen on a phone.
+
+### 🧪 C9 · `scripts/m14/track-d.mjs`
+
+`node scripts/m14/track-d.mjs <prefix> ../docs/handoffs/0014-shots http://localhost:3004`, once per build. Seven shots at 390 × 844, light forced, the grid again in dark. The seen and the studied species are the first two cells of the unfiltered atlas (Turmfalke, Zilpzalp), so both rings sit in one grid shot. Gotcha the script had to handle: the first visit persists `identity.progress` (0 · 0) to `localStorage` (`trpc/client.tsx`), so the origin's storage is cleared after seeding, cookie re-set.
+
+| # | Screen | Today | Proposal | Measured (today → proposal) |
+| --- | --- | --- | --- | --- |
+| 1 | Atlas grid, seen + studied cell | `d-today-grid` | `d-proposal-grid` | seen ring `rgb(22,163,74)` → `rgb(13,148,136)`, studied ring `rgb(196,98,15)` → `rgb(147,51,234)`, 2 px inset both |
+| 2 | Atlas grid, dark | `d-today-grid-dark` | `d-proposal-grid-dark` | rings `rgb(34,197,94)` / `rgb(240,160,48)` → `rgb(20,184,166)` / `rgb(192,132,252)` |
+| 3 | Species top, state row + buttons | `d-today-species` | `d-proposal-species` | "entdeckt · 6. Sept." `rgb(21,128,61)` → `rgb(15,118,110)`; buttons `rgb(22,163,74)` / `rgb(196,98,15)` → `rgb(13,148,136)` / `rgb(147,51,234)`, white text |
+| 4 | Filter drawer, two tiles off, Studiert on | `d-today-drawer` | `d-proposal-drawer` | apply button moss → teal, chips stay sky |
+| 5 | Diary | `d-today-diary` | `d-proposal-diary` | study row ring amber → purple, sighting row ring moss → teal |
+| 6 | Profile, counters + group bars | `d-today-profile` | `d-proposal-profile` | "1 studiert" `rgb(196,98,15)` → `rgb(147,51,234)`, "1 entdeckt" `rgb(21,128,61)` → `rgb(15,118,110)`; bars amber/moss → purple/teal |
+| 7 | Onboarding 3, demo cards | `d-today-onboarding-3` | `d-proposal-onboarding-3` | demo rings as the grid's |
+
+All files `…-de.png`. The onboarding shot says Kyoto: `region-next` takes the first radio in change mode, as in Track A's `g4` shot; the identity is fresh per run, nothing was changed for the owner.
+
+### 👀 The pair, read honestly
+
+- **Teal wins** on the photos and on the forest: the ring, the check badge and "Los geht's" separate from foliage and from the green splash, and white on the primary goes from 3.3 to 3.7. **It loses** the meaning: the app is moss on paper, the icon, the manifest `theme_color` and the offline page stay `#16a34a` / `#15803d` (`public/icon.svg`, `manifest.webmanifest`, `sw.js:147`), and teal next to sky makes the drawer one cool family, so action (teal) vs selection (blue) reads weaker than green vs blue.
+- **Purple wins** where amber always struggled: "studiert" passes AA on white (5.4 vs 4.1), the two rings and bars are unmistakable, and the dark lilac holds. **It loses** the warmth: amber was the only warm accent on the warm paper; with purple the light theme is teal, blue and purple on beige, and a purple frame on a greyscale photo is what many apps use for "visited".
+- Together the pair reads cleaner and colder; the today pair reads like the place the app is about. Which of the two matters more is the owner's question, not answered here.
+
+### 🔀 For the merge
+
+| If the proposal is taken | Where |
+| --- | --- |
+| The hardcoded moss must follow | `public/icon.svg`, `public/manifest.webmanifest` `theme_color`, `public/sw.js:147-148` offline page, `scripts/m14/ui.mjs` `MOSS` / `MOSSES` constants |
+| Token names stay `moss` and `amber` | renaming touches every component; a comment in `tokens.css` says what they are now |
+| Track A's doubt 6 (amber under AA) closes | 5.38 on white |
+
+If today stays: drop `0014-d`; `track-d.mjs` and the shots are worth keeping either way.
+
+### 🌹 Second round: raspberry
+
+Owner's reply to the teal/purple pair: no. Three alternatives offered for the studied axis with moss kept (raspberry `#be185d` / dark `#f472b6`, bark `#7c2d12`, plum `#a21caf`); the owner asked for raspberry shots: `d-raspberry-{grid,grid-dark,species,profile,onboarding-3,diary,drawer}-de.png`, both rings measured (`rgb(34,197,94)` seen, `rgb(244,114,182)` studied). **Decision: keep the orange for now.** Tokens untouched; the shots and this script stay for the next palette round.
