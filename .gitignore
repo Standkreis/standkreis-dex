@@ -4,3 +4,10 @@ dist/
 *.log
 .env*
 app/etl/.cache/
+# owner's walk photos (research fixture, 147 MB): images stay out, labels.csv goes in
+docs/research/walks/**/*.PNG
+docs/research/walks/**/*.png
+docs/research/walks/**/*.jpg
+docs/research/walks/**/*.JPG
+docs/research/walks/**/*.jpeg
+app/scripts/id-probe/.cache/
