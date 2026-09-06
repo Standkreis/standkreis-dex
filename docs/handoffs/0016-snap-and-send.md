@@ -65,7 +65,7 @@ Checks: B-C1 headless Chrome on the production build with a fixture photo inject
 | Do | Where |
 | --- | --- |
 | `ANTHROPIC_API_KEY` in Vercel (Production + Preview) | Vercel → Settings → Environment Variables |
-| A walk in Mainz-Bingen, 20 photos, close-ups included: the second fixture, `docs/research/walks/02/` | the phone; then `score.mjs` again (record 0003 §⚠️) |
+| ~~A walk in Mainz-Bingen first~~ Owner 2026-09-06: the fixture risk is accepted; two more regions are filled and the scan is tested on walks in all three at once | **Schagen** (NLD.9.73_1, the trip on Wednesday) and **Südwestpfalz** (DEU.11.30_1, not the city of Zweibrücken: 6 687 observations, 130 species, a hole in the Landkreis polygon). Fill in the dev DB, dump to Neon: handoff 0017 |
 
 ## ⬇️ Output
 
