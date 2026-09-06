@@ -7,6 +7,7 @@ import { Shell } from '@/components/Shell'
 import { ServiceWorker } from '@/components/ServiceWorker'
 import { IdentityBoot } from '@/components/IdentityBoot'
 import { QueueFlusher } from '@/components/QueueFlusher'
+import { RegionReplay } from '@/components/RegionSheet'
 import { TRPCReactProvider } from '@/trpc/client'
 import Script from 'next/script'
 import { ThemeBoot, themeScript } from '@/components/Appearance'
@@ -58,6 +59,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<'/[
             <Shell />
             <IdentityBoot />
             <QueueFlusher />
+            <RegionReplay />
             <ThemeBoot />
             <ServiceWorker />
           </TRPCReactProvider>

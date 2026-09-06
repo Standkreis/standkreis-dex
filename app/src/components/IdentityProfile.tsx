@@ -10,6 +10,7 @@ import { CountersCard, useSetCounters } from './IdentityCounters'
 import { AvatarButton } from './IdentityAvatar'
 import { GroupProgress } from './IdentityGroups'
 import { OfflineDownload } from './OfflineDownload'
+import { RegionSheet } from './RegionSheet'
 
 export const initialsOf = (name: string | null | undefined) =>
   (name ?? '')
@@ -19,8 +20,8 @@ export const initialsOf = (name: string | null | undefined) =>
     .map((w) => w[0]!.toUpperCase())
     .join('')
 
-// Du, the plain variant (handoff 0006: the profile card without XP; M11 owns XP). Avatar or initials, name, region with its
-// change link (0014 P2: onboarding in change mode, `?change=1` as the drawer's Ändern), the three counters, per group (P3), gear.
+// Du, the plain variant (handoff 0006: the profile card without XP; M11 owns XP). Avatar or initials, name, the active region
+// with "Region ändern" opening the "Meine Regionen" sheet (handoff 0018 R4, no onboarding link any more), the three counters, per group (P3), gear.
 export function IdentityProfile() {
   const t = useTranslations('you')
   const trpc = useTRPC()
@@ -28,6 +29,7 @@ export function IdentityProfile() {
   const me = useQuery(trpc.identity.me.queryOptions())
   const setName = useMutation(trpc.identity.setName.mutationOptions({ onSuccess: () => qc.invalidateQueries({ queryKey: trpc.identity.me.queryKey() }) }))
   const [editing, setEditing] = useState<string | null>(null)
+  const [regionSheet, setRegionSheet] = useState(false)
   const counters = useSetCounters(me.data?.region ?? null)
   const name = me.data?.displayName ?? null
   const initials = initialsOf(name)
@@ -52,7 +54,7 @@ export function IdentityProfile() {
               </div>
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="truncate text-[13px] font-semibold tracking-[0.08em] text-ink-faint uppercase" data-testid="region-name">{me.data?.region?.name ?? t('noRegion')}</span>
-                <Link href="/onboarding?change=1" className="shrink-0 text-[13px] font-semibold text-moss-deep" data-testid="change-region">{t('changeRegion')}</Link>
+                <button type="button" onClick={() => setRegionSheet(true)} aria-haspopup="dialog" className="shrink-0 text-[13px] font-semibold text-moss-deep" data-testid="change-region">{t('changeRegion')}</button>
               </div>
             </>
           ) : (
@@ -76,6 +78,7 @@ export function IdentityProfile() {
       </div>
       <div className="mt-4"><GroupProgress region={me.data?.region ?? null} /></div>
       <div className="mt-4"><OfflineDownload /></div>
+      {regionSheet && <RegionSheet onClose={() => setRegionSheet(false)} />}
     </main>
   )
 }

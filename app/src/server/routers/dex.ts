@@ -180,16 +180,19 @@ export const dexRouter = router({
 
   regions: publicProcedure.query(async ({ ctx }) => {
     const regions = await ctx.db.region.findMany({ orderBy: { name: 'asc' }, select: { id: true, gadmGid: true, name: true, higher: true, status: true, refreshedAt: true } })
+    const month = thisMonth()
     return Promise.all(
       regions.map(async (r) => {
         const inSet = { plausibility: { some: { regionId: r.id } } }
-        const [setSize, content, introEn, noGermanName] = await Promise.all([
+        // `nowCount` (handoff 0018 R3): the set members at ≥ 25 % of their peak this month, the "nur jetzt" chip's number.
+        const [setSize, nowCount, content, introEn, noGermanName] = await Promise.all([
           ctx.db.taxon.count({ where: inSet }),
+          ctx.db.plausibility.findMany({ where: { regionId: r.id }, select: { monthShare: true, peak: true } }).then((rows) => rows.filter((p) => isNow(p.monthShare, p.peak, month)).length),
           ctx.db.taxon.count({ where: { ...inSet, contentAt: { not: null } } }),
           ctx.db.taxon.count({ where: { ...inSet, intro: { path: ['lang'], equals: 'en' } } }),
           ctx.db.taxon.count({ where: { ...inSet, contentAt: { not: null }, NOT: { commonNames: { path: ['de'], string_contains: '' } } } }),
         ])
-        return { ...r, setSize, content, introEn, noGermanName, introEnShare: setSize ? +(introEn / setSize).toFixed(3) : 0 }
+        return { ...r, setSize, nowCount, content, introEn, noGermanName, introEnShare: setSize ? +(introEn / setSize).toFixed(3) : 0 }
       }),
     )
   }),

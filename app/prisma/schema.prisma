@@ -55,8 +55,11 @@ model Filter {
   id         String   @id @default(uuid())
   identity   Identity @relation(fields: [identityId], references: [id], onDelete: Cascade)
   identityId String   @unique
+  /// The active region (handoff 0018): the grid, the counters, the scan's set. Always one of `regionIds`.
   region     Region?  @relation(fields: [regionId], references: [id])
   regionId   String?
+  /// The identity's regions (handoff 0018 R1), ready ones only; the sheet "Meine Regionen" switches among them.
+  regionIds  String[] @default([])
   tiles      Tile[]
   /// Chip "nur jetzt": share ≥ 25 % of peak this month. Off by default.
   nowOnly    Boolean  @default(false)

@@ -134,6 +134,18 @@
     "groups": "By group",
     "ofPossible": "of {n}"
   },
+  "regions": {
+    "title": "My regions",
+    "open": "Switch region",
+    "species": "{n} species",
+    "now": "{n} now",
+    "inList": "{region} in my list",
+    "activeStays": "The active region stays. Switch to another one first.",
+    "lastStays": "One region stays.",
+    "onlineFirst": "load online first",
+    "offlineList": "Adding and removing needs the network.",
+    "hint": "One region is active: the atlas, the counters and the scan follow it. Studied and discovered count everywhere."
+  },
   "log": {
     "title": "Log a sighting",
     "search": "Search",

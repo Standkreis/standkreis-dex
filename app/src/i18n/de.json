@@ -134,6 +134,18 @@
     "groups": "Nach Gruppe",
     "ofPossible": "von {n}"
   },
+  "regions": {
+    "title": "Meine Regionen",
+    "open": "Region wechseln",
+    "species": "{n} Arten",
+    "now": "{n} jetzt",
+    "inList": "{region} in meiner Liste",
+    "activeStays": "Die aktive Region bleibt. Wechsle erst zu einer anderen.",
+    "lastStays": "Eine Region bleibt.",
+    "onlineFirst": "erst online laden",
+    "offlineList": "Hinzufügen und Entfernen geht erst mit Netz.",
+    "hint": "Eine Region ist aktiv: Atlas, Zähler und Scan gelten für sie. Studiert und entdeckt zählen überall."
+  },
   "log": {
     "title": "Eintragen",
     "search": "Suchen",

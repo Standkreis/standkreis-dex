@@ -68,6 +68,10 @@ export const identityRouter = router({
       ctx.db.passkey.count({ where: { identityId: ctx.identity.id } }),
       ctx.db.filter.findUnique({ where: { identityId: ctx.identity.id }, include: { region: { select: { id: true, name: true, status: true } } } }),
     ])
+    // The identity's regions (handoff 0018 R2) in the order they were added; the active one is `region`.
+    const rows = filter?.regionIds.length ? await ctx.db.region.findMany({ where: { id: { in: filter.regionIds } }, select: { id: true, name: true, status: true } }) : []
+    const byId = new Map(rows.map((r) => [r.id, r]))
+    const regions = (filter?.regionIds ?? []).flatMap((id) => byId.get(id) ?? [])
     return {
       id: ctx.identity.id,
       createdAt: ctx.identity.createdAt,
@@ -76,6 +80,8 @@ export const identityRouter = router({
       displayName: ctx.identity.displayName,
       avatarUrl: ctx.identity.avatarAssetId ? photoUrl(ctx.identity.avatarAssetId) : null,
       region: filter?.region ?? null,
+      regionIds: regions.map((r) => r.id),
+      regions,
     }
   }),
 
@@ -116,18 +122,40 @@ export const identityRouter = router({
     return { avatarUrl: input.assetId ? photoUrl(input.assetId) : null }
   }),
 
-  // The global filter (spec §🏗️): region and tiles from onboarding, the "nur jetzt" chip from the drawer. The only write
-  // the grid makes; everything reads it back through `me` and `progress`. Empty tiles = all (see `progress`).
+  // The global filter (spec §🏗️): the regions and the active one (handoff 0018 R2), the tiles from onboarding, the "nur
+  // jetzt" chip from the drawer. `regionIds` is the identity's list (≥ 1, ready regions only, no duplicates), `regionId`
+  // the active one and must be in the list: removing the active region or the last one is refused here as well as in the
+  // sheet. `tiles` and `nowOnly` are optional so the sheet can change the list without knowing them, `regionIds` is
+  // optional so the grid can write tiles without knowing the list; whatever is absent stays as it is.
   setFilter: publicProcedure
-    .input(z.object({ regionId: z.string().uuid(), tiles: z.array(z.enum(Object.values(Tile) as [Tile, ...Tile[]])), nowOnly: z.boolean().default(false) }))
-    .mutation(({ ctx, input }) =>
-      ctx.db.filter.upsert({
+    .input(z.object({
+      regionId: z.string().uuid(),
+      regionIds: z.array(z.string().uuid()).min(1).max(20).optional(),
+      tiles: z.array(z.enum(Object.values(Tile) as [Tile, ...Tile[]])).optional(),
+      nowOnly: z.boolean().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      // No list given (the grid's tile write): the list stays as it is; a first filter starts with the one region.
+      const existing = input.regionIds ? null : await ctx.db.filter.findUnique({ where: { identityId: ctx.identity.id }, select: { regionIds: true } })
+      const regionIds = [...new Set(input.regionIds ?? (existing?.regionIds.length ? existing.regionIds : [input.regionId]))]
+      if (!regionIds.includes(input.regionId)) throw new TRPCError({ code: 'BAD_REQUEST', message: 'the active region must be in the list' })
+      const ready = await ctx.db.region.count({ where: { id: { in: regionIds }, status: 'ready' } })
+      if (ready !== regionIds.length) throw new TRPCError({ code: 'BAD_REQUEST', message: 'only ready regions' })
+      return ctx.db.filter.upsert({
         where: { identityId: ctx.identity.id },
-        create: { identityId: ctx.identity.id, regionId: input.regionId, tiles: input.tiles, nowOnly: input.nowOnly },
-        update: { regionId: input.regionId, tiles: input.tiles, nowOnly: input.nowOnly },
-        select: { regionId: true, tiles: true, nowOnly: true },
-      }),
-    ),
+        create: { identityId: ctx.identity.id, regionId: input.regionId, regionIds, tiles: input.tiles ?? [], nowOnly: input.nowOnly ?? false },
+        update: { regionId: input.regionId, regionIds, ...(input.tiles ? { tiles: input.tiles } : {}), ...(input.nowOnly !== undefined ? { nowOnly: input.nowOnly } : {}) },
+        select: { regionId: true, regionIds: true, tiles: true, nowOnly: true },
+      })
+    }),
+
+  // The one-tap switch (handoff 0018 R2): the active region becomes another one of the list. Nothing else changes.
+  setRegion: publicProcedure.input(z.object({ regionId: z.string().uuid() })).mutation(async ({ ctx, input }) => {
+    const filter = await ctx.db.filter.findUnique({ where: { identityId: ctx.identity.id }, select: { id: true, regionIds: true } })
+    if (!filter) throw new TRPCError({ code: 'NOT_FOUND', message: 'no filter yet' })
+    if (!filter.regionIds.includes(input.regionId)) throw new TRPCError({ code: 'BAD_REQUEST', message: 'not one of your regions' })
+    return ctx.db.filter.update({ where: { id: filter.id }, data: { regionId: input.regionId }, select: { regionId: true, regionIds: true } })
+  }),
 
   // ── Passkeys ────────────────────────────────────────────────────────────────
   registerOptions: publicProcedure.mutation(async ({ ctx }) => {

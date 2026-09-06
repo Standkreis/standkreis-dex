@@ -27,7 +27,7 @@ const PERSIST_MAX_AGE = 30 * 24 * 60 * 60 * 1000
 // (2^31-1 ms, 24.8 days); past that the timer overflows and fires at once, and every query nobody looks at is gone
 // within the second (seen in C2: the prefetched `journal.get` and every hydrated query vanished from the store).
 const PERSIST_GC_TIME = Math.min(PERSIST_MAX_AGE, 2 ** 31 - 1)
-const PERSISTED: [string, string][] = [['dex', 'set'], ['identity', 'progress'], ['identity', 'me'], ['sighting', 'photos'], ['sighting', 'outside'], ['journal', 'days'], ['journal', 'get'], ['taxon', 'page'], ['taxon', 'mapCentre']]
+const PERSISTED: [string, string][] = [['dex', 'set'], ['dex', 'regions'], ['identity', 'progress'], ['identity', 'me'], ['sighting', 'photos'], ['sighting', 'outside'], ['journal', 'days'], ['journal', 'get'], ['taxon', 'page'], ['taxon', 'mapCentre']]
 const PAGE_CAP = 10 // `taxon.page` entries kept, newest first: ~59 KB each
 const SIGHTING_CAP = 30 // `journal.get` entries kept, newest first (handoff 0012 F2): the walk's sightings open offline; ~1 KB each
 const isPath = (key: readonly unknown[], path: [string, string]) => Array.isArray(key[0]) && key[0][0] === path[0] && key[0][1] === path[1]

@@ -16,6 +16,7 @@ import { Icon } from './Marks'
 import { OnboardingSilhouette } from './OnboardingSilhouette'
 import { rememberSpeciesOrigin, restoreSpeciesOrigin } from './SpeciesOrigin'
 import { nudgeSeen, PasskeyNudge } from './PasskeyNudge'
+import { RegionSheet } from './RegionSheet'
 
 type Species = NonNullable<ReturnType<typeof useAtlasSet>['set']>['species'][number]
 // One grid row: a set member, or a species seen wild outside the set (record 0002 E13) that sits at the bottom.
@@ -28,6 +29,7 @@ type Row = Pick<Species, 'taxonId' | 'gbifKey' | 'sciName' | 'names' | 'tile'> &
 export function AtlasGrid({ title }: { title: string }) {
   const t = useTranslations('dex')
   const tc = useTranslations('common')
+  const tr = useTranslations('regions')
   const locale = useLocale()
   const format = useFormatter()
   const trpc = useTRPC()
@@ -86,7 +88,7 @@ export function AtlasGrid({ title }: { title: string }) {
   const writeTiles = (next: Tile[]) => {
     if (!region) return
     qc.setQueryData(trpc.identity.progress.queryKey(), (old) => (old ? { ...old, tiles: next } : old))
-    setFilter.mutate({ regionId: region.id, tiles: next, nowOnly })
+    setFilter.mutate({ regionId: region.id, tiles: next, nowOnly }) // no `regionIds`: the list stays (handoff 0018)
   }
   const toggleTile = (x: Tile) => {
     const next = new Set(tilesOn)
@@ -149,6 +151,7 @@ export function AtlasGrid({ title }: { title: string }) {
 
   // ── Drawer, and the floating button once the search bar has scrolled away ──
   const [drawer, setDrawer] = useState<null | 'bar' | 'fab'>(null)
+  const [regionSheet, setRegionSheet] = useState(false) // "Meine Regionen" (handoff 0018 R4): from the header's region button and the drawer's Ändern
   const bar = useRef<HTMLDivElement>(null)
   const [barGone, setBarGone] = useState(false)
   useEffect(() => {
@@ -165,8 +168,15 @@ export function AtlasGrid({ title }: { title: string }) {
 
   return (
     <main className="mx-auto min-h-full max-w-[520px] px-4 pt-3 pb-24">
-      <div className="flex h-10 items-center">
+      <div className="flex h-10 items-center justify-between gap-3">
         <h1 className="text-[28px] leading-none font-bold tracking-tight">{title}</h1>
+        {region && (
+          <button type="button" onClick={() => setRegionSheet(true)} aria-haspopup="dialog" aria-label={`${tr('open')} · ${region.name}`} data-testid="region-switch"
+            className="flex h-9 min-w-0 max-w-[60%] shrink items-center gap-0.5 rounded-full bg-tile pr-2 pl-3 text-[15px] font-semibold text-ink-soft">
+            <span className="truncate" data-testid="region-switch-name">{region.name}</span>
+            <Icon name="chevron" size={16} className="shrink-0" />
+          </button>
+        )}
       </div>
       {region?.status === 'queued' && <p className="mt-3 text-[15px] text-ink-soft" data-testid="preparing">{region.name} · {t('preparing')}</p>}
       {region?.status === 'failed' && (
@@ -213,7 +223,7 @@ export function AtlasGrid({ title }: { title: string }) {
           {drawer && region && (
             <FilterDrawer
               focusSearch={drawer === 'fab'} query={query} regionName={region.name} tiles={tilesShown} tilesOn={tilesOn} show={show} sort={sort} nowOnly={nowOnly} month={month} results={visible.length}
-              onClose={() => setDrawer(null)} onQuery={(q) => setParams({ q })} onChangeRegion={() => router.push('/onboarding?change=1')}
+              onClose={() => setDrawer(null)} onQuery={(q) => setParams({ q })} onChangeRegion={() => setRegionSheet(true)}
               onToggleTile={toggleTile} onShow={(s) => setParams({ show: s === 'all' ? null : s })} onSort={(s) => setParams({ sort: s === 'now' ? null : s })}
               onNowOnly={(on) => setParams({ now: on ? '1' : null })} onReset={reset} />
           )}
@@ -225,6 +235,7 @@ export function AtlasGrid({ title }: { title: string }) {
         </>
       )}
       {loading && <p className="mt-3 text-[15px] text-ink-soft">{tc('working')}</p>}
+      {regionSheet && <RegionSheet onClose={() => setRegionSheet(false)} />}
     </main>
   )
 }

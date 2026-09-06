@@ -235,12 +235,15 @@ function TilesScreen({ of, region, tiles, setTiles, onNext }: { of: number; regi
   // Fish is shown only when the region's set has some (E12). Before the set exists we cannot know: the seven land tiles.
   const shown = tileOrder.filter((x) => x !== 'fish' || (counts.get('fish') ?? 0) > 0)
   const setFilter = useMutation(trpc.identity.setFilter.mutationOptions({ onSuccess: () => { qc.invalidateQueries({ queryKey: trpc.identity.pathKey() }); onNext() } }))
+  // Handoff 0018 R6: the first run makes the list `[it]`; change mode (no link left, the URL still works) keeps the list and adds it.
+  const me = useQuery(trpc.identity.me.queryOptions())
+  const regionIds = [...new Set([...(me.data?.regionIds ?? []), region.id])]
   const toggle = (x: Tile) => { const n = new Set(tiles); if (n.has(x)) n.delete(x); else n.add(x); setTiles(n) }
   const chosen = shown.filter((x) => tiles.has(x))
 
   return (
     <StepFrame step={2} of={of} title={t('tilesTitle')} body={t('tilesBody')}
-      action={<button type="button" disabled={!chosen.length || setFilter.isPending} data-testid="tiles-next" onClick={() => setFilter.mutate({ regionId: region.id, tiles: chosen, nowOnly: false })} className="h-14 w-full rounded-2xl bg-moss text-[18px] font-bold text-white disabled:opacity-50">{t('next')}</button>}>
+      action={<button type="button" disabled={!chosen.length || setFilter.isPending} data-testid="tiles-next" onClick={() => setFilter.mutate({ regionId: region.id, regionIds, tiles: chosen, nowOnly: false })} className="h-14 w-full rounded-2xl bg-moss text-[18px] font-bold text-white disabled:opacity-50">{t('next')}</button>}>
       <ul className="mt-5 grid grid-cols-2 gap-3" data-testid="tiles">
         {shown.map((x) => {
           const on = tiles.has(x)
