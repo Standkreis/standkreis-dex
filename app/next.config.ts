@@ -13,7 +13,7 @@ const seed = process.env.npm_lifecycle_event?.startsWith('build') ? join(process
 const buildId = process.env.BUILD_ID ?? (seed && existsSync(seed) ? readFileSync(seed, 'utf8').trim() : Date.now().toString(36))
 
 const nextConfig: NextConfig = {
-  output: isExport ? 'export' : process.env.VERCEL ? undefined : 'standalone', // Vercel's tracer breaks on standalone (handoff 0011) // standalone: the Docker image copies .next/standalone (handoff 0010)
+  output: isExport ? 'export' : undefined, // Vercel builds the server; the standalone output left with the VM deploy (handoff 0010)
   trailingSlash: isExport, // /de/ → de/index.html, so any plain file server serves it
   pageExtensions: isExport ? ['tsx'] : ['tsx', 'ts'],
   reactStrictMode: true,

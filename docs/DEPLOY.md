@@ -1,6 +1,6 @@
 # ▲ Deploy — the live stack
 
-> How the app runs in production as of 2026-09-06. Decisions and the open work: [handoff 0011](handoffs/0011-vercel.md). The one-VM deploy of [handoff 0010](handoffs/0010-deploy.md) is parked, see §🅿️.
+> How the app runs in production as of 2026-09-06. Decisions and the open work: [handoff 0011](handoffs/0011-vercel.md). The one-VM deploy of [handoff 0010](handoffs/0010-deploy.md) was removed, see §🗑️.
 
 | 🗓️ Updated | 👤 Owner | 🌐 Live | 🔁 Fallback |
 | --- | --- | --- | --- |
@@ -34,7 +34,7 @@ No values here. Set in Vercel → Settings → Environment Variables unless the 
 | `PHOTO_DIR` | project, value `/tmp/photos` | Stopgap: photos land in `/tmp` and **do not persist**; goes away with 0011 A | no |
 | `CRON_SECRET` | not yet set | Guards the sweep cron route, 0011 Track B | yes |
 
-`next.config.ts` picks `output` by environment: `'export'` for the static export, `undefined` on Vercel (its tracer fails on `standalone`: `ENOENT next-server.js.nft.json`), `'standalone'` elsewhere for the Docker image.
+`next.config.ts` picks `output` by environment: `'export'` for the static export, `undefined` otherwise (Vercel's tracer fails on `standalone`: `ENOENT next-server.js.nft.json`).
 
 ## 🚀 Deploying
 
@@ -83,6 +83,10 @@ Everything below is [handoff 0011](handoffs/0011-vercel.md).
 | Restart sweep | runs per cold start, races itself | B: hourly cron route + `CRON_SECRET` |
 | Resend domain, magic link | not added | M7b |
 
-## 🅿️ Parked: the VM deploy
+## 🗑️ Removed: the VM deploy
 
-[Handoff 0010](handoffs/0010-deploy.md) built a one-VM deploy (Docker Compose, Caddy, Postgres on the box) and [findings 0010](handoffs/0010-deploy-findings.md) proved it on the Mac. Hetzner refused the card, so it never went live. `app/Dockerfile`, [`deploy/`](../deploy/README.md) and `.github/workflows/deploy.yml` stay in the repo as the exit route if Vercel bills or limits bite.
+[Handoff 0010](handoffs/0010-deploy.md) built a one-VM deploy (Docker Compose, Caddy, Postgres on the box), [findings 0010](handoffs/0010-deploy-findings.md) proved it on the Mac, Hetzner refused the card. `deploy/`, `app/Dockerfile` and `.github/workflows/deploy.yml` were deleted rather than left to rot once 0011 moves photos to Blob. If Vercel ever bills or limits bite:
+
+```bash
+git checkout 113a630 -- deploy app/Dockerfile app/.dockerignore .github/workflows/deploy.yml
+```
