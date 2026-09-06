@@ -1,0 +1,177 @@
+{
+  "locale": "en",
+  "width": 390,
+  "height": 844,
+  "base": "http://localhost:3002",
+  "step1": {
+    "step": "onboarding-region",
+    "regions": [
+      "Mainz-Bingen"
+    ],
+    "locate": "Use my location",
+    "searchField": false,
+    "typePlaceButton": false,
+    "hint": false,
+    "credit": false,
+    "emoji": false,
+    "splash": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    "themeColor": "#080803",
+    "bodyBg": "rgb(8, 8, 3)",
+    "htmlBg": "rgb(8, 8, 3)",
+    "paint": {
+      "fcpMs": 72,
+      "splash": {
+        "name": "splash.jpg",
+        "startMs": 79,
+        "endMs": 98,
+        "bytes": 617944
+      },
+      "currentSrc": "splash.jpg"
+    },
+    "clicked": "Mainz-Bingen"
+  },
+  "step2": {
+    "step": "onboarding-tiles",
+    "counter": "2 of 4",
+    "h1": {
+      "x": 20,
+      "y": 58.5,
+      "w": 350,
+      "h": 35.1875
+    },
+    "splash": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    "tiles": [
+      {
+        "tile": "bird",
+        "on": "true",
+        "text": "✓ · Birds · 69 species",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "insect",
+        "on": "true",
+        "text": "✓ · Insects · 429 species",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "plant",
+        "on": "true",
+        "text": "✓ · Plants · 388 species",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "fungus",
+        "on": "true",
+        "text": "✓ · Fungi · 23 species",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "mammal",
+        "on": "true",
+        "text": "✓ · Mammals · 8 species",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "amphibian",
+        "on": "true",
+        "text": "✓ · Amphibians · 7 species",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "reptile",
+        "on": "true",
+        "text": "✓ · Reptiles · 5 species",
+        "thumb": true,
+        "thumbLoaded": true
+      }
+    ],
+    "lightBodyBg": "rgb(8, 8, 3)"
+  },
+  "step3": {
+    "step": "onboarding-ready",
+    "counter": "3 of 4",
+    "h1": {
+      "x": 20,
+      "y": 58.5,
+      "w": 350,
+      "h": 35.1875
+    },
+    "splash": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    "numbers": [
+      "364 species",
+      "929"
+    ],
+    "body": "364 species are likely in Mainz-Bingen in September, 929 over the whole year. All still grey. Two ways to bring them into colour:",
+    "noAccount": false,
+    "button": "Next"
+  },
+  "step4": {
+    "step": "onboarding-promises",
+    "counter": "4 of 4",
+    "h1": {
+      "x": 20,
+      "y": 58.5,
+      "w": 350,
+      "h": 35.1875
+    },
+    "splash": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    "title": "Two promises",
+    "promises": "OURS\n\nNo account, no leaderboard. Your data stays on this device until you want to see it elsewhere. Only the district is stored; exact places never leave your phone.\n\nYOURS\n\nOutdoors we are guests. We look, we marvel, we leave everything as we found it. No photo is worth crowding an animal or taking a plant. Walk slowly and you see more.",
+    "button": "I'm in"
+  },
+  "atlas": {
+    "ms": 101,
+    "url": "/en",
+    "bodyBg": "rgb(18, 27, 22)",
+    "onboardingGone": true
+  },
+  "change": {
+    "cancel": true,
+    "tilesCounter": "2 of 3",
+    "readyCounter": "3 of 3",
+    "readyButton": "Let's go",
+    "hasNext": false,
+    "atlasMs": 56,
+    "url": "/en"
+  },
+  "denied": {
+    "ms": 0,
+    "error": "No location. Type the place instead.",
+    "regionsStill": 1,
+    "searchField": false
+  },
+  "outside": {
+    "ms": 1,
+    "error": "Paris is not available yet. Type another place.",
+    "regionsStill": 1,
+    "searchField": false,
+    "step": "onboarding-region",
+    "buttonThenStep": "onboarding-tiles"
+  }
+}

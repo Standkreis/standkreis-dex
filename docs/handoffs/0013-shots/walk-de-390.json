@@ -1,0 +1,177 @@
+{
+  "locale": "de",
+  "width": 390,
+  "height": 844,
+  "base": "http://localhost:3002",
+  "step1": {
+    "step": "onboarding-region",
+    "regions": [
+      "Mainz-Bingen"
+    ],
+    "locate": "Meinen Standort nutzen",
+    "searchField": false,
+    "typePlaceButton": false,
+    "hint": false,
+    "credit": false,
+    "emoji": false,
+    "splash": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    "themeColor": "#080803",
+    "bodyBg": "rgb(8, 8, 3)",
+    "htmlBg": "rgb(8, 8, 3)",
+    "paint": {
+      "fcpMs": 84,
+      "splash": {
+        "name": "splash.jpg",
+        "startMs": 78,
+        "endMs": 80,
+        "bytes": 617944
+      },
+      "currentSrc": "splash.jpg"
+    },
+    "clicked": "Mainz-Bingen"
+  },
+  "step2": {
+    "step": "onboarding-tiles",
+    "counter": "2 von 4",
+    "h1": {
+      "x": 20,
+      "y": 58.5,
+      "w": 350,
+      "h": 35.1875
+    },
+    "splash": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    "tiles": [
+      {
+        "tile": "bird",
+        "on": "true",
+        "text": "✓ · Vögel · 69 Arten",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "insect",
+        "on": "true",
+        "text": "✓ · Insekten · 429 Arten",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "plant",
+        "on": "true",
+        "text": "✓ · Pflanzen · 388 Arten",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "fungus",
+        "on": "true",
+        "text": "✓ · Pilze · 23 Arten",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "mammal",
+        "on": "true",
+        "text": "✓ · Säugetiere · 8 Arten",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "amphibian",
+        "on": "true",
+        "text": "✓ · Amphibien · 7 Arten",
+        "thumb": true,
+        "thumbLoaded": true
+      },
+      {
+        "tile": "reptile",
+        "on": "true",
+        "text": "✓ · Reptilien · 5 Arten",
+        "thumb": true,
+        "thumbLoaded": true
+      }
+    ],
+    "lightBodyBg": "rgb(8, 8, 3)"
+  },
+  "step3": {
+    "step": "onboarding-ready",
+    "counter": "3 von 4",
+    "h1": {
+      "x": 20,
+      "y": 58.5,
+      "w": 350,
+      "h": 35.1875
+    },
+    "splash": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    "numbers": [
+      "364 Arten",
+      "929"
+    ],
+    "body": "364 Arten sind im September in Mainz-Bingen wahrscheinlich, 929 im ganzen Jahr. Alle noch grau. Zwei Wege, sie in Farbe zu bringen:",
+    "noAccount": false,
+    "button": "Weiter"
+  },
+  "step4": {
+    "step": "onboarding-promises",
+    "counter": "4 von 4",
+    "h1": {
+      "x": 20,
+      "y": 58.5,
+      "w": 350,
+      "h": 35.1875
+    },
+    "splash": {
+      "x": 0,
+      "y": 0,
+      "w": 390,
+      "h": 844
+    },
+    "title": "Zwei Versprechen",
+    "promises": "UNSERES\n\nKein Konto, keine Rangliste. Deine Daten bleiben auf diesem Gerät, bis du sie woanders sehen willst. Gespeichert wird nur der Landkreis; genaue Orte verlassen dein Handy nie.\n\nDEINES\n\nDraußen sind wir Gast. Wir schauen, staunen, lassen alles, wie wir es gefunden haben. Kein Foto ist es wert, ein Tier zu bedrängen oder eine Pflanze zu nehmen. Wer langsam geht, sieht mehr.",
+    "button": "Bin dabei"
+  },
+  "atlas": {
+    "ms": 111,
+    "url": "/de",
+    "bodyBg": "rgb(18, 27, 22)",
+    "onboardingGone": true
+  },
+  "change": {
+    "cancel": true,
+    "tilesCounter": "2 von 3",
+    "readyCounter": "3 von 3",
+    "readyButton": "Los geht's",
+    "hasNext": false,
+    "atlasMs": 56,
+    "url": "/de"
+  },
+  "denied": {
+    "ms": 0,
+    "error": "Kein Standort. Gib den Ort ein.",
+    "regionsStill": 1,
+    "searchField": false
+  },
+  "outside": {
+    "ms": 1,
+    "error": "Paris ist noch nicht verfügbar. Gib einen anderen Ort ein.",
+    "regionsStill": 1,
+    "searchField": false,
+    "step": "onboarding-region",
+    "buttonThenStep": "onboarding-tiles"
+  }
+}

@@ -9,6 +9,7 @@
   --color-ink-soft: #5b675f;
   --color-ink-faint: #9aa39d;
   --color-night: #1e2a23;         /* always dark: onboarding splash */
+  --color-night-deep: #080803;    /* the splash's bottom edge (sampled, handoff 0013 O4): body and theme-color of the onboarding route */
   --color-moss: #16a34a;          /* primary, saturated: surfaces, badges, buttons */
   --color-moss-deep: #15803d;     /* text on paper, AA contrast */
   --color-moss-soft: #dcf5e3;

@@ -29,8 +29,12 @@ function Tab({ tab }: { tab: (typeof tabs)[number] }) {
 
 export function Shell() {
   const t = useTranslations('nav')
+  const pathname = usePathname()
   const [logOpen, setLogOpen] = useState(false)
 
+  // Handoff 0013 O4: no bar under the onboarding. It was covered (z-30 over z-20) but Safari tints its own bar from the
+  // bottom-most fixed element, so the card colour showed under the splash (findings 0013 C7).
+  if (pathname === '/onboarding') return null
   return (
     <>
       <nav className="fixed inset-x-0 bottom-0 z-20">
