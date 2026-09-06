@@ -309,7 +309,7 @@ function ReadyScreen({ of, region, tiles, onNext }: { of: number; region: Region
 // drawn like AtlasGrid's Cell so the grid looks familiar on first open. Cards opaque like the tile cards (step 2).
 function DemoCard({ demo, state, text }: { demo: DemoSpecies | null; state: 'studied' | 'seen'; text: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl bg-white/85 px-4 py-4 text-night" data-testid={`demo-${state}`}>
+    <div className="flex items-center gap-4 rounded-2xl bg-white px-4 py-4 text-night" data-testid={`demo-${state}`}>
       <div className="flex shrink-0 items-center gap-1.5">
         <DemoCell demo={demo} state="new" />
         <span className="text-[14px] text-night/40" aria-hidden>→</span>
@@ -348,12 +348,12 @@ function PromisesScreen({ of, onNext }: { of: number; onNext: () => void }) {
     <StepFrame step={4} of={of} title={t('promisesTitle')} body={t('promisesBody')}
       action={<button type="button" data-testid="go" onClick={onNext} className="h-14 w-full rounded-2xl bg-moss text-[18px] font-bold text-white">{t('promisesGo')}</button>}>
       <div className="mt-5 flex flex-col gap-3" data-testid="promises">
-        <div className="rounded-2xl bg-white/85 px-4 py-4 text-night">
-          <div className="text-[13px] font-bold tracking-[0.12em] text-moss-deep uppercase">{t('promisesOurs')}</div>
+        <div className="rounded-2xl bg-white px-4 py-4 text-night">
+          <div className="text-[13px] font-bold tracking-[0.12em] text-night uppercase">{t('promisesOurs')}</div>
           <p className="mt-2 text-[17px] leading-snug">{t('promisesOursText')}</p>
         </div>
-        <div className="rounded-2xl bg-white/85 px-4 py-4 text-night">
-          <div className="text-[13px] font-bold tracking-[0.12em] text-moss-deep uppercase">{t('promisesYours')}</div>
+        <div className="rounded-2xl bg-white px-4 py-4 text-night">
+          <div className="text-[13px] font-bold tracking-[0.12em] text-night uppercase">{t('promisesYours')}</div>
           <p className="mt-2 text-[17px] leading-snug">{t('promisesYoursText')}</p>
         </div>
       </div>
