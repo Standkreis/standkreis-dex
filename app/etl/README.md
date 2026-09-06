@@ -29,7 +29,15 @@ Why the region job precedes the content job: a species enters a set first, conte
 
 Production is **Neon Postgres** behind Vercel ([docs/DEPLOY.md](../../docs/DEPLOY.md)); no VM, no tunnel. The ETL runs on the laptop, whose `.cache/` turns a fill into minutes, against the **unpooled** Neon URL (`DATABASE_URL_UNPOOLED`; the pooled one drops long transactions). Sightings, photos and identities never travel; only the set tables do. Migrations are not the ETL's job: Vercel's build runs `prisma migrate deploy`.
 
-**Option 1 — the ETL against Neon** (the normal way; region ≈ 2 min, content ≈ 20 min for a region, bounded by iNaturalist):
+| Situation | Do | Time |
+| --- | --- | --- |
+| The dev DB already holds the region, fully filled (`contentAt` set on every taxon of the set) | **Option 2**, dump and restore | minutes |
+| New region, or a content refresh | Fill the dev DB first, verify in the app, then Option 2 | ETL once, locally |
+| Neon must be the first to see it | Option 1 | region ≈ 2 min, content ≈ **75 min** per region |
+
+The content job is ≈ 30 sequential rate-limited requests per taxon across eight hosts (2026-09-06, Mainz-Bingen: 929 taxa, 16,000+ GBIF calls, 75 min); the `.cache/` only helps on a repeat of the same region. Running it against Neon when the laptop already has the data is wasted time, learned the hard way.
+
+**Option 1 — the ETL against Neon** (when the data does not exist locally):
 
 ```sh
 cd app
@@ -42,7 +50,7 @@ rm /tmp/dex-prod.env
 
 The region job is one transaction; a dropped connection leaves the region `failed` and the next run replaces it. `content` is one transaction per taxon and resumes where it stopped. `ETL_BUDGET` and `ETL_YEARS` are read from the laptop's environment as always.
 
-**Option 2 — copy the set tables from the dev DB** (when the laptop already holds the region):
+**Option 2 — copy the set tables from the dev DB** (the default when the laptop already holds the region; filter other regions and user assets out first if the dev DB holds more than the one set):
 
 ```sh
 # laptop: only the tables the ETL owns, in dependency order; never Identity, Sighting, Study, Filter

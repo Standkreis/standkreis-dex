@@ -24,6 +24,7 @@ Personal atlas over open biodiversity data. Next.js 16 App Router · tRPC 11 · 
 ## ✅ Always
 
 - Work in `app/`. `npm run check` (typecheck, lint, 30+ tests, export build) must be green before a merge.
+- Fill regions in the dev DB first, then dump the set tables to Neon ([ETL README §🚀](app/etl/README.md) option 2). The content ETL against Neon takes ~75 min per region; run it there only when the data exists nowhere else.
 - Test data in the dev DB (`postgresql://dex:dex@localhost:5433/dex`, Docker `standkreis-dex-db-1`) is fine. Never point local dev at Neon.
 - Offline and worker behaviour is tested on the **production build** (`npm run build` + `next start -p 3002`), never on `next dev`. The desktop app's Browser pane blocks service workers; use headless Chrome over CDP (`app/scripts/m8a/offline.mjs`) or the iOS Simulator.
 - Parallel milestones: two worktrees from `main` (`../standkreis-dex-<track>`), Track A merges first, B rebases. Verify no conflict markers before `git rebase --continue`.
