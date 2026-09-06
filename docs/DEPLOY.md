@@ -31,7 +31,7 @@ No values here. Set in Vercel → Settings → Environment Variables unless the 
 | `WEBAUTHN_RP_ID` | project, value `standkreis.de` | Passkey relying-party id: the **apex**, so passkeys survive a subdomain move | no |
 | `WEBAUTHN_ORIGIN` | project, value `https://atlas.standkreis.de` | The origin passkeys are minted for | no |
 | `WEBAUTHN_SECRET` | project | HMAC key for challenge cookies and delete tokens, 64 hex | yes |
-| `PHOTO_DIR` | project, value `/tmp/photos` | Stopgap: photos land in `/tmp` and **do not persist**; goes away with 0011 A | no |
+| `PHOTO_DIR` | not set on Vercel (removed 2026-09-06 after 0011 A) | Disk photo store for dev and `next start`; on Vercel the Blob token replaces it | no |
 | `CRON_SECRET` | project, Prod + Preview | Guards `GET /api/cron/sweep`; Vercel's cron sends it as `Authorization: Bearer …` (0011 Track B). Unset: the route answers 401 to everyone | yes |
 
 `next.config.ts` picks `output` by environment: `'export'` for the static export, `undefined` otherwise (Vercel's tracer fails on `standalone`: `ENOENT next-server.js.nft.json`).

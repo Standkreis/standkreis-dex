@@ -4,7 +4,7 @@
 
 | 🗓️ Updated | 👤 Owner | ➡️ Next |
 | --- | --- | --- |
-| 2026-09-06 | Sven Reiser | M8b on Vercel, live at [atlas.standkreis.de](https://atlas.standkreis.de), Mainz-Bingen filled; [handoff 0011](handoffs/0011-vercel.md) open (Blob photos, `waitUntil`, cron). [DEPLOY.md](DEPLOY.md) |
+| 2026-09-06 | Sven Reiser | **M9 🚶 the first walk**: live at [atlas.standkreis.de](https://atlas.standkreis.de) with Mainz-Bingen; the owner walks, the frictions become handoff 0012. Known: onboarding search shows "One moment" forever on a server error; a sighting page is blank offline until opened online once. [DEPLOY.md](DEPLOY.md) |
 
 ## 📍 Milestones
 
@@ -20,8 +20,8 @@
 | M7 | 🔐 Identity + data | 1 | Anonymous id, passkey/email sync, export JSON, delete, Du with counters and settings | M2 | ✅ 2026-09-05, [findings 0006](handoffs/0006-etl-and-identity-findings.md) |
 | M7b | ✉️ Email attach | 1 | Verify an address through **Resend** (EU region), magic link adopts the identity like a passkey does, second recovery path. Needs the production domain for DKIM and the passkey relying-party id | M7, domain | owner's call 2026-09-05: Resend |
 | M8 | 📴 Offline | 1 | Atlas for the active filter opens with no network, sightings queue and sync | M5, M7 | ✅ 2026-09-05 ([findings 0009](handoffs/0009-offline-findings.md)) |
-| M8b | 🚀 Deploy | 1 | The app on Vercel (`fra1`, Node 24) with Neon Postgres and Blob photos at `atlas.standkreis.de`, RP id the apex; the phone reaches the app from a field ([DEPLOY.md](DEPLOY.md)). The VM deploy of [handoff 0010](handoffs/0010-deploy.md) was proven, then removed (Hetzner refused the card; restore: `git checkout 113a630 -- deploy`) | M8, domain | 🟡 live 2026-09-06, region filled; photos and jobs not yet serverless-safe: [handoff 0011](handoffs/0011-vercel.md) open |
-| M9 | 🚶 The first walk | 1 | The owner uses it on one walk and opens it again the next day | M6, M8b | ➡️ next, after C6–C8 |
+| M8b | 🚀 Deploy | 1 | The app on Vercel (`fra1`, Node 24) with Neon Postgres and Blob photos at `atlas.standkreis.de`, RP id the apex; the phone reaches the app from a field ([DEPLOY.md](DEPLOY.md)). The VM deploy of [handoff 0010](handoffs/0010-deploy.md) was proven, then removed (Hetzner refused the card; restore: `git checkout 113a630 -- deploy`) | M8, domain | ✅ 2026-09-06, [findings 0011](handoffs/0011-vercel-findings.md); C6 on the phone passed (photo persists, out-of-set content lands) |
+| M9 | 🚶 The first walk | 1 | The owner uses it on one walk and opens it again the next day | M6, M8b | ➡️ next |
 | M10 | 🔥 Quest + recap grill | 2 | Generator rules, repeat avoidance, the two-question recap, XP curve | M9 | |
 | M11 | 🧭 Quests + recap + XP | 2 | Three weekly quests, recap unlocks studied XP, Du with level, "kommt bald" replaced | M10, M4 data | |
 | M12 | 📷 Snap-and-send | 2–3 | Pl@ntNet key, BioCLIP 2 host, taxon ladder prefilling the search | M6 | |

@@ -166,3 +166,14 @@ Pass ✅.
 - `etl/README.md` §🚀: delete the "Until 0011 Track B lands" clause (B6).
 - Vercel side, nothing to do beyond `CRON_SECRET` (set): the cron appears under the project's Cron Jobs tab after the first production deploy with `vercel.json`. `curl -H "Authorization: Bearer $CRON_SECRET" https://atlas.standkreis.de/api/cron/sweep` is the manual run.
 - C6 is where `waitUntil` is really proven (B1).
+
+## 📱 Owner · C6 on Vercel (2026-09-06)
+
+| Check | Result |
+| --- | --- |
+| C6 | ✅ Preview from `main` built, `/api/health` ok; a photo from the phone persisted; an out-of-set species got its content within a minute, so `waitUntil` holds (closes B1) |
+| Found on the way | `dex.lookupRegion` 500ed on Vercel: the ETL's `fetch.ts` wrote its disk cache under the read-only bundle (`ENOENT mkdir /var/task/app/etl/.cache`). Fixed in `3a39f36`: cache off when `VERCEL` is set, best-effort elsewhere. The onboarding showed "One moment" forever instead of an error: M9 input |
+| Vercel | `PHOTO_DIR` removed from the project |
+| C7 | Not run as a separate check; PWA install, offline flush and the passkey are covered by M8 C9 C10 in the Simulator and by the walk (M9) |
+
+M8b closed.
