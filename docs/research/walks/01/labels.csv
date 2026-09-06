@@ -1,19 +1,19 @@
-n,file,guess,kind,inSet,ownerName,ownerSci,inMainzBingen
-1,IMG_3084.PNG,Pyrus communis,"whole tree, distance",likely,,,
-2,IMG_3085.PNG,fruit tree (Malus/Pyrus),"whole tree, distance",?,,,
-3,IMG_3086.PNG,Malus domestica,"whole tree, distance",?,,,
-4,IMG_3087.PNG,Pyrus communis or Juglans regia,"whole tree, distance",?,,,
-5,IMG_3088.PNG,Juglans regia or Fraxinus excelsior (young),young tree,?,,,
-6,IMG_3089.PNG,Malus domestica,"whole tree, distance",?,,,
-7,IMG_3090.PNG,Prunus avium,"whole tree, distance",?,,,
-8,IMG_3091.PNG,old fruit tree (Malus/Pyrus),"whole tree, distance",?,,,
-9,IMG_3092.PNG,bonsai (Olea europaea or Ficus),"pot plant, cultivated",no,,,
-10,IMG_3093.PNG,Schefflera arboricola,"pot plant, cultivated",no,,,
-11,IMG_3094.PNG,Juglans regia (young),young tree,?,,,
-12,IMG_3095.PNG,Mantis religiosa,"animal, close-up",yes,,,
-13,IMG_3096.PNG,"several (Quercus, Pinus)","scene, several species",several,,,
-14,IMG_3097.PNG,Cucurbita pepo,"crop, cultivated",no,,,
-15,PHOTO-2026-09-06-19-29-38.jpg,Prunus avium,"tree, fruit visible",yes,,,
-16,PHOTO-2026-09-06-19-29-44.jpg,"Prunus spinosa, Prunus avium or Prunus cerasifera","shrub, flowers visible",likely,,,
-17,PHOTO-2026-09-06-19-29-45.jpg,white-flowering tree (Prunus?),"drone, top-down",?,,,
-18,PHOTO-2026-09-06-19-29-45 2.jpg,several (flowering Prunus?),"drone, oblique, several",several,,,
+n,file,guess,kind,inSet,ownerName,ownerSci,inMainzBingen,place,photographer
+1,IMG_3084.PNG,Pyrus communis,"whole tree, distance",likely,,,no,Schauerberg,owner or Sebastian
+2,IMG_3085.PNG,fruit tree (Malus/Pyrus),"whole tree, distance",?,,,no,Schauerberg,owner or Sebastian
+3,IMG_3086.PNG,Malus domestica,"whole tree, distance",?,,,no,Schauerberg,owner or Sebastian
+4,IMG_3087.PNG,Pyrus communis or Juglans regia,"whole tree, distance",?,,,no,Schauerberg,owner or Sebastian
+5,IMG_3088.PNG,Juglans regia or Fraxinus excelsior (young),young tree,?,,,no,Schauerberg,owner or Sebastian
+6,IMG_3089.PNG,Malus domestica,"whole tree, distance",?,,,no,Schauerberg,owner or Sebastian
+7,IMG_3090.PNG,Prunus avium,"whole tree, distance",?,,,no,Schauerberg,owner or Sebastian
+8,IMG_3091.PNG,old fruit tree (Malus/Pyrus),"whole tree, distance",?,,,no,Schauerberg,owner or Sebastian
+9,IMG_3092.PNG,bonsai (Olea europaea or Ficus),"pot plant, cultivated",no,,,no,,owner or Sebastian
+10,IMG_3093.PNG,Schefflera arboricola,"pot plant, cultivated",no,,,no,,owner or Sebastian
+11,IMG_3094.PNG,Juglans regia (young),young tree,?,,,no,,owner or Sebastian
+12,IMG_3095.PNG,Mantis religiosa,"animal, close-up",yes,,,no,unknown,owner or Sebastian
+13,IMG_3096.PNG,"several (Quercus, Pinus)","scene, several species",several,,,no,Dahn,owner or Sebastian
+14,IMG_3097.PNG,Cucurbita pepo,"crop, cultivated",no,,,no,Kirrberg,owner or Sebastian
+15,PHOTO-2026-09-06-19-29-38.jpg,Prunus avium,"tree, fruit visible",yes,,,no,Oestrich-Winkel,owner or Sebastian
+16,PHOTO-2026-09-06-19-29-44.jpg,"Prunus spinosa, Prunus avium or Prunus cerasifera","shrub, flowers visible",likely,,,no,Oestrich-Winkel,owner or Sebastian
+17,PHOTO-2026-09-06-19-29-45.jpg,white-flowering tree (Prunus?),"drone, top-down",?,,,no,Oestrich-Winkel,owner or Sebastian
+18,PHOTO-2026-09-06-19-29-45 2.jpg,several (flowering Prunus?),"drone, oblique, several",several,,,no,Kirrberg,owner or Sebastian
