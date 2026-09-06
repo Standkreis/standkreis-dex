@@ -368,12 +368,14 @@ function StepFrame({ step, of, title, body, children, action }: { step: number; 
   const ref = useRef<HTMLDivElement>(null)
   useEffect(() => { ref.current?.scrollIntoView() }, [])
   return (
-    <div ref={ref} className="mx-auto flex min-h-full max-w-[520px] flex-col px-5" style={{ paddingTop: 'calc(2rem + env(safe-area-inset-top))', paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>
+    <div ref={ref} className="mx-auto flex min-h-full max-w-[520px] flex-col px-5" style={{ paddingTop: 'calc(2rem + env(safe-area-inset-top))' }}>
       <div className="text-[15px] text-white/60">{t('stepOf', { step, of })}</div>
       <h1 className="mt-1 text-[32px] leading-[1.1] font-bold tracking-tight">{title}</h1>
       {body && <p className="mt-2 text-[18px] leading-snug text-white/80">{body}</p>}
       <div className="flex-1">{children}</div>
-      <div className="sticky bottom-0 -mx-5 mt-6 bg-gradient-to-t from-night-deep from-60% to-transparent px-5 pt-6">{action}</div>
+      {/* The safe-area padding lives in the sticky footer, not the container: `bottom: 0` ignores the container's padding,
+          and a moss button flush with the page bottom is what Safari's bar sampled its tint from (green bar on steps 2–4). */}
+      <div className="sticky bottom-0 -mx-5 mt-6 bg-gradient-to-t from-night-deep from-70% to-transparent px-5 pt-6" style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))' }}>{action}</div>
     </div>
   )
 }
