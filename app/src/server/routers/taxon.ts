@@ -4,6 +4,7 @@ import type { InteractionKind } from '@/generated/prisma/enums'
 import { get, q, UA } from '../../../etl/fetch'
 import { gbifSpecies } from '../../../etl/gbif'
 import { isNow, nowRatio, perMille, tileOf } from '../../../etl/rules'
+import { background } from '../jobs'
 import { takeSearchToken } from '../searchCap'
 import { publicProcedure, router } from '../trpc'
 
@@ -36,7 +37,8 @@ async function regionCentre(gadmGid: string): Promise<{ lat: number; lng: number
 }
 
 // In-process content kicks for out-of-set species (handoff 0008 Track A), cached on globalThis like the region jobs so a
-// dev reload or a double tap never runs the same key twice at once.
+// dev reload or a double tap never runs the same key twice at once. Not awaited by the caller; on Vercel the promise
+// goes to `waitUntil` (handoff 0011 Track B, `server/jobs.ts`) so the function is not frozen with the kick half done.
 const kicks: Map<number, Promise<void>> = ((globalThis as unknown as { __dexContentKicks?: Map<number, Promise<void>> }).__dexContentKicks ??= new Map())
 function kickContent(gbifKey: number) {
   if (kicks.has(gbifKey)) return
@@ -49,6 +51,7 @@ function kickContent(gbifKey: number) {
     .catch((e) => log(`failed: ${e instanceof Error ? e.message : String(e)}`))
     .finally(() => kicks.delete(gbifKey))
   kicks.set(gbifKey, job)
+  background(job)
 }
 
 // The species page (spec §🎨 3). Pure read; the dex state row (studiert · entdeckt) is the client's join (M5/M6).

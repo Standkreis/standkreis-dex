@@ -32,7 +32,7 @@ No values here. Set in Vercel → Settings → Environment Variables unless the 
 | `WEBAUTHN_ORIGIN` | project, value `https://atlas.standkreis.de` | The origin passkeys are minted for | no |
 | `WEBAUTHN_SECRET` | project | HMAC key for challenge cookies and delete tokens, 64 hex | yes |
 | `PHOTO_DIR` | project, value `/tmp/photos` | Stopgap: photos land in `/tmp` and **do not persist**; goes away with 0011 A | no |
-| `CRON_SECRET` | not yet set | Guards the sweep cron route, 0011 Track B | yes |
+| `CRON_SECRET` | project, Prod + Preview | Guards `GET /api/cron/sweep`; Vercel's cron sends it as `Authorization: Bearer …` (0011 Track B). Unset: the route answers 401 to everyone | yes |
 
 `next.config.ts` picks `output` by environment: `'export'` for the static export, `undefined` otherwise (Vercel's tracer fails on `standalone`: `ENOENT next-server.js.nft.json`).
 
@@ -44,6 +44,15 @@ No values here. Set in Vercel → Settings → Environment Variables unless the 
 | Push to any other branch | Preview deploy on a `*.vercel.app` URL, against the same Neon DB (Preview is connected). Passkeys fail there by design (RP id) |
 
 The build command runs `npx prisma migrate deploy` first: **migrations run only there**, never from the Mac (owner's dev rule: no reset, no push, no dev migrate against production). Then `npm run build`: `prebuild` mints the build id, `next build`, `postbuild` writes the worker manifest.
+
+## 🩺 Health, cron, background work
+
+| Route | Who calls it | Answer |
+| --- | --- | --- |
+| `GET /api/health` | an uptime monitor, you | `200 {ok, buildId, sweepAt}`; `503 {ok: false, error}` when Neon does not answer. `sweepAt` is when the last sweep finished **in this instance** (null on a fresh one; there is no table for the stamp) |
+| `GET /api/cron/sweep` | Vercel's cron, hourly (`app/vercel.json`, `0 * * * *`), with `Authorization: Bearer $CRON_SECRET`; by hand with `curl -H "Authorization: Bearer $CRON_SECRET" https://atlas.standkreis.de/api/cron/sweep` | the `SweepResult` JSON (`regions`, `content`, `contentDone`, `contentFailed`, `photos`, `seconds`, `cut`); `null` when another run holds the advisory lock; `401` without the secret. Vercel → project → Cron Jobs shows the runs |
+
+Jobs that must outlive the response (the region job on `dex.requestRegion`, the content kick on `taxon.ensure`) go through `waitUntil` (`app/src/server/jobs.ts`), so the invocation lives until they settle; the tRPC route and the cron route declare `maxDuration = 300` (fluid compute). The sweep stops starting new batches at 240 s and reports `cut: true`; the next hour continues, every step is idempotent. `register()` (instrumentation) only checks the environment on Vercel; the sweep at start is for `next start` on a laptop.
 
 ## 🗄️ Filling or refreshing the database from the Mac
 
@@ -79,8 +88,8 @@ Everything below is [handoff 0011](handoffs/0011-vercel.md).
 | Gap | Today | Track |
 | --- | --- | --- |
 | Photos persist | `/tmp`, gone on the next invocation | A: Blob behind the `photos.ts` seam |
-| Region job, content kick outlive the response | in-process, die when the function freezes | B: `waitUntil` |
-| Restart sweep | runs per cold start, races itself | B: hourly cron route + `CRON_SECRET` |
+| Region job, content kick outlive the response | ✅ `waitUntil` via `server/jobs.ts`, `maxDuration = 300` on the tRPC route (0011 B, C4); proven on Vercel itself by the owner's C6 | B, done |
+| Restart sweep | ✅ hourly `GET /api/cron/sweep` with `CRON_SECRET`, `register()` skips the sweep on Vercel (0011 B, C5) | B, done |
 | Resend domain, magic link | not added | M7b |
 
 ## 🗑️ Removed: the VM deploy

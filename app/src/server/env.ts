@@ -16,6 +16,7 @@ const strict = z.object({
   WEBAUTHN_SECRET: z.string().trim().min(32, 'at least 32 characters: openssl rand -hex 32'),
   PHOTO_DIR: z.string().trim().transform((s) => s || undefined).optional(), // required unless photos go to Blob (below)
   BLOB_READ_WRITE_TOKEN: z.string().trim().transform((s) => s || undefined).optional(), // set: photos in Vercel Blob (handoff 0011 A)
+  CRON_SECRET: z.string().trim().min(1).optional(), // guards /api/cron/sweep (handoff 0011 Track B); unset: the route refuses
 }).superRefine((e, ctx) => {
   if (!e.PHOTO_DIR && !e.BLOB_READ_WRITE_TOKEN) ctx.addIssue({ code: 'custom', path: ['PHOTO_DIR'], message: 'not set (or set BLOB_READ_WRITE_TOKEN to store photos in Vercel Blob)' })
 })
@@ -26,6 +27,7 @@ const lenient = z.object({
   WEBAUTHN_SECRET: z.string().trim().min(1).default('dev-only-secret-set-WEBAUTHN_SECRET-in-production'),
   PHOTO_DIR: z.string().trim().min(1).default(join(process.cwd(), 'data', 'photos')),
   BLOB_READ_WRITE_TOKEN: z.string().trim().transform((s) => s || undefined).optional(), // set: photos in Vercel Blob instead of PHOTO_DIR
+  CRON_SECRET: z.string().trim().min(1).optional(),
 })
 
 export type Env = z.infer<typeof strict> & z.infer<typeof lenient>
@@ -38,6 +40,7 @@ function read(): Env {
     WEBAUTHN_SECRET: process.env.WEBAUTHN_SECRET,
     PHOTO_DIR: process.env.PHOTO_DIR,
     BLOB_READ_WRITE_TOKEN: process.env.BLOB_READ_WRITE_TOKEN,
+    CRON_SECRET: process.env.CRON_SECRET,
   }
   const parsed = (isProduction ? strict : lenient).safeParse(source)
   if (parsed.success) return parsed.data as Env

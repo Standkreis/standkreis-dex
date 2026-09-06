@@ -3,6 +3,7 @@ import { Tile } from '@/generated/prisma/enums'
 import { get, q } from '../../../etl/fetch'
 import { resolveRegion } from '../../../etl/gbif'
 import { isNow, nowRatio, perMille } from '../../../etl/rules'
+import { background } from '../jobs'
 import { publicProcedure, router } from '../trpc'
 
 const GBIF = 'https://api.gbif.org/v1'
@@ -20,14 +21,15 @@ const toUnit = (h: GadmHit) => {
 }
 type Unit = ReturnType<typeof toUnit>
 
-// In-process region jobs (handoff 0007 Track A, accepted for M5; M8 brings a queue). Cached on globalThis so dev reloads
-// do not start the same region twice; a second identity asking for a running region waits on the same job.
+// In-process region jobs (handoff 0007 Track A, accepted for M5). Cached on globalThis so dev reloads do not start the
+// same region twice; a second identity asking for a running region waits on the same job. On Vercel the promise is
+// handed to `waitUntil` (handoff 0011 Track B, `server/jobs.ts`), so the invocation lives until the job settles.
 const jobs: Map<string, Promise<void>> = ((globalThis as unknown as { __dexRegionJobs?: Map<string, Promise<void>> }).__dexRegionJobs ??= new Map())
 
 /**
  * The region job: facets → set → content, in this process, once per gadmGid at a time. `requestRegion` starts it for a
- * new or failed region; the restart sweep (handoff 0009 Track B, `server/sweep.ts`) restarts it for a region left
- * `queued` by a server that died. Returns the running job, so a caller may await it.
+ * new or failed region; the restart sweep (handoff 0009 Track B, `server/sweep.ts`, on Vercel the hourly cron) restarts
+ * it for a region left `queued` by a server that died. Returns the running job, so a caller may await it.
  */
 export function startRegionJob(gadmGid: string): Promise<void> {
   const running = jobs.get(gadmGid)
@@ -44,6 +46,7 @@ export function startRegionJob(gadmGid: string): Promise<void> {
     .catch((e) => log(`failed: ${e instanceof Error ? e.message : String(e)}`))
     .finally(() => jobs.delete(gadmGid))
   jobs.set(gadmGid, job)
+  background(job)
   return job
 }
 

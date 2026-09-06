@@ -81,3 +81,87 @@ Branch `0011-a`, worktree `standkreis-dex-a`. Files: `app/src/server/photos.ts`,
 - `package.json`: `"@vercel/blob": "^2.8.0"` in `dependencies`; B adds `@vercel/functions` next to it. `package-lock.json`: run `npm install` after the merge rather than resolving the lock by hand.
 - Vercel: `PHOTO_DIR` can be removed from the project's variables once this is live (harmless if left).
 - The one lint warning in `npm run check` (`scripts/m8b/queue.mjs:39` `waitGone` unused) predates this track.
+## ⏱️ Track B
+
+Branch `0011-b`, worktree `standkreis-dex-b`. Proven against `npm run build` + `NODE_ENV=production npx next start -p 3003` (build `mtp409du`), the dev DB on 5433, 2026-09-06.
+
+### 📐 Decisions
+
+| Topic | Decision | Why |
+| --- | --- | --- |
+| Where `background()` is called | Inside `startRegionJob` and `kickContent`, right after the map `set` | Every caller is covered (`requestRegion`, the sweep, `ensure` twice); a caller that also awaits the job (the sweep) hands `waitUntil` a promise that is settled by the time the response goes out, which is harmless |
+| The on-Vercel switch | `process.env.VERCEL === '1'` in `jobs.ts` and `instrumentation.ts`, not `@vercel/functions` `getEnv()` | One line, testable with `VERCEL=1 next start` (C5). `waitUntil` off Vercel is a no-op (`getContext().waitUntil?.()`), so the fallback to `void` is belt and braces |
+| `CRON_SECRET` in `env.ts` | Optional in **both** objects (`strict` and `lenient`), at the end | The parent said "the lenient object"; but zod strips unknown keys, so a variable only in `lenient` is `undefined` on every production server. Both, or the cron route would 401 on Vercel forever |
+| Cron route without a secret | 401 to everyone, never runs | A laptop sweeps with `npm run etl -- sweep`; a public trigger for a 5-minute job is not a feature |
+| `maxDuration = 300` | Route segment config on `api/trpc/[trpc]/route.ts` and on the cron route; `next.config.ts` untouched | The handoff's preference; per route, not global |
+| Sweep deadline | `sweep(log, { deadlineMs })`, new optional argument; the cron passes **240 s**; `SweepResult` gains `cut: boolean` | The transaction's 6 h timeout is fiction on Vercel: the function is killed at 300 s. A backlog of 900 taxa without content (≈ 75 min, ETL README) would be killed mid-batch every hour. With the deadline the run stops between batches, returns a result, and the next hour continues (`contentAt` is per taxon, `Region.status` per region). `npm run etl -- sweep` passes no deadline: unchanged |
+| `sweepAt` on Vercel | The cron route stamps `globalThis.dexSweepAt`, `register()` no longer does there | As the handoff says: "since this instance woke", written into DEPLOY.md |
+| `vercel.json` | `crons` only, `0 * * * *`, with the `$schema` line | Nothing else belongs there; functions config lives in the routes |
+| `register()` log line | `[sweep] on Vercel: skipped at start, the cron route /api/cron/sweep owns it` | C5 asked for proof; a silent skip proves nothing in a Vercel log |
+
+### 🧪 C4 · `next start`: an out-of-set species logged, the kick lands after the response
+
+`Alces alces` (GBIF 2440940), not in the dev DB (Mainz-Bingen and Kyoto `ready`, 23,752 taxa, 0 without content in a ready set).
+
+| Step | Evidence |
+| --- | --- |
+| `POST /api/trpc/taxon.ensure {gbifKey: 2440940}` at 01:05:30 | `200` in **0.169 s**, body `contentAt: null, created: true, lead: null`: the response did not wait |
+| `POST /api/trpc/sighting.create {taxonId, at, wildness: wild}` | `200` in 0.036 s, `evidence: "claimed", first: true` |
+| `Taxon.contentAt` polled every 2 s | set at **01:05:34.763**, 4 s after the request |
+| Server log | `[content 2440940] content: 1 taxa to fill` · `wikidata 1 items · commons 1 files` · `done: 1 filled, 0 failed in 4.0 s` (131 GBIF calls, one each to Wikidata, Commons, iNaturalist, de.wikipedia, AnAge, GloBI) |
+| DB after | `commonNames.de = "Elch"`, 1 reference `Asset` |
+
+Pass ✅. On Vercel itself the same path runs through `waitUntil`: the owner's C6.
+
+### 🧪 C5 · the cron route, and `register()` on Vercel
+
+Local `CRON_SECRET` = `openssl rand -hex 32` in the shell (64 chars, never printed).
+
+| Step | Evidence |
+| --- | --- |
+| `curl -H "Authorization: Bearer $CRON_SECRET" localhost:3003/api/cron/sweep` | `200` in 0.083 s: `{"regions":[],"content":0,"contentDone":0,"contentFailed":0,"photos":0,"seconds":0.072,"cut":false}`; `/api/health` `sweepAt` moved to the run's finish (`01:05:30.596Z`) |
+| Without the header | `401 {"error":"unauthorized"}` |
+| Wrong secret (`Bearer nope`) | `401` |
+| **`VERCEL=1 next start -p 3003`**, `/api/health` 3 s after ready | `{"ok":true,"buildId":"mtp409du","sweepAt":null}`; log: `[sweep] on Vercel: skipped at start, the cron route /api/cron/sweep owns it`; no `[sweep] done` line |
+| Cron route under `VERCEL=1` | `200`, `SweepResult`, `sweepAt` stamped `01:06:07.400Z` |
+| The kick under `VERCEL=1` (the `waitUntil` branch, no Vercel context so `waitUntil` is a no-op): `taxon.ensure` `Fratercula arctica` 2481353 | `200` in 0.172 s, `contentAt` set 6 s later, `done: 1 filled, 0 failed in 3.5 s` |
+| Deadline cut: `contentAt` of the moose set to null, `sweep(log, {deadlineMs: -1})` via `tsx` | `content 1 (0 filled) · cut at the deadline, the rest waits for the next run`, `cut: true`; the following `sweep(log)` → `1 filled`, `cut: false`, `contentAt` set |
+| `npm run check` | typecheck, lint (the pre-existing `queue.mjs` warning), **30 tests**, export build `sw-manifest mtp42sby: 19 files, 919 KB` |
+
+Pass ✅.
+
+### 📁 Files
+
+| File | What |
+| --- | --- |
+| `app/src/server/jobs.ts` | new: `onVercel`, `background(promise)` |
+| `app/src/app/api/cron/sweep/route.ts` | new: bearer check, `sweep` with the 240 s deadline, the `sweepAt` stamp, `maxDuration = 300` |
+| `app/vercel.json` | new: the hourly cron |
+| `app/src/server/routers/dex.ts` | `background(job)` in `startRegionJob`, two comments |
+| `app/src/server/routers/taxon.ts` | `background(job)` in `kickContent`, one comment |
+| `app/src/server/sweep.ts` | `deadlineMs`, `cut` in the result and the log line |
+| `app/src/instrumentation.ts` | the `VERCEL` branch |
+| `app/src/app/api/trpc/[trpc]/route.ts` | `export const maxDuration = 300` |
+| `app/src/server/env.ts` | `CRON_SECRET` optional, end of `strict`, `lenient` and `source` |
+| `app/.env.example` | `CRON_SECRET=` at the end |
+| `app/package.json`, lockfile | `@vercel/functions ^3.9.5` |
+| `docs/DEPLOY.md` | `CRON_SECRET` row, new §🩺 with `/api/health` and `/api/cron/sweep`, the two §🚧 rows |
+
+### ❓ Doubts
+
+| # | Doubt | Weight |
+| --- | --- | --- |
+| B1 | **`waitUntil` was only proven as a no-op.** Off Vercel there is no request context; whether the fluid-compute runtime really keeps the invocation for 4 s after the response is the owner's C6 (log a species outside the set on the phone, watch `contentAt` within a minute, and the function log for `[content …] done`) | the check that matters |
+| B2 | **A region job through `waitUntil` needs ~2 min for the set plus the content run** (111 s for Mainz-Bingen's set, then 75 min of content). `maxDuration` 300 covers the set; the content run dies at 300 s and the hourly sweep finishes it in 4-minute slices: ≈ 20 hours for a new region. Fine for one user and no new regions from the UI (CLAUDE.md); a queue is the honest fix when regions open | medium, by design |
+| B3 | **The deadline stops between batches, not inside one.** A batch is 20 taxa ≈ 100 s (5 s each, C4 numbers), so a run can reach 240 + 100 = 340 s > 300 and be killed after all. Lowering to 180 s or the batch to 10 would close it; left at 240/20 until a real run shows the time per batch on Vercel (Neon latency is not the laptop's) | medium, one constant |
+| B4 | **Two instances, two kicks.** The `globalThis` maps dedupe within a warm instance only; two requests for the same key on two instances both run the content job. The job serialises its writes (findings 0008 A11); double work, no corruption | low |
+| B5 | **`register()` on Preview deploys** also skips the sweep (`VERCEL=1` there too); Preview shares Neon with Production and the production cron sweeps it. Fine | none |
+| B6 | **`etl/README.md` §🚀 last sentence** says "Until 0011 Track B lands … the restart sweep runs per cold start on Vercel". Not my file (the parent said do not touch); one sentence to drop at the merge | merge note |
+| B7 | Test rows left in the dev DB: `Alces alces` and `Fratercula arctica` (real taxa, with content), one `claimed` sighting and its identity | dev DB, fine |
+
+### 🔀 For the merge
+
+- **Shared files, take both lines.** `env.ts`: Track A appends `BLOB_READ_WRITE_TOKEN`, B appends `CRON_SECRET` to `strict`, `lenient` and `source`; B's lines carry the comment on the `strict` one. `.env.example`: B's block is the last five lines. `package.json`: `@vercel/functions` sits alphabetically before `idb-keyval`; the lockfile will conflict, run `npm install` after the merge and take the regenerated one.
+- `etl/README.md` §🚀: delete the "Until 0011 Track B lands" clause (B6).
+- Vercel side, nothing to do beyond `CRON_SECRET` (set): the cron appears under the project's Cron Jobs tab after the first production deploy with `vercel.json`. `curl -H "Authorization: Bearer $CRON_SECRET" https://atlas.standkreis.de/api/cron/sweep` is the manual run.
+- C6 is where `waitUntil` is really proven (B1).
