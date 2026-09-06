@@ -7,3 +7,33 @@ body { background: var(--color-paper); color: var(--color-ink); -webkit-font-smo
 /* The fill moment (spec §🎨 5): the sheet and the toast slide up; the counter ticks once. */
 @keyframes fill-up { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes fill-tick { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+
+/* ── Motion (handoff 0014b), CSS only. Durations and curves are the tokens in styles/tokens.css. ────────────────── */
+
+/* A1 · the bottom sheet (components/Sheet.tsx): the scrim fades, the panel rises; `data-state="closing"` reverses both
+   and the component unmounts on the panel's transitionend (or a timeout). The drag hook writes an inline transform while
+   the finger is down, so the keyframe (not a transition) carries the entrance: it cannot fight the inline style. */
+@keyframes sheet-in { from { transform: translateY(100%); } }
+@keyframes scrim-in { from { opacity: 0; } }
+.sheet-scrim { animation: scrim-in var(--motion-fast) ease-out; transition: opacity var(--motion-fast) ease-out; }
+.sheet-panel { animation: sheet-in var(--motion-sheet) var(--ease-out-soft); transition: transform var(--motion-sheet-out) var(--ease-out-soft); }
+.sheet[data-state="closing"] .sheet-scrim { opacity: 0; }
+.sheet[data-state="closing"] .sheet-panel { transform: translateY(100%); }
+
+/* A2 · toggles: chips, radios, checks. The badge mounts with the check, so it is a keyframe with a slight overshoot. */
+@keyframes badge-in { from { transform: scale(0.6); opacity: 0; } }
+@keyframes ring-in { from { opacity: 0; } }
+.motion-toggle { transition: background-color var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast), border-color var(--motion-fast), opacity var(--motion-fast), filter var(--motion-base); }
+.motion-badge { animation: badge-in var(--motion-base) var(--ease-overshoot); }
+.motion-ring { animation: ring-in var(--motion-base) ease-out; }
+
+/* A3 · the tab bar: outline and filled glyph stacked, the filled one fades and scales in; the one moss dot slides. */
+.tab-glyph { transition: opacity var(--motion-fast) ease-out, transform var(--motion-fast) var(--ease-out-soft); }
+.tab-glyph[data-on="false"] { opacity: 0; }
+.tab-glyph[data-on="false"].tab-fill { transform: scale(0.6); }
+.tab-dot { transition: transform var(--motion-base) var(--ease-out-soft), opacity var(--motion-fast); }
+
+/* A4 · reduced motion: durations to zero; the scrim's opacity fade may stay. */
+@media (prefers-reduced-motion: reduce) {
+  .sheet-panel, .motion-toggle, .motion-badge, .motion-ring, .tab-glyph, .tab-dot { animation-duration: 0s !important; transition-duration: 0s !important; }
+}

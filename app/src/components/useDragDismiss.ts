@@ -5,11 +5,14 @@ import { useCallback, useRef, useState, type CSSProperties, type PointerEvent } 
 // Drag-to-dismiss for the bottom sheets (handoff 0014 G1): the handle and the header follow the finger, the sheet
 // closes past DRAG_CLOSE_FRACTION of its height or on a fast downward flick, and snaps back on a short wobble.
 // Pointer events only, no library; the drag surface sets `touch-action: none` so the page does not scroll under it.
+// Handoff 0014b: the settle runs on the motion tokens (`--motion-base`, `--ease-out-soft`); SETTLE_MS mirrors the token so
+// the phase ends with the transition. `transition: none` while the finger is down keeps the Sheet's leave transition
+// (globals.css `.sheet-panel`) from smoothing the drag itself.
 export const DRAG_CLOSE_FRACTION = 0.3 // of the sheet's height
 export const DRAG_FLICK_PX_PER_MS = 0.5 // downward velocity over the last VELOCITY_WINDOW_MS
 export const DRAG_FLICK_MIN_PX = 24 // a flick still needs this much travel; less is a wobble
 const VELOCITY_WINDOW_MS = 100
-const SETTLE_MS = 180
+const SETTLE_MS = 220 // = --motion-base
 
 export function useDragDismiss(onClose: () => void) {
   const sheet = useRef<HTMLDivElement>(null)
@@ -63,7 +66,7 @@ export function useDragDismiss(onClose: () => void) {
   }
   const sheetStyle: CSSProperties = {
     transform: dy ? `translateY(${dy}px)` : undefined,
-    transition: phase === 'settle' ? `transform ${SETTLE_MS}ms ease-out` : undefined,
+    transition: phase === 'drag' ? 'none' : phase === 'settle' ? `transform ${SETTLE_MS}ms var(--ease-out-soft)` : undefined,
   }
   return { sheet, dragProps, sheetStyle, dragging: phase === 'drag' && dy > 0 }
 }

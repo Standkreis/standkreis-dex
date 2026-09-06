@@ -73,7 +73,7 @@ export function Journal({ title }: { title: string }) {
           <div className="mt-3 flex gap-2" role="tablist" data-testid="pills">
             {KINDS.map((k) => (
               <button key={k} type="button" role="tab" aria-selected={kind === k} onClick={() => setKind(k)} data-testid={`pill-${k}`}
-                className={`rounded-full px-4 py-2 text-[15px] font-semibold ${kind === k ? 'bg-sky-soft text-sky-deep ring-1 ring-sky' : 'bg-tile text-ink-soft'}`}>
+                className={`motion-toggle rounded-full px-4 py-2 text-[15px] font-semibold ${kind === k ? 'bg-sky-soft text-sky-deep ring-1 ring-sky' : 'bg-tile text-ink-soft'}`}>
                 {t(k)}
               </button>
             ))}

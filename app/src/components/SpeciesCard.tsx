@@ -28,7 +28,7 @@ export function Thumb({ card, state, size, inSet = true }: { card: Card; state: 
       ) : (
         <span className="text-ink-faint" style={{ fontSize: size * 0.45 }}>{inSet ? tileIcon[card.tile] ?? '?' : '?'}</span>
       )}
-      {state !== 'none' && <span className={`pointer-events-none absolute inset-0 rounded-xl ring-2 ring-inset ${state === 'seen' ? 'ring-moss' : 'ring-amber'}`} />}
+      {state !== 'none' && <span className={`motion-ring pointer-events-none absolute inset-0 rounded-xl ring-2 ring-inset ${state === 'seen' ? 'ring-moss' : 'ring-amber'}`} />}
     </span>
   )
 }

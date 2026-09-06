@@ -21,6 +21,17 @@
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
+/* Motion (handoff 0014b): three durations and two curves. Sheets rise 260 ms and leave 200 ms, the moss dot slides 220 ms,
+   toggles and the scrim 150 ms. Every rule that uses them is zeroed under prefers-reduced-motion in globals.css. */
+:root {
+  --motion-fast: 150ms;
+  --motion-base: 220ms;
+  --motion-sheet: 260ms;
+  --motion-sheet-out: 200ms;
+  --ease-out-soft: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-overshoot: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
 :root { color-scheme: light; }
 
 :root[data-theme="dark"] {

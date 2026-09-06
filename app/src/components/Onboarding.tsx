@@ -148,8 +148,8 @@ function RegionScreen({ change, onChosen }: { change: boolean; onChosen: (r: Reg
                 const on = selected?.id === r.id
                 return (
                   <li key={r.id}>
-                    <button type="button" role="radio" aria-checked={on} disabled={busy} data-region={r.id} onClick={() => setPicked(r.id)} className={`flex h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-[18px] font-bold disabled:opacity-60 ${on ? 'bg-white text-night' : 'bg-white/10 text-white'}`}>
-                      <span aria-hidden className={`grid size-6 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-sky' : 'border-white/50'}`}>{on && <span className="size-3 rounded-full bg-sky" />}</span>
+                    <button type="button" role="radio" aria-checked={on} disabled={busy} data-region={r.id} onClick={() => setPicked(r.id)} className={`motion-toggle flex h-14 w-full items-center gap-3 rounded-2xl px-4 text-left text-[18px] font-bold disabled:opacity-60 ${on ? 'bg-white text-night' : 'bg-white/10 text-white'}`}>
+                      <span aria-hidden className={`motion-toggle grid size-6 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-sky' : 'border-white/50'}`}>{on && <span className="motion-badge size-3 rounded-full bg-sky" />}</span>
                       <span className="truncate">{r.name}</span>
                     </button>
                   </li>
@@ -251,17 +251,17 @@ function TilesScreen({ of, region, tiles, setTiles, onNext }: { of: number; regi
               {/* The grid's cell language (spec §🎨 2), theme-stable over the splash: on = white card, the photo in colour, a check on it in
                   sky (handoff 0014 G5: selection is blue, moss means "entdeckt"); off = glass, greyscale at 45 %, no check. Stacked so the German group names never truncate at 360 px. */}
               <button type="button" role="checkbox" aria-checked={on} onClick={() => toggle(x)} data-tile={x}
-                className={`flex h-[108px] w-full flex-col rounded-2xl p-3 text-left ${on ? 'bg-white text-night' : 'bg-white/10 text-white/60'}`}>
+                className={`motion-toggle flex h-[108px] w-full flex-col rounded-2xl p-3 text-left ${on ? 'bg-white text-night' : 'bg-white/10 text-white/60'}`}>
                 <span className="relative h-11 w-11 shrink-0">
                   <span className={`flex h-full w-full items-center justify-center overflow-hidden rounded-full ${on ? 'bg-tile' : 'bg-white/10'}`}>
                     {thumb ? (
                       // eslint-disable-next-line @next/next/no-img-element -- static export, remote hosts, no optimiser
-                      <img src={thumb.src} alt="" loading="lazy" decoding="async" className={`h-full w-full object-cover ${on ? '' : 'opacity-45 grayscale'}`} />
+                      <img src={thumb.src} alt="" loading="lazy" decoding="async" className={`motion-toggle h-full w-full object-cover ${on ? '' : 'opacity-45 grayscale'}`} />
                     ) : (
                       <OnboardingSilhouette tile={x} className={`h-7 w-7 ${on ? 'text-ink-soft' : 'text-white/40'}`} />
                     )}
                   </span>
-                  {on && <span className="absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-sky text-[12px] font-bold text-white ring-2 ring-white" aria-hidden>✓</span>}
+                  {on && <span className="motion-badge absolute -right-1 -bottom-1 flex h-5 w-5 items-center justify-center rounded-full bg-sky text-[12px] font-bold text-white ring-2 ring-white" aria-hidden>✓</span>}
                 </span>
                 <span className="mt-auto block w-full truncate text-[15px] leading-tight font-bold">{tt(x)}</span>
                 <span className={`mt-0.5 block text-[13px] leading-tight ${on ? 'text-ink-soft' : ''}`}>{n === undefined ? (ready ? '' : t('countsPending')) : t('speciesHere', { n })}</span>

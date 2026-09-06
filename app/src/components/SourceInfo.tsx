@@ -3,7 +3,7 @@
 import { useState, type ReactNode } from 'react'
 import { useTranslations } from 'next-intl'
 import { Icon } from './Marks'
-import { useDragDismiss } from './useDragDismiss'
+import { Sheet, useSheetClose } from './Sheet'
 
 /**
  * One source or image credit as the ⓘ sheet renders it (handoff 0014 D3). `label` names the row when a sheet lists
@@ -52,34 +52,35 @@ export function SourceInfo({ title, sources, tone = 'plain', size = 28, classNam
 /** The sheet behind the ⓘ and behind a long-press on a slider image: author · licence · source per row, drag or tap outside to close. */
 export function SourceSheet({ title, sources, onClose, children }: { title: string; sources: Source[]; onClose: () => void; children?: ReactNode }) {
   const t = useTranslations('species.attribution')
-  const tc = useTranslations('common')
-  const { sheet, dragProps, sheetStyle } = useDragDismiss(onClose)
   const link = (href: string | null | undefined, text: string) => (href ? <a href={href} target="_blank" rel="noreferrer" className="text-moss-deep underline" onClick={(e) => e.stopPropagation()}>{text}</a> : text)
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-ink/40" onClick={(e) => { e.stopPropagation(); onClose() }} role="presentation" data-testid="source-sheet">
-      <div ref={sheet} role="dialog" aria-modal aria-labelledby="source-title" className="mx-auto flex max-h-[80vh] w-full max-w-[520px] flex-col rounded-t-3xl bg-paper text-ink" style={sheetStyle} onClick={(e) => e.stopPropagation()}>
-        <div {...dragProps} className="cursor-grab px-4 pt-3 select-none">
-          <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink/20" />
-          <div className="flex items-center justify-between">
-            <h2 id="source-title" className="text-[20px] font-bold">{title}</h2>
-            <button type="button" onClick={onClose} className="text-[13px] text-ink-soft">{tc('close')}</button>
+    <Sheet onClose={onClose} labelledBy="source-title" z="z-50" maxH="max-h-[80vh]" testId="source-sheet"
+      handle={
+        <div className="mt-3 flex items-center justify-between">
+          <h2 id="source-title" className="text-[20px] font-bold">{title}</h2>
+          <SheetCloseButton />
+        </div>
+      }>
+      <div className="min-h-0 overflow-y-auto px-4 pt-3" style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }}>
+        {sources.map((s, i) => (
+          <div key={i} className={i > 0 ? 'mt-3 border-t border-tile pt-3' : ''} data-testid="source-row">
+            {s.label && <div className="mb-1 text-[15px] font-semibold">{s.label}</div>}
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[15px]">
+              {s.author && <><dt className="text-ink-soft">{t('author')}</dt><dd className="min-w-0 break-words">{s.author}</dd></>}
+              {s.licence && <><dt className="text-ink-soft">{t('licence')}</dt><dd className="min-w-0 break-words">{link(s.licenceUrl, s.licence)}</dd></>}
+              {(s.origin || s.sourceUrl) && <><dt className="text-ink-soft">{t('source')}</dt><dd className="min-w-0 break-words">{link(s.sourceUrl, s.origin ?? s.sourceUrl ?? '')}</dd></>}
+            </dl>
+            {s.note && <p className="mt-1 text-[13px] text-ink-faint">{s.note}</p>}
           </div>
-        </div>
-        <div className="min-h-0 overflow-y-auto px-4 pt-3" style={{ paddingBottom: 'calc(2rem + env(safe-area-inset-bottom))' }}>
-          {sources.map((s, i) => (
-            <div key={i} className={i > 0 ? 'mt-3 border-t border-tile pt-3' : ''} data-testid="source-row">
-              {s.label && <div className="mb-1 text-[15px] font-semibold">{s.label}</div>}
-              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[15px]">
-                {s.author && <><dt className="text-ink-soft">{t('author')}</dt><dd className="min-w-0 break-words">{s.author}</dd></>}
-                {s.licence && <><dt className="text-ink-soft">{t('licence')}</dt><dd className="min-w-0 break-words">{link(s.licenceUrl, s.licence)}</dd></>}
-                {(s.origin || s.sourceUrl) && <><dt className="text-ink-soft">{t('source')}</dt><dd className="min-w-0 break-words">{link(s.sourceUrl, s.origin ?? s.sourceUrl ?? '')}</dd></>}
-              </dl>
-              {s.note && <p className="mt-1 text-[13px] text-ink-faint">{s.note}</p>}
-            </div>
-          ))}
-          {children}
-        </div>
+        ))}
+        {children}
       </div>
-    </div>
+    </Sheet>
   )
+}
+
+function SheetCloseButton() {
+  const tc = useTranslations('common')
+  const close = useSheetClose()
+  return <button type="button" onClick={close} className="text-[13px] text-ink-soft">{tc('close')}</button>
 }

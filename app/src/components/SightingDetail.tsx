@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type ChangeEvent, type ReactNode } from 'react'
+import { useRef, useState, type ChangeEvent, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useFormatter, useTranslations } from 'next-intl'
 import { Link, useRouter } from '@/i18n/navigation'
@@ -13,7 +13,7 @@ import { SourceInfo, useImageSource } from './SourceInfo'
 import { tileIcon, useName } from './SpeciesCard'
 import { SightingMap } from './SightingMap'
 import { rememberSpeciesOrigin } from './SpeciesOrigin'
-import { useDragDismiss } from './useDragDismiss'
+import { Sheet, useSheetClose } from './Sheet'
 
 type Wildness = 'wild' | 'captive' | 'cultivated'
 
@@ -175,7 +175,7 @@ export function SightingDetail({ id, mode, origin, onGone }: { id: string; mode:
         <div className="flex gap-2" role="radiogroup">
           {options.map((w) => (
             <button key={w} type="button" role="radio" aria-checked={wildness === w} onClick={() => setWildness(w)} data-testid={`wildness-${w}`}
-              className={`flex-1 rounded-full px-4 py-2 text-[15px] font-semibold ${wildness === w ? (w === 'wild' ? 'bg-moss text-white' : 'bg-ink text-paper') : 'bg-tile text-ink-soft'}`}>
+              className={`motion-toggle flex-1 rounded-full px-4 py-2 text-[15px] font-semibold ${wildness === w ? (w === 'wild' ? 'bg-moss text-white' : 'bg-ink text-paper') : 'bg-tile text-ink-soft'}`}>
               {t(w)}
             </button>
           ))}
@@ -209,27 +209,30 @@ export function SightingDetail({ id, mode, origin, onGone }: { id: string; mode:
 /** The diary's drawer (T1): the same detail under a handle, drag or tap outside to close, Escape too. No URL of its own; a pasted link opens the route. */
 export function SightingDrawer({ id, origin, onClose }: { id: string; origin: string; onClose: () => void }) {
   const t = useTranslations('sighting')
-  const tc = useTranslations('common')
-  const { sheet, dragProps, sheetStyle } = useDragDismiss(onClose)
-  useEffect(() => {
-    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', key)
-    return () => window.removeEventListener('keydown', key)
-  }, [onClose])
   return (
-    <div className="fixed inset-0 z-30 flex items-end bg-ink/40" onClick={onClose} role="presentation" data-testid="sighting-drawer">
-      <div ref={sheet} role="dialog" aria-modal aria-labelledby="sighting-title" className="mx-auto flex max-h-[92vh] w-full max-w-[520px] flex-col rounded-t-3xl bg-paper" style={sheetStyle} onClick={(e) => e.stopPropagation()}>
-        <div {...dragProps} className="cursor-grab px-4 pt-3 select-none" data-testid="sighting-handle">
-          <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-ink/20" />
-          <div className="flex items-center justify-between">
-            <h2 id="sighting-title" className="text-[13px] font-bold tracking-wide text-ink-soft uppercase">{t('title')}</h2>
-            <button type="button" onClick={onClose} className="text-[13px] text-ink-soft" data-testid="sighting-close">{tc('close')}</button>
-          </div>
+    <Sheet onClose={onClose} labelledBy="sighting-title" testId="sighting-drawer" handleTestId="sighting-handle"
+      handle={
+        <div className="mt-3 flex items-center justify-between">
+          <h2 id="sighting-title" className="text-[13px] font-bold tracking-wide text-ink-soft uppercase">{t('title')}</h2>
+          <CloseButton testId="sighting-close" />
         </div>
-        <div className="min-h-0 overflow-y-auto px-4 pt-3" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
-          <SightingDetail id={id} mode="drawer" origin={origin} onGone={onClose} />
-        </div>
-      </div>
+      }>
+      <DrawerBody id={id} origin={origin} />
+    </Sheet>
+  )
+}
+
+function CloseButton({ testId }: { testId: string }) {
+  const tc = useTranslations('common')
+  const close = useSheetClose()
+  return <button type="button" onClick={close} className="text-[13px] text-ink-soft" data-testid={testId}>{tc('close')}</button>
+}
+
+function DrawerBody({ id, origin }: { id: string; origin: string }) {
+  const close = useSheetClose()
+  return (
+    <div className="min-h-0 overflow-y-auto px-4 pt-3" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+      <SightingDetail id={id} mode="drawer" origin={origin} onGone={close} />
     </div>
   )
 }
