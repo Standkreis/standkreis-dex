@@ -7,6 +7,8 @@ import { Link } from '@/i18n/navigation'
 import { useTRPC } from '@/trpc/client'
 import { Icon } from './Marks'
 import { CountersCard, useSetCounters } from './IdentityCounters'
+import { AvatarButton } from './IdentityAvatar'
+import { GroupProgress } from './IdentityGroups'
 import { OfflineDownload } from './OfflineDownload'
 
 export const initialsOf = (name: string | null | undefined) =>
@@ -17,7 +19,8 @@ export const initialsOf = (name: string | null | undefined) =>
     .map((w) => w[0]!.toUpperCase())
     .join('')
 
-// Du, the plain variant (handoff 0006: the profile card without XP; M11 owns XP). Name and initials, region, the three counters, gear.
+// Du, the plain variant (handoff 0006: the profile card without XP; M11 owns XP). Avatar or initials, name, region with its
+// change link (0014 P2: onboarding in change mode, `?change=1` as the drawer's Ändern), the three counters, per group (P3), gear.
 export function IdentityProfile() {
   const t = useTranslations('you')
   const trpc = useTRPC()
@@ -39,9 +42,7 @@ export function IdentityProfile() {
       </div>
 
       <section className="mt-4 flex items-center gap-4 rounded-3xl bg-card px-4 py-4 shadow-[0_2px_12px_rgba(30,42,35,0.06)]">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-moss-soft text-[22px] font-bold text-moss-deep" aria-hidden>
-          {initials || <Icon name="you" size={28} />}
-        </div>
+        <AvatarButton name={name} initials={initials} avatarUrl={me.data?.avatarUrl ?? null} />
         <div className="min-w-0 flex-1">
           {editing === null ? (
             <>
@@ -49,7 +50,10 @@ export function IdentityProfile() {
                 <h2 className={`truncate text-[22px] leading-tight font-bold ${name ? '' : 'text-ink-soft'}`} data-testid="display-name">{name ?? t('noName')}</h2>
                 <button type="button" onClick={() => setEditing(name ?? '')} className="shrink-0 text-[13px] font-semibold text-moss-deep">{t('edit')}</button>
               </div>
-              <div className="mt-1 text-[13px] font-semibold tracking-[0.08em] text-ink-faint uppercase">{me.data?.region?.name ?? t('noRegion')}</div>
+              <div className="mt-1 flex items-baseline gap-2">
+                <span className="truncate text-[13px] font-semibold tracking-[0.08em] text-ink-faint uppercase" data-testid="region-name">{me.data?.region?.name ?? t('noRegion')}</span>
+                <Link href="/onboarding?change=1" className="shrink-0 text-[13px] font-semibold text-moss-deep" data-testid="change-region">{t('changeRegion')}</Link>
+              </div>
             </>
           ) : (
             <form
@@ -70,6 +74,7 @@ export function IdentityProfile() {
       <div className="mt-4">
         <CountersCard regionName={me.data?.region?.name ?? null} counters={counters} />
       </div>
+      <div className="mt-4"><GroupProgress region={me.data?.region ?? null} /></div>
       <div className="mt-4"><OfflineDownload /></div>
     </main>
   )

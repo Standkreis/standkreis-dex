@@ -15,17 +15,21 @@ datasource db {
 /// Anonymous first (record Q3). Minted on first request, bound to a cookie. Passkeys attach later (handoff 0006).
 /// Deletion is a hard cascade: no deletedAt.
 model Identity {
-  id          String     @id @default(uuid())
-  createdAt   DateTime   @default(now())
+  id            String     @id @default(uuid())
+  createdAt     DateTime   @default(now())
   /// Reserved for a magic-link attach; unused in M7 (no mail provider).
-  email       String?    @unique
+  email         String?    @unique
   /// Name and photo are optional, local only, never on a share card (spec §⚖️).
-  displayName String?
-  passkeys    Passkey[]
-  filter      Filter?
-  sightings   Sighting[]
-  studies     Study[]
-  assets      Asset[]
+  displayName   String?
+  /// The profile photo (handoff 0014 P2): one user Asset per identity, square, ≤ 256 px, served by /api/photo/<id>.
+  /// Replaced on re-upload (the old Asset and its file go), gone with the identity. Never on a share card.
+  avatar        Asset?     @relation("avatar", fields: [avatarAssetId], references: [id], onDelete: SetNull)
+  avatarAssetId String?    @unique
+  passkeys      Passkey[]
+  filter        Filter?
+  sightings     Sighting[]
+  studies       Study[]
+  assets        Asset[]
 }
 
 /// One WebAuthn credential per device. Anonymous = zero rows; "Auf N Geräten" = N rows.
@@ -220,6 +224,8 @@ model Asset {
   sightingId String?
   owner      Identity? @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId    String?
+  /// Set when this user photo is an identity's avatar (0014 P2); such an asset has no sighting and the sweep leaves it alone.
+  avatarOf   Identity? @relation("avatar")
 
   @@index([taxonId])
 }

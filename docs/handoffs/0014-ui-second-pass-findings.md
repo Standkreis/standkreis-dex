@@ -142,3 +142,57 @@ Files Track B changed that A changed or C is likely to touch:
 | `de.json`, `en.json` | new: `species.ecology.showMore/showLess`, `species.sourceInfo.*` (6 keys, end of the `species` block), `sighting.referenceTag/addPhoto` (end of `sighting`), top-level `sourceInfo.open/title` (end of file). Removed: see doubt 8 | C adds its own keys at the end of its blocks; merge by hand |
 
 New files: `SourceInfo.tsx`, `SightingDetail.tsx`, `scripts/m14/track-b.mjs`, eleven `b-*` shots. `journal.ts` untouched (the diary's cards carry no `leadInfo`; `Card.leadInfo` is optional).
+
+## 🅲 Track C
+
+| 🗓️ | 👤 | 🌿 Where | 🧪 |
+| --- | --- | --- | --- |
+| 2026-09-06 | agent (Claude Fable 5.1) | worktree `../standkreis-dex-c`, branch `0014-c` on A's `b61bb64`, working tree, not committed | `npm run check` green (32 tests) · `scripts/m14/track-c.mjs` on `next build` + `next start -p 3002`, dev DB, Mainz-Bingen, disk photo store |
+
+### 🛠️ The rows
+
+| Row | Done | Where |
+| --- | --- | --- |
+| P2 avatar | `Identity.avatarAssetId` → one user `Asset` per identity (`@unique`, `onDelete: SetNull`), back-relation `Asset.avatarOf`. Migration **`20260906140000_identity_avatar`**, written by hand, applied to the dev DB with `migrate deploy` only; `migrate diff` against the dev DB is empty. Client: `cropToAvatar` takes the centre square through a canvas at ≤ 256 px JPEG 0.85 (no EXIF, orientation applied first), uploads through the existing `POST /api/photo` (`uploadPhoto`), then `identity.setAvatar({ assetId })` binds the unattached Asset and drops the previous one (row and file via `deletePhoto`); `null` takes it off. Served by the existing `GET /api/photo/<id>`; a new id per upload, so the immutable cache header holds. `identity.me` carries `avatarUrl`. The sweep skips assets with `avatarOf`; adoption carries the avatar when the adopted identity has none; identity delete already removes every owned file. Shown only on the profile card, camera badge on the circle | `schema.prisma:26-27,227-228` · `prisma/migrations/20260906140000_identity_avatar/migration.sql` · `IdentityAvatar.tsx:17-32` (crop), `:38-84` (button, hidden input `avatar-input`) · `identity.ts:77` (`me`), `:107-117` (`setAvatar`), `:56` (merge) · `photos.ts:72` (sweep) · `IdentityProfile.tsx:45` · `Marks.tsx:14` (`camera`) |
+| P2 region | "Region ändern" next to the region name, a link to `/onboarding?change=1`, the same entry the drawer's Ändern uses (`AtlasGrid.tsx:216`; `Onboarding.tsx:41` reads `change=1`, not `mode=change` as the handoff wrote) | `IdentityProfile.tsx:53-56` |
+| P3 | Card "Nach Gruppe" under the counters: one row per tile of `dex.set.tiles` (fish only where the set has it, E12), name from `dex.tile.*`, "studied · seen von possible" on the right, two 4 px bars (studied amber, seen moss; a non-zero bar is floored at 2 % as `CountersBar`). No new query: `useAtlasSet` is the cache entry the grid and the counters card already hold. Counting is pure in `groupsOf` (dedupes ids, ignores out-of-set finds), tested | `IdentityGroups.tsx:15-45` · `GroupRows.ts:6-15` · `GroupRows.test.ts` · `IdentityProfile.tsx:77` |
+| i18n | `you.avatar`, `avatarBusy`, `avatarError`, `changeRegion`, `groups`, `ofPossible`, appended at the end of the `you` block in both files | `de.json:131-136`, `en.json` same keys |
+
+### 🧪 C8 · `scripts/m14/track-c.mjs`
+
+Fresh identity, Mainz-Bingen, one sighting (Idaea bilinearia) and one study (Bombus hortorum), 390 × 844 light. The fixture is `public/splash.jpg` (1440 × 2640, portrait) set on the hidden input over CDP `DOM.setFileInputFiles`.
+
+| Step | Result | Shot |
+| --- | --- | --- |
+| P3 rows | 7 rows (no fish in Mainz-Bingen), `possible` 69 · 8 · 7 · 5 · 429 · 388 · 23 = **929**, the counter line's number. Insekten `1 · 1 von 429`, bars 2 % amber `rgb(196,98,15)` and 2 % moss `rgb(22,163,74)`, 4 px; every other row `0 · 0`, bars 0 % | `c-p3-groups` |
+| Upload | Before: no image, empty circle (no name). After the input change: `<img>` `/api/photo/db20f5a5-…`, **256 × 256** natural (the portrait fixture cropped square), served `200 image/jpeg`, **19 237 bytes**, `private, max-age=31536000, immutable`, file under `PHOTO_DIR`, `identity.me.avatarUrl` the same URL, no error line | `c-p2-avatar` |
+| Reload | `Page.reload` → the same `src`, 256 × 256, `complete` | |
+| Replace | Second upload → new id `e9ed70c0-…`, `me` follows; the old URL **404**, the old file gone from disk | `c-p2-avatar-replaced` |
+| Foreign asset | `identity.setAvatar` with an unknown uuid → `404 not your unattached photo` | |
+| Region change | Click `change-region` → `/de/onboarding?change=1` in 11 ms, `data-testid=onboarding-region`, Abbrechen visible | `c-p2-change-region` |
+| Delete | `data.delete` two steps → `done`; the avatar URL 404, the file gone | |
+
+**Not verified**: the Simulator's photo library (the handoff's C8 wording): CDP sets the file, the picker itself was not opened. Vercel Blob: the worktree has no token, so the store was disk; the seam is untouched and the avatar uses the same `writePhoto`/`readPhoto`/`del` path as sighting photos, which 0011 proved on Blob. The sweep's `avatarOf: null` filter was not exercised (a sweep starts region jobs and content batches); it is one where-clause.
+
+### ❓ Doubts for the owner
+
+1. **Change mode preselects the first region, not the current one.** Step 1 shows Kyoto checked while the identity is in Mainz-Bingen (`c-p2-change-region`). Pre-existing behaviour of `Onboarding.tsx` (not in C's files); in change mode it should start from `me.region`. One line in `Onboarding.tsx` for whoever touches it next.
+2. **Bar order in P3** is studied then seen, matching the counter line and `CountersBar` (A's doubt 1), not D1's seen-then-studied. If the owner swaps the line and the bar, swap `IdentityGroups.tsx:34-35` with them.
+3. **Seven rows, not eight** in Mainz-Bingen: `dex.set.tiles` drops fish when the set has none (E12), as the drawer does. A row "Fische 0 · 0 von 0" would contradict the drawer; left out.
+4. **Adoption with two avatars**: when both identities have one, the adopted side keeps its own and the device's becomes an orphan the sweep removes after a day (`avatarOf` is null once `from` is deleted). Same rule as `displayName`.
+5. **Avatar on the static export**: `photoSrc` prefixes `NEXT_PUBLIC_API_URL`, as for sighting photos. The worker does not precache it; it is fetched when the profile opens, so offline the circle falls back to the browser's cache or the alt text. The profile is not part of the walk.
+6. **The FAB covers the offline card's button** when the profile is scrolled to the bottom (`c-p2-avatar-replaced`, bottom). Pre-existing, now more visible because P3 makes the page longer. `pb-24` on `<main>` does not clear the FAB's centre.
+
+### 🔀 For the merge
+
+| File | C's change | Who else |
+| --- | --- | --- |
+| `src/i18n/de.json`, `en.json` | six keys at the end of `you` | B adds keys at the end of its blocks; keep both |
+| `IdentityProfile.tsx` | avatar button, region link, groups card | A left it alone (P1 is in `IdentityCounters.tsx`); B not planned |
+| `Marks.tsx` | `camera` path added after `check` | A added `check` and the filled set in this file on `main` already; B (D3's ⓘ) may add `info` variants: append, no conflict expected |
+| `photos.ts` | one where-clause in `deleteAbandonedPhotos` | nobody planned |
+| `identity.ts` | `avatarUrl`, `setAvatar`, merge line | nobody planned |
+| `schema.prisma` + migration | new column, relation | the migration runs in Vercel's build (`scripts/deploy/migrate.mjs`), nothing to do by hand; Neon gets it on the next deploy |
+| `Journal.tsx`, `SightingPage.tsx`, `SpeciesPage.tsx` | **untouched** | B |
+
+New files: `IdentityAvatar.tsx`, `IdentityGroups.tsx`, `GroupRows.ts`, `GroupRows.test.ts`, `scripts/m14/track-c.mjs`, `prisma/migrations/20260906140000_identity_avatar/`, four `c-*` shots. `data/photos/` is git-ignored and empty after the run.

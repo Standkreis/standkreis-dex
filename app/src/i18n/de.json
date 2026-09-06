@@ -126,7 +126,13 @@
     "preparing": "wird vorbereitet",
     "studied": "{n} studiert",
     "seen": "{n} entdeckt",
-    "possible": "{n} möglich"
+    "possible": "{n} möglich",
+    "avatar": "Foto ändern",
+    "avatarBusy": "wird hochgeladen …",
+    "avatarError": "Das hat nicht geklappt",
+    "changeRegion": "Region ändern",
+    "groups": "Nach Gruppe",
+    "ofPossible": "von {n}"
   },
   "log": {
     "title": "Eintragen",

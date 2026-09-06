@@ -9,6 +9,7 @@ import type { AuthenticationResponseJSON, RegistrationResponseJSON } from '@simp
 import { z } from 'zod'
 import { Tile } from '@/generated/prisma/enums'
 import { IDENTITY_COOKIE, IDENTITY_COOKIE_MAX_AGE, publicProcedure, router, type Context } from '../trpc'
+import { deletePhoto, photoUrl } from '../photos'
 import { expectedOrigin, issueChallenge, rpID, rpName, takeChallenge } from '../webauthn'
 
 // The WebAuthn response shapes come from the browser library; zod only checks the envelope, simplewebauthn checks the rest.
@@ -51,6 +52,8 @@ async function mergeIdentities(db: Context['db'], fromId: string, intoId: string
     await tx.asset.updateMany({ where: { ownerId: fromId }, data: { ownerId: intoId } })
     if (from.filter && !into.filter) await tx.filter.update({ where: { id: from.filter.id }, data: { identityId: intoId } })
     if (from.displayName && !into.displayName) await tx.identity.update({ where: { id: intoId }, data: { displayName: from.displayName } })
+    // The avatar too (0014 P2): the asset already moved with `ownerId`; without this it would be an orphan for the sweep.
+    if (from.avatarAssetId && !into.avatarAssetId) await tx.identity.update({ where: { id: intoId }, data: { avatarAssetId: from.avatarAssetId } })
 
     await tx.identity.delete({ where: { id: fromId } }) // cascades whatever is left: filter, duplicate rows already gone
     return { sightingsMerged: keep.length, sightingsDropped: dropSightings.length, studiesMerged }
@@ -71,6 +74,7 @@ export const identityRouter = router({
       anonymous: devices === 0,
       devices,
       displayName: ctx.identity.displayName,
+      avatarUrl: ctx.identity.avatarAssetId ? photoUrl(ctx.identity.avatarAssetId) : null,
       region: filter?.region ?? null,
     }
   }),
@@ -96,6 +100,21 @@ export const identityRouter = router({
   setName: publicProcedure.input(z.object({ displayName: z.string().trim().max(40) })).mutation(({ ctx, input }) =>
     ctx.db.identity.update({ where: { id: ctx.identity.id }, data: { displayName: input.displayName || null }, select: { displayName: true } }),
   ),
+
+  // The profile photo (handoff 0014 P2). The client crops it square (≤ 256 px JPEG) and uploads it through POST /api/photo
+  // like a sighting photo; this binds the unattached Asset to the identity. The previous avatar (row and file) goes with
+  // it, so an identity never owns more than one, and `null` takes the photo off again. Shown in the profile, nowhere else.
+  setAvatar: publicProcedure.input(z.object({ assetId: z.string().uuid().nullable() })).mutation(async ({ ctx, input }) => {
+    const previous = ctx.identity.avatarAssetId
+    if (input.assetId) {
+      const asset = await ctx.db.asset.findFirst({ where: { id: input.assetId, origin: 'user', ownerId: ctx.identity.id, sightingId: null }, select: { id: true } })
+      if (!asset) throw new TRPCError({ code: 'NOT_FOUND', message: 'not your unattached photo' })
+    }
+    if (input.assetId === previous) return { avatarUrl: previous ? photoUrl(previous) : null }
+    await ctx.db.identity.update({ where: { id: ctx.identity.id }, data: { avatarAssetId: input.assetId } })
+    if (previous) await deletePhoto(previous)
+    return { avatarUrl: input.assetId ? photoUrl(input.assetId) : null }
+  }),
 
   // The global filter (spec §🏗️): region and tiles from onboarding, the "nur jetzt" chip from the drawer. The only write
   // the grid makes; everything reads it back through `me` and `progress`. Empty tiles = all (see `progress`).

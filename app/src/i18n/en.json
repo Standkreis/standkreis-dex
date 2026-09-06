@@ -126,7 +126,13 @@
     "preparing": "being prepared",
     "studied": "{n} studied",
     "seen": "{n} discovered",
-    "possible": "{n} possible"
+    "possible": "{n} possible",
+    "avatar": "Change photo",
+    "avatarBusy": "uploading …",
+    "avatarError": "That did not work",
+    "changeRegion": "Change region",
+    "groups": "By group",
+    "ofPossible": "of {n}"
   },
   "log": {
     "title": "Log a sighting",
