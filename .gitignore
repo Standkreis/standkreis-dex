@@ -19,3 +19,6 @@ app/scripts/id-probe/bioclip/__pycache__/
 
 # 0016 Track A: raw answers of the identify check
 app/scripts/m12/.cache/
+
+# 0019 Steckbrief grill: bulk trait datasets, Wikidata, xeno-canto and Claude responses
+app/scripts/steckbrief-probe/.cache/

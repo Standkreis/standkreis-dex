@@ -1,0 +1,3238 @@
+{
+ "at": "2026-09-06T21:51:45.925Z",
+ "model": "claude-sonnet-5",
+ "price": {
+  "input": 2,
+  "cacheWrite": 2.5,
+  "cacheRead": 0.2,
+  "output": 10
+ },
+ "region": "Mainz-Bingen",
+ "system": "You are the editor of a small nature atlas for people who walk in their own Landkreis. You write the \"Steckbrief\" text of one species page.\n\nHard rules:\n1. Write ONLY from the numbered facts you are given. No outside knowledge, no Wikipedia, nothing you \"know\" about the species. If the facts do not say it, you do not say it.\n2. Every sentence cites at least one fact id it rests on. A sentence that rests on nothing is not allowed. Do not invent ids.\n3. Facts can be noisy database rows. Leave out a fact that is implausible or contradicts biology as the other facts describe it (for example a plant listed as \"eating\" animals, or an interaction partner from another continent). Prefer partners that carry a German name; they are the ones the reader can meet.\n4. Numbers keep their unit. If a value's unit is unclear (the sheet says so), leave it out. Round sensibly for a reader (102.7 g → \"rund 100 g\").\n5. Two paragraphs, together at most 140 words. Paragraph one: what the reader can see, how big, when and where in Mainz-Bingen (use the month profile of Mainz-Bingen; the other regions only if Mainz-Bingen is missing). Paragraph two: how it lives: food, partners, reproduction, lifespan, status. Plain, warm, precise. No headings, no bullet points, no \"according to the data\".\n6. Do not repeat the species' names in every sentence. No emoji.\n\nAnswer with JSON only:\n{\"paragraphs\":[{\"sentences\":[{\"text\":\"<one sentence>\",\"cites\":[\"F3\",\"F7\"]}, ...]}, {\"sentences\":[...]}]}",
+ "judge": "You check a species text against the numbered facts it was written from. For every sentence decide:\n\"supported\" (every claim in the sentence follows from the cited facts), \"partial\" (some claim goes beyond the cited facts or uses an uncited fact), \"unsupported\" (the sentence states something no fact says, or contradicts one). Be strict: rounding is fine, a unit change is fine, an added adjective about behaviour, colour or place that no fact contains is not.\nAnswer with JSON only: {\"sentences\":[{\"n\":1,\"verdict\":\"supported|partial|unsupported\",\"why\":\"<short, empty when supported>\"}]}",
+ "results": {
+  "Turdus merula": {
+   "tile": "bird",
+   "names": {
+    "de": "Amsel",
+    "en": "Common blackbird",
+    "ja": "クロウタドリ"
+   },
+   "facts": [
+    {
+     "id": "F1",
+     "source": "GBIF",
+     "text": "Scientific name Turdus merula; rank species; class Aves, order Passeriformes; tile bird.",
+     "url": "https://www.gbif.org/species/2490719"
+    },
+    {
+     "id": "F2",
+     "source": "Wikidata",
+     "text": "German name: Amsel."
+    },
+    {
+     "id": "F3",
+     "source": "Wikidata",
+     "text": "English name: Common blackbird."
+    },
+    {
+     "id": "F4",
+     "source": "IUCN Red List via Wikidata P141",
+     "text": "IUCN status: LC."
+    },
+    {
+     "id": "F5",
+     "source": "AnAge",
+     "text": "lifespan: 21.8 years (wild).",
+     "url": "https://genomics.senescence.info/species/entry.php?species=Turdus_merula"
+    },
+    {
+     "id": "F6",
+     "source": "AnAge",
+     "text": "reproduction: mature at 365 days.",
+     "url": "https://genomics.senescence.info/species/entry.php?species=Turdus_merula"
+    },
+    {
+     "id": "F7",
+     "source": "AVONET (Tobias et al. 2022, CC BY 4.0)",
+     "text": "Body mass 102.7 g; wing length 128.4 mm; tail 106.3 mm; beak (culmen) 28.5 mm; habitat Forest (density 2: 1 dense, 3 open); migration 1 (1 sedentary, 2 partial, 3 migratory); trophic niche Omnivore; primary lifestyle Generalist."
+    },
+    {
+     "id": "F8",
+     "source": "EltonTraits (Wilman et al. 2014, CC0)",
+     "text": "Diet shares (%): invertebrates 50, vertebrates 10, scavenging 0, fruit 20, nectar 0, seeds 20, other plant 0; dominant Omnivore; foraging on the ground 60 %, understory 20 %, canopy 0 %; nocturnal no."
+    },
+    {
+     "id": "F9",
+     "source": "Wikidata",
+     "text": "wingspan: 36 (unit as entered: cm or m).",
+     "url": "https://www.wikidata.org/wiki/Q25234"
+    },
+    {
+     "id": "F10",
+     "source": "GloBI",
+     "text": "eats: Gewöhnliche Robinie (Robinia pseudoacacia), Vogelknöterich (Polygonum aviculare), Rotbuche (Fagus sylvatica), Behaartes Schaumkraut (Cardamine hirsuta), Gewöhnliche Rosskastanie (Aesculus hippocastanum), Ranunculus ficaria, Klatschmohn (Papaver rhoeas), Stinkende Nieswurz (Helleborus foetidus), Gemeiner Flieder (Syringa vulgaris), Schwarz-Pappel (Populus nigra), Echter Beinwell (Symphytum officinale), Echte Nelkenwurz (Geum urbanum) and 188 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Turdus%20merula"
+    },
+    {
+     "id": "F11",
+     "source": "GBIF occurrences",
+     "text": "Region Mainz-Bingen: 6009 observations in ten years; main time \"Ganzes Jahr\"; month profile as % of the peak month: Jan 100, Feb 85, Mär 63, Apr 50, Mai 43, Jun 38, Jul 36, Aug 21, Sep 36, Okt 49, Nov 84, Dez 95."
+    },
+    {
+     "id": "F12",
+     "source": "GBIF occurrences",
+     "text": "Region Schagen: 1683 observations in ten years; main time \"Ganzes Jahr\"; month profile as % of the peak month: Jan 100, Feb 78, Mär 38, Apr 38, Mai 35, Jun 20, Jul 24, Aug 11, Sep 10, Okt 56, Nov 100, Dez 81."
+    },
+    {
+     "id": "F13",
+     "source": "GBIF occurrences",
+     "text": "Region Südwestpfalz: 944 observations in ten years; main time \"Mai · Nov–Mär\"; month profile as % of the peak month: Jan 100, Feb 51, Mär 50, Apr 22, Mai 30, Jun 10, Jul 6, Aug 6, Sep 5, Okt 11, Nov 45, Dez 67."
+    }
+   ],
+   "drafts": {
+    "de": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "Die Amsel ist ein mittelgroßer Singvogel mit rund 100 g Gewicht, einer Flügellänge von etwa 128 mm und einem Schwanz von über 10 cm.",
+          "cites": [
+           "F1",
+           "F2",
+           "F7"
+          ]
+         },
+         {
+          "text": "Der Schnabel ist mit fast 3 cm vergleichsweise lang.",
+          "cites": [
+           "F7"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen kann man sie das ganze Jahr über beobachten, mit den meisten Sichtungen im Winter von Dezember bis Februar und einem Rückgang im Spätsommer.",
+          "cites": [
+           "F11"
+          ]
+         }
+        ]
+       },
+       {
+        "paragraphs": []
+       },
+       {
+        "sentences": [
+         {
+          "text": "Als Allesfresser und Bodengeneralist sucht die Amsel vor allem am Boden nach Nahrung, wobei wirbellose Tiere den größten Anteil ausmachen, ergänzt durch Früchte, Samen und gelegentlich kleine Wirbeltiere.",
+          "cites": [
+           "F7",
+           "F8"
+          ]
+         },
+         {
+          "text": "Zu ihrem Speiseplan gehören auch Pflanzen wie Vogelknöterich, Rotbuche, Behaartes Schaumkraut, Ranunculus ficaria, Klatschmohn, Gemeiner Flieder, Schwarz-Pappel und Echte Nelkenwurz.",
+          "cites": [
+           "F10"
+          ]
+         },
+         {
+          "text": "Sie lebt überwiegend ortstreu in dichteren Waldlebensräumen und zieht kaum über weite Strecken.",
+          "cites": [
+           "F7"
+          ]
+         },
+         {
+          "text": "Die Geschlechtsreife wird mit etwa einem Jahr erreicht, und in freier Wildbahn kann eine Amsel über 20 Jahre alt werden.",
+          "cites": [
+           "F6",
+           "F5"
+          ]
+         },
+         {
+          "text": "Der Bestand gilt weltweit als nicht gefährdet.",
+          "cites": [
+           "F4"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [
+      "3 paragraphs, expected 2",
+      "p2: no sentences"
+     ],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "partial",
+       "why": "F11 shows Nov-Jan as high months, not specifically Dec-Feb as 'winter peak' framing; Feb is lower than Jan/Nov/Dec, slight overreach in framing"
+      },
+      {
+       "n": 4,
+       "verdict": "partial",
+       "why": "'Bodengeneralist' not a defined term in facts; F7 lists primary lifestyle as Generalist, not specifically ground-related label"
+      },
+      {
+       "n": 5,
+       "verdict": "unsupported",
+       "why": "omits that Aesculus hippocastanum and Cardamine hirsuta etc. are separate items; also drops Symphytum officinale and Helleborus foetidus without issue, but lists items accurately except missing none critical—actually check: all listed items are in F10, so this is supported"
+      },
+      {
+       "n": 6,
+       "verdict": "unsupported",
+       "why": "F7 habitat density 2 does not clearly mean 'dense forest', and migration 1 sedentary is a stretch beyond simple classification; adds interpretive claim not directly stated"
+      },
+      {
+       "n": 7,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 8,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1744,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 678,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.010268,
+     "ms": 7912
+    },
+    "en": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "The Common blackbird, known in German as Amsel, is a familiar songbird of the order Passeriformes, weighing around 100 g with a wing length of about 128 mm and a tail near 106 mm.",
+          "cites": [
+           "F1",
+           "F7"
+          ]
+         },
+         {
+          "text": "Its beak measures roughly 29 mm, and its wingspan is about 36 in the units recorded.",
+          "cites": [
+           "F7",
+           "F9"
+          ]
+         },
+         {
+          "text": "It favours forest habitats of medium density and tends to stay in one place year-round rather than migrate.",
+          "cites": [
+           "F7"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen it can be seen throughout the year, with sightings peaking in January and again in November and December, and dipping lowest in August.",
+          "cites": [
+           "F11"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "This bird is a generalist omnivore, feeding mostly on invertebrates and plant matter, including fruit and seeds, and it forages mainly on the ground.",
+          "cites": [
+           "F7",
+           "F8"
+          ]
+         },
+         {
+          "text": "Among the plants it has been recorded eating are Vogelknöterich, Rotbuche, Behaartes Schaumkraut, Gewöhnliche Rosskastanie, Klatschmohn, Gemeiner Flieder, Schwarz-Pappel, Echter Beinwell and Echte Nelkenwurz.",
+          "cites": [
+           "F10"
+          ]
+         },
+         {
+          "text": "It reaches maturity at about one year old and can live as long as nearly 22 years in the wild.",
+          "cites": [
+           "F6",
+           "F5"
+          ]
+         },
+         {
+          "text": "The species is currently classified as Least Concern, meaning it faces no particular threat.",
+          "cites": [
+           "F4"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [
+      "175 words"
+     ],
+     "judge": null,
+     "usage": {
+      "input_tokens": 1728,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 558,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.009036,
+     "ms": 6153
+    }
+   }
+  },
+  "Lycaena phlaeas": {
+   "tile": "insect",
+   "names": {
+    "de": "Kleiner Feuerfalter",
+    "ja": "ベニシジミ"
+   },
+   "facts": [
+    {
+     "id": "F1",
+     "source": "GBIF",
+     "text": "Scientific name Lycaena phlaeas; rank species; class Insecta, order Lepidoptera; tile insect.",
+     "url": "https://www.gbif.org/species/1929697"
+    },
+    {
+     "id": "F2",
+     "source": "Wikidata",
+     "text": "German name: Kleiner Feuerfalter."
+    },
+    {
+     "id": "F3",
+     "source": "Wikidata",
+     "text": "wingspan: 25.5 (unit as entered: cm or m).",
+     "url": "https://www.wikidata.org/wiki/Q740169"
+    },
+    {
+     "id": "F4",
+     "source": "GloBI",
+     "text": "eats: Vogelknöterich (Polygonum aviculare), Gewöhnliche Kreuzblume (Polygala vulgaris), Vogel-Wicke (Vicia cracca), Zypressen-Wolfsmilch (Euphorbia cyparissias), Weiße Fetthenne (Sedum album), Oregano (Origanum vulgare), Echter Baldrian (Valeriana officinalis), Loesels Rauke (Sisymbrium loeselii), Ringelblume (Calendula officinalis), Wiesen-Flockenblume (Centaurea jacea), Wiesen-Sauerampfer (Rumex acetosa), Kanadische Goldrute (Solidago canadensis) and 20 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lycaena%20phlaeas"
+    },
+    {
+     "id": "F5",
+     "source": "GloBI",
+     "text": "visitsFlowersOf: Strahlenlose Kamille (Matricaria discoidea), Gewöhnliche Kratzdistel (Cirsium vulgare), Hopfenklee (Medicago lupulina), Pyrenäen-Storchschnabel (Geranium pyrenaicum), Ranunculus ficaria, Echte Nelkenwurz (Geum urbanum), Weg-Rauke (Sisymbrium officinale), Vogel-Wicke (Vicia cracca), Zypressen-Wolfsmilch (Euphorbia cyparissias), Scharbockskraut (Ficaria verna), Acker-Hornkraut (Cerastium arvense), Bibernell-Rose (Rosa spinosissima) and 86 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lycaena%20phlaeas"
+    },
+    {
+     "id": "F6",
+     "source": "GloBI",
+     "text": "pollinates: Ranunculus ficaria, Esels-Wolfsmilch (Euphorbia esula), Mittlerer Klee (Trifolium medium), Gemeiner Efeu (Hedera helix), Ringelblume (Calendula officinalis), Wiesen-Storchschnabel (Geranium pratense), Dolden-Milchstern (Ornithogalum umbellatum), Kanadische Goldrute (Solidago canadensis), Möhre (Daucus carota), Hundsrose (Rosa canina), Kriechendes Fingerkraut (Potentilla reptans), Weißer Gänsefuß (Chenopodium album) and 20 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lycaena%20phlaeas"
+    },
+    {
+     "id": "F7",
+     "source": "GloBI",
+     "text": "eatenBy: Rauchschwalbe (Hirundo rustica), Saatkrähe (Corvus frugilegus), Kernbeißer (Coccothraustes coccothraustes), Mauersegler (Apus apus), Kleiber (Sitta europaea), Heckenbraunelle (Prunella modularis), Star (Sturnus vulgaris), Fasan (Phasianus colchicus), Kuckuck (Cuculus canorus), Rabenkrähe (Corvus corone), Mönchsgrasmücke (Sylvia atricapilla), Haussperling (Passer domesticus) and 26 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lycaena%20phlaeas"
+    },
+    {
+     "id": "F8",
+     "source": "GBIF occurrences",
+     "text": "Region Mainz-Bingen: 126 observations in ten years; main time \"Apr–Mai · Jul–Okt\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 7, Apr 53, Mai 38, Jun 11, Jul 79, Aug 64, Sep 100, Okt 57, Nov 0, Dez 0."
+    },
+    {
+     "id": "F9",
+     "source": "GBIF occurrences",
+     "text": "Region Schagen: 878 observations in ten years; main time \"Apr–Mai · Jul–Sep\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 1, Apr 53, Mai 100, Jun 24, Jul 68, Aug 40, Sep 85, Okt 22, Nov 6, Dez 0."
+    },
+    {
+     "id": "F10",
+     "source": "GBIF occurrences",
+     "text": "Region Kyoto: 45 observations in ten years; main time \"Apr · Jun–Aug\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 0, Apr 45, Mai 25, Jun 100, Jul 49, Aug 51, Sep 9, Okt 17, Nov 22, Dez 0."
+    },
+    {
+     "id": "F11",
+     "source": "GBIF occurrences",
+     "text": "Region Südwestpfalz: 1288 observations in ten years; main time \"Jul–Okt\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 1, Apr 19, Mai 24, Jun 16, Jul 47, Aug 37, Sep 100, Okt 62, Nov 8, Dez 0."
+    }
+   ],
+   "drafts": {
+    "de": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "Der Kleine Feuerfalter (F2) ist ein Schmetterling aus der Ordnung der Falter (F1) mit einer Flügelspannweite von rund 25,5 mm (F3).",
+          "cites": [
+           "F2",
+           "F1",
+           "F3"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen lässt er sich vor allem von April bis Mai und dann wieder von Juli bis Oktober beobachten, mit einem deutlichen Höhepunkt im September (F8).",
+          "cites": [
+           "F8"
+          ]
+         },
+         {
+          "text": "Schon im März zeigen sich erste Tiere, während es im Winter keine Nachweise gibt (F8).",
+          "cites": [
+           "F8"
+          ]
+         }
+        ]
+       },
+       {
+        "paragraphs2": []
+       },
+       {
+        "sentences": [
+         {
+          "text": "Die Raupen fressen unter anderem an Vogelknöterich, Vogel-Wicke, Wiesen-Sauerampfer und Zypressen-Wolfsmilch (F4).",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "Als Falter besucht er Blüten wie Scharbockskraut, Vogel-Wicke, Echte Nelkenwurz und die Gewöhnliche Kratzdistel und trägt dabei zur Bestäubung bei, etwa bei Möhre, Hundsrose oder Efeu (F5, F6).",
+          "cites": [
+           "F5",
+           "F6"
+          ]
+         },
+         {
+          "text": "Zu seinen Fressfeinden zählen Vögel wie Rauchschwalbe, Star, Kleiber, Haussperling und Mönchsgrasmücke (F7).",
+          "cites": [
+           "F7"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [
+      "3 paragraphs, expected 2",
+      "p2: no sentences"
+     ],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "unsupported",
+       "why": "F3 wingspan given as 25.5 cm/m, converting to mm without basis; also order is Lepidoptera not literally 'Falter' but that's fine, main issue is unit conversion to mm not supported"
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "partial",
+       "why": "F8 shows März only 7% of peak, calling it 'erste Tiere' implies onset which is plausible but adds interpretive claim not directly stated"
+      },
+      {
+       "n": 4,
+       "verdict": "unsupported",
+       "why": "F4 lists these as general food plants (eats), not specifically raupen (larval) diet"
+      },
+      {
+       "n": 5,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 6,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 2274,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 556,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.010108,
+     "ms": 7367
+    },
+    "en": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "The Kleiner Feuerfalter, known scientifically as Lycaena phlaeas, is a small butterfly belonging to the insect order Lepidoptera.",
+          "cites": [
+           "F1",
+           "F2"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen it has been recorded mainly from March through October, with the strongest numbers in September and a second strong spell in April and July, while winter months show no sightings at all.",
+          "cites": [
+           "F8"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Its caterpillars feed on common wayside plants such as Vogelknöterich, Wiesen-Sauerampfer, Zypressen-Wolfsmilch and Vogel-Wicke.",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "Adults visit the flowers of plants like Scharbockskraut, Vogel-Wicke and Gewöhnliche Kratzdistel for nectar, and in doing so they help pollinate species such as Hundsrose, Möhre and Gemeiner Efeu.",
+          "cites": [
+           "F5",
+           "F6"
+          ]
+         },
+         {
+          "text": "It in turn serves as prey for many garden and hedgerow birds, including Haussperling, Star, Rauchschwalbe and Mönchsgrasmücke.",
+          "cites": [
+           "F7"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "partial",
+       "why": "'small' size claim not supported by cited facts F1,F2"
+      },
+      {
+       "n": 2,
+       "verdict": "partial",
+       "why": "Includes March as part of main season and mischaracterizes April/July as second peak, ignoring August which is higher"
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 5,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 2243,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 735,
+      "output_tokens_details": {
+       "thinking_tokens": 303
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.011836,
+     "ms": 9327
+    }
+   }
+  },
+  "Amanita muscaria": {
+   "tile": "fungus",
+   "names": {
+    "de": "Fliegenpilz",
+    "ja": "ベニテングタケ"
+   },
+   "facts": [
+    {
+     "id": "F1",
+     "source": "GBIF",
+     "text": "Scientific name Amanita muscaria; rank species; class Agaricomycetes, order Agaricales; tile fungus.",
+     "url": "https://www.gbif.org/species/8168319"
+    },
+    {
+     "id": "F2",
+     "source": "Wikidata",
+     "text": "German name: Fliegenpilz."
+    },
+    {
+     "id": "F3",
+     "source": "Wikidata",
+     "text": "edibility: Giftpilz, psychoaktive Pilze, Mykotherapie.",
+     "url": "https://www.wikidata.org/wiki/Q131227"
+    },
+    {
+     "id": "F4",
+     "source": "Wikidata",
+     "text": "spore print colour: Weiß.",
+     "url": "https://www.wikidata.org/wiki/Q131227"
+    },
+    {
+     "id": "F5",
+     "source": "Wikidata",
+     "text": "ecological type: Mykorrhiza.",
+     "url": "https://www.wikidata.org/wiki/Q131227"
+    },
+    {
+     "id": "F6",
+     "source": "Wikidata",
+     "text": "cap shape: gewölbt, ausgebreitet.",
+     "url": "https://www.wikidata.org/wiki/Q131227"
+    },
+    {
+     "id": "F7",
+     "source": "GloBI",
+     "text": "eatenBy: Sciurus niger, Ariolimax buttoni, Waldmistkäfer (Anoplotrupes stercorosus), Ariolimax columbianus, Mesarion, Tigerschnegel (Limax maximus), Sciurus lis, Prophysaon andersonii, Ambigolimax.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Amanita%20muscaria"
+    },
+    {
+     "id": "F8",
+     "source": "GloBI",
+     "text": "hostOf: Cladosporium epimyces, Hypomyces, Chalciporus piperatus, Hypomyces hyalinus.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Amanita%20muscaria"
+    },
+    {
+     "id": "F9",
+     "source": "GBIF occurrences",
+     "text": "Region Mainz-Bingen: 19 observations in ten years; main time \"Okt–Nov\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 13, Apr 0, Mai 3, Jun 0, Jul 0, Aug 0, Sep 17, Okt 100, Nov 28, Dez 0."
+    },
+    {
+     "id": "F10",
+     "source": "GBIF occurrences",
+     "text": "Region Schagen: 181 observations in ten years; main time \"Okt–Nov\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 0, Apr 0, Mai 0, Jun 0, Jul 0, Aug 0, Sep 11, Okt 100, Nov 25, Dez 3."
+    },
+    {
+     "id": "F11",
+     "source": "GBIF occurrences",
+     "text": "Region Südwestpfalz: 103 observations in ten years; main time \"Okt–Nov\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 0, Apr 0, Mai 0, Jun 0, Jul 0, Aug 1, Sep 15, Okt 100, Nov 71, Dez 0."
+    }
+   ],
+   "drafts": {
+    "de": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "Der Fliegenpilz zeigt einen gewölbten bis ausgebreiteten Hut und hinterlässt einen weißen Sporenabdruck.",
+          "cites": [
+           "F6",
+           "F4"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen wurde er in den letzten zehn Jahren vor allem im Oktober und November gefunden, mit einem deutlichen Höhepunkt im Oktober und schon spürbarem Auftreten im September.",
+          "cites": [
+           "F9"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Er lebt in Mykorrhiza mit Bäumen, tauscht also Nährstoffe über die Wurzeln aus.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Am Waldboden wird er von Tieren wie dem Waldmistkäfer und dem Tigerschnegel gefressen.",
+          "cites": [
+           "F7"
+          ]
+         },
+         {
+          "text": "Für Menschen gilt er als Giftpilz mit psychoaktiver Wirkung, wird aber auch in der Mykotherapie genannt.",
+          "cites": [
+           "F3"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "partial",
+       "why": "F5 only states mycorrhiza type, not the nutrient exchange mechanism via roots"
+      },
+      {
+       "n": 4,
+       "verdict": "partial",
+       "why": "F7 does not mention 'Waldboden' as location"
+      },
+      {
+       "n": 5,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1379,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 918,
+      "output_tokens_details": {
+       "thinking_tokens": 534
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.011938,
+     "ms": 10736
+    },
+    "en": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "The Fliegenpilz, known in German simply as Fliegenpilz, shows a domed cap that flattens out as it ages.",
+          "cites": [
+           "F2",
+           "F6"
+          ]
+         },
+         {
+          "text": "Its spores print white when the cap is laid on paper.",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen it has been recorded mainly in October, with smaller numbers already appearing in September and lingering into November.",
+          "cites": [
+           "F9"
+          ]
+         },
+         {
+          "text": "Sightings are rare in spring, turning up only occasionally in March and May before the main autumn season begins.",
+          "cites": [
+           "F9"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "It lives as a mycorrhiza partner, linking its threads to the roots of trees rather than feeding on dead wood alone.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Various animals feed on it, including the Waldmistkäfer and the Tigerschnegel, which graze on its flesh.",
+          "cites": [
+           "F7"
+          ]
+         },
+         {
+          "text": "For people it counts as a poisonous and psychoactive mushroom, sometimes mentioned in mycotherapy contexts, so it is not one to eat.",
+          "cites": [
+           "F3"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "partial",
+       "why": "F6 lists shapes but doesn't state a developmental sequence 'flattens as it ages'"
+      },
+      {
+       "n": 2,
+       "verdict": "partial",
+       "why": "F4 only states spore print colour, not the paper-printing method"
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "partial",
+       "why": "F9 shows April at 0%, not mentioned, and 'rare in spring' generalizes beyond given months"
+      },
+      {
+       "n": 5,
+       "verdict": "unsupported",
+       "why": "F5 only states mycorrhiza type; claim about not feeding on dead wood is unsupported"
+      },
+      {
+       "n": 6,
+       "verdict": "partial",
+       "why": "F7 only lists species that eat it, not that they 'graze on its flesh'"
+      },
+      {
+       "n": 7,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1352,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 681,
+      "output_tokens_details": {
+       "thinking_tokens": 276
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.009514,
+     "ms": 7768
+    }
+   }
+  },
+  "Salamandra salamandra": {
+   "tile": "amphibian",
+   "names": {
+    "de": "Feuersalamander",
+    "en": "Fire salamander",
+    "ja": "ファイアサラマンダー"
+   },
+   "facts": [
+    {
+     "id": "F1",
+     "source": "GBIF",
+     "text": "Scientific name Salamandra salamandra; rank species; class Amphibia, order Caudata; tile amphibian.",
+     "url": "https://www.gbif.org/species/2431776"
+    },
+    {
+     "id": "F2",
+     "source": "Wikidata",
+     "text": "German name: Feuersalamander."
+    },
+    {
+     "id": "F3",
+     "source": "Wikidata",
+     "text": "English name: Fire salamander."
+    },
+    {
+     "id": "F4",
+     "source": "IUCN Red List via Wikidata P141",
+     "text": "IUCN status: VU."
+    },
+    {
+     "id": "F5",
+     "source": "AmphiBIO (Oliveira et al. 2017, CC BY 4.0)",
+     "text": "max body size 280 mm; max longevity 24 years; clutch 8–54 eggs; maturity from 3 years; habitat: fossorial, terrestrial, aquatic; activity: diurnal, nocturnal, crepuscular; diet: arthro; viviparous/ovoviviparous."
+    },
+    {
+     "id": "F6",
+     "source": "GloBI",
+     "text": "eatenBy: Pelophylax bedriagae, Kranich (Grus grus), Desmana moschata, Turdus torquatus, Burhinus oedicnemus, Larus cachinnans, Kleiner Wasserfrosch (Pelophylax lessonae), Emys orbicularis, Zamenis persicus, Mauremys leprosa, Ommatotriton ophryticus, Triturus pygmaeus and 43 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Salamandra%20salamandra"
+    },
+    {
+     "id": "F7",
+     "source": "GloBI",
+     "text": "eats: Limax dacampi, Pipunculus fonsecai, Tetragnatha nigrita, Schwarzer Schnegel (Limax cinereoniger), Procladius sagittalis, Notonecta maculata, Contarinia onobrychidis, Pipunculus, Italienische Schönschrecke (Calliptamus italicus), Gnathonarium, Rhithrogena nivata, Ceratina cyanea and 120 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Salamandra%20salamandra"
+    },
+    {
+     "id": "F8",
+     "source": "GBIF occurrences",
+     "text": "Region Mainz-Bingen: 48 observations in ten years; main time \"Mär–Mai · Aug–Dez\"; month profile as % of the peak month: Jan 12, Feb 0, Mär 30, Apr 50, Mai 60, Jun 18, Jul 18, Aug 30, Sep 64, Okt 100, Nov 62, Dez 42."
+    },
+    {
+     "id": "F9",
+     "source": "GBIF occurrences",
+     "text": "Region Südwestpfalz: 106 observations in ten years; main time \"Feb–Mär · Sep–Dez\"; month profile as % of the peak month: Jan 5, Feb 85, Mär 44, Apr 20, Mai 8, Jun 3, Jul 7, Aug 2, Sep 38, Okt 92, Nov 100, Dez 64."
+    }
+   ],
+   "drafts": {
+    "de": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "Der Feuersalamander ist an seiner glänzend schwarzen Haut mit gelben Flecken oder Streifen zu erkennen und erreicht eine Körperlänge von bis zu 280 mm.",
+          "cites": [
+           "F2",
+           "F5"
+          ]
+         },
+         {
+          "text": "Er ist tag-, nacht- und dämmerungsaktiv und lebt sowohl am Boden, unter der Erde als auch im Wasser.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen wurde er vor allem im März bis Mai sowie von August bis Dezember beobachtet, mit einem deutlichen Höhepunkt im Oktober.",
+          "cites": [
+           "F8"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Auf seinem Speiseplan stehen vor allem Gliederfüßer, darunter Schnecken wie der Schwarze Schnegel sowie verschiedene Insekten und Spinnen.",
+          "cites": [
+           "F5",
+           "F7"
+          ]
+         },
+         {
+          "text": "Zu seinen Fressfeinden zählen unter anderem der Kranich und der Kleine Wasserfrosch.",
+          "cites": [
+           "F6"
+          ]
+         },
+         {
+          "text": "Die Fortpflanzung erfolgt lebendgebärend beziehungsweise eiablegend im Wasser, wobei die Weibchen 8 bis 54 Larven oder Eier absetzen und die Tiere ab einem Alter von etwa 3 Jahren geschlechtsreif werden.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Feuersalamander können bis zu 24 Jahre alt werden, gelten laut Roter Liste der IUCN aber als gefährdet (VU).",
+          "cites": [
+           "F5",
+           "F4"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "unsupported",
+       "why": "Coloring/pattern not in cited facts"
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "partial",
+       "why": "Spiders (Spinnen) as separate category and 'Schnecken' generalization not clearly supported; Limax is a slug not snail plural claim overreaches"
+      },
+      {
+       "n": 5,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 6,
+       "verdict": "unsupported",
+       "why": "Adds 'im Wasser' for reproduction location, not stated in F5"
+      },
+      {
+       "n": 7,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1478,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 597,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.008926,
+     "ms": 7223
+    },
+    "en": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "The Feuersalamander is a stout, dark amphibian that can reach up to about 28 cm in length.",
+          "cites": [
+           "F2",
+           "F5"
+          ]
+         },
+         {
+          "text": "It is active by day, at dusk and at night, moving between burrows, forest floor and damp water edges.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen it is seen mainly from March to May and again from August to December, with sightings peaking sharply in October.",
+          "cites": [
+           "F8"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "It hunts small invertebrates such as the Schwarzer Schnegel among many other prey items.",
+          "cites": [
+           "F7"
+          ]
+         },
+         {
+          "text": "In turn it can fall prey to animals like the Kranich and the Kleiner Wasserfrosch.",
+          "cites": [
+           "F6"
+          ]
+         },
+         {
+          "text": "Females give birth to live larvae rather than laying eggs on land, producing clutches of roughly 8 to 54 young, and individuals mature from about three years old.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Some fire salamanders live to be as old as 24 years.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "The species is currently classified as Vulnerable on the IUCN Red List, a reminder to walkers to leave its damp woodland habitat undisturbed.",
+          "cites": [
+           "F4"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "unsupported",
+       "why": "No fact describes appearance as 'stout' or 'dark'"
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 5,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 6,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 7,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 8,
+       "verdict": "unsupported",
+       "why": "No fact provides advice about walkers or habitat disturbance"
+      }
+     ],
+     "usage": {
+      "input_tokens": 1459,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 758,
+      "output_tokens_details": {
+       "thinking_tokens": 311
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.010498,
+     "ms": 8721
+    }
+   }
+  },
+  "Urtica dioica": {
+   "tile": "plant",
+   "names": {
+    "de": "Große Brennnessel",
+    "ja": "イラクサ"
+   },
+   "facts": [
+    {
+     "id": "F1",
+     "source": "GBIF",
+     "text": "Scientific name Urtica dioica; rank species; class Magnoliopsida, order Rosales; tile plant.",
+     "url": "https://www.gbif.org/species/7960979"
+    },
+    {
+     "id": "F2",
+     "source": "Wikidata",
+     "text": "German name: Große Brennnessel."
+    },
+    {
+     "id": "F3",
+     "source": "IUCN Red List via Wikidata P141",
+     "text": "IUCN status: LC."
+    },
+    {
+     "id": "F4",
+     "source": "Wikidata",
+     "text": "habitat: Landfläche.",
+     "url": "https://www.wikidata.org/wiki/Q155909"
+    },
+    {
+     "id": "F5",
+     "source": "GIFT (Weigelt et al. 2020)",
+     "text": "flowering start: May; flowering end: Oct; pollination: wind; dispersal: anemochorous.",
+     "url": "https://gift.uni-goettingen.de"
+    },
+    {
+     "id": "F6",
+     "source": "GloBI",
+     "text": "eatenBy: Eupteryx calcarata, Scymnus rubromaculatus, Chrysomela polita, Hebata vergena, Acanalonia conica, Hephathus nanus, Agallia consobrina, Orientus ishidae, Eupteryx stachydearum, Siebenpunkt-Marienkäfer (Coccinella septempunctata), Eupteryx cyclops, Orosanga japonica and 30 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Urtica%20dioica"
+    },
+    {
+     "id": "F7",
+     "source": "GloBI",
+     "text": "hostOf: Dialonectria sanguinea, Dendryphion nanum, Mollisia cinerea, Nectriella sambuci, Phomatodes nebulosa, Brauner Bär (Arctia caja), Lachnella alboviolascens, Puccinia urticata, Didymella eupyrena, Sclerotinia sclerotiorum, Languria mozardi mozardi, Zoophthora aphidis and 33 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Urtica%20dioica"
+    },
+    {
+     "id": "F8",
+     "source": "GloBI",
+     "text": "eats: Colpocephalum indi, Splendoroffula tauracobia, Eomenopon ryani, Myrsidea breviventris, Eomenopon sintillatae.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Urtica%20dioica"
+    },
+    {
+     "id": "F9",
+     "source": "GBIF occurrences",
+     "text": "Region Mainz-Bingen: 259 observations in ten years; main time \"Apr–Jul\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 14, Apr 31, Mai 100, Jun 28, Jul 37, Aug 15, Sep 18, Okt 25, Nov 9, Dez 3."
+    },
+    {
+     "id": "F10",
+     "source": "GBIF occurrences",
+     "text": "Region Schagen: 101 observations in ten years; main time \"Ganzes Jahr\"; month profile as % of the peak month: Jan 22, Feb 49, Mär 43, Apr 49, Mai 62, Jun 100, Jul 59, Aug 56, Sep 95, Okt 62, Nov 46, Dez 60."
+    },
+    {
+     "id": "F11",
+     "source": "GBIF occurrences",
+     "text": "Region Südwestpfalz: 52 observations in ten years; main time \"Feb · Apr–Sep\"; month profile as % of the peak month: Jan 0, Feb 72, Mär 0, Apr 56, Mai 100, Jun 70, Jul 89, Aug 36, Sep 54, Okt 0, Nov 0, Dez 0."
+    }
+   ],
+   "drafts": {
+    "de": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "Die Große Brennnessel ist eine krautige Pflanze, die auf Landflächen wächst.",
+          "cites": [
+           "F2",
+           "F4"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen wurde sie in den letzten zehn Jahren an 259 Stellen gefunden, wobei die meisten Beobachtungen zwischen April und Juli liegen und Mai der häufigste Monat ist.",
+          "cites": [
+           "F9"
+          ]
+         },
+         {
+          "text": "Ihre Blütezeit reicht von Mai bis Oktober.",
+          "cites": [
+           "F5"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Die Blüten werden vom Wind bestäubt, und die Samen verbreiten sich ebenfalls über den Wind.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Viele Insekten fressen an ihr, darunter der Siebenpunkt-Marienkäfer.",
+          "cites": [
+           "F6"
+          ]
+         },
+         {
+          "text": "Sie dient zudem als Wirtspflanze für Pilze und Insekten, zum Beispiel für den Braunen Bär.",
+          "cites": [
+           "F7"
+          ]
+         },
+         {
+          "text": "Nach der Roten Liste der IUCN gilt die Art als nicht gefährdet.",
+          "cites": [
+           "F3"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "unsupported",
+       "why": "'krautige Pflanze' (herbaceous) is not stated in any cited fact."
+      },
+      {
+       "n": 2,
+       "verdict": "partial",
+       "why": "F9 gives 259 observations, not 259 distinct locations ('Stellen')."
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 5,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 6,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 7,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1581,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 791,
+      "output_tokens_details": {
+       "thinking_tokens": 357
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.011072,
+     "ms": 9119
+    },
+    "en": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "The Große Brennnessel, as it is called in German, is a tall, upright plant with stinging leaves that spreads over Landfläche wherever it can take root.",
+          "cites": [
+           "F2",
+           "F4"
+          ]
+         },
+         {
+          "text": "It flowers from May through October, with wind carrying its pollen and its seeds later drifting away on the breeze.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen it is mostly noticed between April and July, with sightings climbing sharply in April, peaking in May, and tapering off through the summer months.",
+          "cites": [
+           "F9"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Its leaves feed a long list of small creatures, among them the Siebenpunkt-Marienkäfer, which finds a steady meal on the plant.",
+          "cites": [
+           "F6"
+          ]
+         },
+         {
+          "text": "The Brauner Bär caterpillar also depends on it as a host plant, alongside numerous fungi that settle on its stems and leaves.",
+          "cites": [
+           "F7"
+          ]
+         },
+         {
+          "text": "Reproduction happens through its wind-pollinated flowers and wind-dispersed seeds, letting new plants establish some distance from the parent.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Overall, the species is classified as Least Concern, meaning it faces no particular threat at present.",
+          "cites": [
+           "F3"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "unsupported",
+       "why": "Adds unsupported details like 'tall, upright' and 'stinging leaves' not present in F2/F4"
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "partial",
+       "why": "Describes a smooth taper after May peak, but data shows a rise in July (37%) before falling, not a simple taper"
+      },
+      {
+       "n": 4,
+       "verdict": "partial",
+       "why": "Adds unsupported behavioural claim 'finds a steady meal' not in F6"
+      },
+      {
+       "n": 5,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 6,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 7,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1554,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 904,
+      "output_tokens_details": {
+       "thinking_tokens": 456
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.012148,
+     "ms": 11236
+    }
+   }
+  },
+  "Zoropsis spinimana": {
+   "tile": "insect",
+   "names": {
+    "de": "Nosferatu-Spinne"
+   },
+   "facts": [
+    {
+     "id": "F1",
+     "source": "GBIF",
+     "text": "Scientific name Zoropsis spinimana; rank species; class Arachnida, order Araneae; tile insect.",
+     "url": "https://www.gbif.org/species/2153287"
+    },
+    {
+     "id": "F2",
+     "source": "Wikidata",
+     "text": "German name: Nosferatu-Spinne."
+    },
+    {
+     "id": "F3",
+     "source": "GloBI",
+     "text": "eats: Araneae, Lepidoptera.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Zoropsis%20spinimana"
+    },
+    {
+     "id": "F4",
+     "source": "GBIF occurrences",
+     "text": "Region Mainz-Bingen: 1077 observations in ten years; main time \"Aug–Nov\"; month profile as % of the peak month: Jan 12, Feb 16, Mär 16, Apr 14, Mai 6, Jun 4, Jul 12, Aug 28, Sep 100, Okt 45, Nov 34, Dez 17."
+    },
+    {
+     "id": "F5",
+     "source": "GBIF occurrences",
+     "text": "Region Südwestpfalz: 35 observations in ten years; main time \"Okt–Dez\"; month profile as % of the peak month: Jan 3, Feb 10, Mär 18, Apr 2, Mai 1, Jun 3, Jul 1, Aug 5, Sep 15, Okt 26, Nov 39, Dez 100."
+    }
+   ],
+   "drafts": {
+    "de": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "Bei dieser Art handelt es sich um eine Spinne aus der Ordnung Araneae, die unter dem deutschen Namen Nosferatu-Spinne bekannt ist.",
+          "cites": [
+           "F1",
+           "F2"
+          ]
+         },
+         {
+          "text": "Im Landkreis Mainz-Bingen wurde sie innerhalb von zehn Jahren 1077-mal gemeldet, wobei die Hauptzeit von August bis November liegt.",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "Die meisten Beobachtungen fallen auf den September, während im Früh­sommer nur wenige Tiere auffallen.",
+          "cites": [
+           "F4"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Auf ihrem Speiseplan stehen andere Spinnen sowie Schmetterlinge, die sie erbeutet.",
+          "cites": [
+           "F3"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 992,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1199,
+      "output_tokens_details": {
+       "thinking_tokens": 888
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.013974,
+     "ms": 14033
+    },
+    "en": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "The Nosferatu-Spinne is a spider (Arachnida, Araneae) rather than an insect, despite what some records suggest.",
+          "cites": [
+           "F1",
+           "F2"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen it has been recorded 1077 times over ten years, with sightings possible year-round but concentrated from August through November.",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "Numbers rise sharply in August, peak in September, and then decline through October, November and December, so late summer and early autumn are the best times to spot it.",
+          "cites": [
+           "F4"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "It feeds on other spiders and on moths and butterflies, hunting rather than building webs for prey capture.",
+          "cites": [
+           "F3"
+          ]
+         },
+         {
+          "text": "As a predator within the Araneae, it likely interacts with a range of other spider species it preys upon.",
+          "cites": [
+           "F3"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "partial",
+       "why": "F1 labels it 'tile insect' but does not say records suggest it's an insect; that framing is unsupported speculation"
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "unsupported",
+       "why": "F3 gives no info about hunting behavior or web-building"
+      },
+      {
+       "n": 5,
+       "verdict": "partial",
+       "why": "the predator/prey relation is supported but 'likely interacts with a range of' is speculative addition"
+      }
+     ],
+     "usage": {
+      "input_tokens": 962,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 309,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.005014,
+     "ms": 3818
+    }
+   }
+  },
+  "Grus grus": {
+   "tile": "bird",
+   "names": {
+    "de": "Kranich",
+    "en": "Common crane",
+    "ja": "クロヅル"
+   },
+   "facts": [
+    {
+     "id": "F1",
+     "source": "GBIF",
+     "text": "Scientific name Grus grus; rank species; class Aves, order Gruiformes; tile bird.",
+     "url": "https://www.gbif.org/species/2474950"
+    },
+    {
+     "id": "F2",
+     "source": "Wikidata",
+     "text": "German name: Kranich."
+    },
+    {
+     "id": "F3",
+     "source": "Wikidata",
+     "text": "English name: Common crane."
+    },
+    {
+     "id": "F4",
+     "source": "IUCN Red List via Wikidata P141",
+     "text": "IUCN status: LC."
+    },
+    {
+     "id": "F5",
+     "source": "AnAge",
+     "text": "lifespan: 43 years (wild).",
+     "url": "https://genomics.senescence.info/species/entry.php?species=Grus_grus"
+    },
+    {
+     "id": "F6",
+     "source": "AVONET (Tobias et al. 2022, CC BY 4.0)",
+     "text": "Body mass 5500.0 g; wing length 540.6 mm; tail 193.4 mm; beak (culmen) 108.1 mm; habitat Wetland (density 3: 1 dense, 3 open); migration 3 (1 sedentary, 2 partial, 3 migratory); trophic niche Omnivore; primary lifestyle Terrestrial."
+    },
+    {
+     "id": "F7",
+     "source": "EltonTraits (Wilman et al. 2014, CC0)",
+     "text": "Diet shares (%): invertebrates 10, vertebrates 20, scavenging 0, fruit 10, nectar 0, seeds 20, other plant 40; dominant PlantSeed; foraging on the ground 50 %, understory 0 %, canopy 0 %; nocturnal no."
+    },
+    {
+     "id": "F8",
+     "source": "Wikidata",
+     "text": "wingspan: 2.22 (unit as entered: cm or m).",
+     "url": "https://www.wikidata.org/wiki/Q4764"
+    },
+    {
+     "id": "F9",
+     "source": "Wikidata",
+     "text": "main food: Allesfresser.",
+     "url": "https://www.wikidata.org/wiki/Q4764"
+    },
+    {
+     "id": "F10",
+     "source": "GloBI",
+     "text": "eats: Telescopus fallax, Phalaropus fulicarius, Meriones tamariscinus, Sorex antinorii, Eirenis medus, Platyceps ventromaculatus, Eirenis punctatolineatus, Grasfrosch (Rana temporaria), Alpenstrandläufer (Calidris alpina), Microtus bavaricus, Galerida cristata, Chionomys nivalis and 185 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Grus%20grus"
+    },
+    {
+     "id": "F11",
+     "source": "GloBI",
+     "text": "eatenBy: Rabenkrähe (Corvus corone).",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Grus%20grus"
+    },
+    {
+     "id": "F12",
+     "source": "GBIF occurrences",
+     "text": "Region Mainz-Bingen: 977 observations in ten years; main time \"Feb · Okt–Dez\"; month profile as % of the peak month: Jan 19, Feb 100, Mär 6, Apr 1, Mai 0, Jun 0, Jul 0, Aug 0, Sep 0, Okt 70, Nov 88, Dez 30."
+    },
+    {
+     "id": "F13",
+     "source": "GBIF occurrences",
+     "text": "Region Südwestpfalz: 142 observations in ten years; main time \"Feb · Okt–Dez\"; month profile as % of the peak month: Jan 7, Feb 100, Mär 4, Apr 0, Mai 0, Jun 0, Jul 0, Aug 0, Sep 0, Okt 28, Nov 74, Dez 52."
+    }
+   ],
+   "drafts": {
+    "de": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "Der Kranich ist ein großer, langbeiniger Vogel mit einem Körpergewicht von rund 5,5 kg und einer Flügellänge von etwa 54 cm, dessen Gefieder ihn schon aus der Ferne erkennbar macht (F6).",
+          "cites": [
+           "F6"
+          ]
+         },
+         {
+          "text": "Die Flügelspannweite liegt bei etwa 2,22 m (F8).",
+          "cites": [
+           "F8"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen zeigt er sich vor allem im Februar sowie von Oktober bis Dezember, mit dem stärksten Auftreten im Februar und einem zweiten Höhepunkt im November (F12).",
+          "cites": [
+           "F12"
+          ]
+         },
+         {
+          "text": "Er ist als Zugvogel unterwegs und hält sich bevorzugt in offenen Feuchtgebieten auf (F6).",
+          "cites": [
+           "F6"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Als Allesfresser nimmt der Kranich eine breite Mischung aus pflanzlicher und tierischer Nahrung zu sich, wobei Samen und andere Pflanzenteile einen großen Anteil ausmachen, ergänzt durch Wirbellose, kleine Wirbeltiere und Früchte, die er meist am Boden sucht (F7, F9).",
+          "cites": [
+           "F7",
+           "F9"
+          ]
+         },
+         {
+          "text": "Zu seiner Beute zählen unter anderem der Grasfrosch und der Alpenstrandläufer (F10).",
+          "cites": [
+           "F10"
+          ]
+         },
+         {
+          "text": "Die Rabenkrähe wiederum zählt zu seinen Fressfeinden (F11).",
+          "cites": [
+           "F11"
+          ]
+         },
+         {
+          "text": "In freier Wildbahn kann der Kranich bis zu 43 Jahre alt werden (F5).",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Nach der Roten Liste der IUCN gilt die Art derzeit als nicht gefährdet (F4).",
+          "cites": [
+           "F4"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "partial",
+       "why": "F6 has no info on body shape (long-legged, large) or plumage recognizability"
+      },
+      {
+       "n": 2,
+       "verdict": "partial",
+       "why": "F8 unit ambiguous, sentence asserts meters as certain"
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "partial",
+       "why": "F6 gives migration score 3 (migratory) but 'bevorzugt offene Feuchtgebiete' overstates habitat density value, though habitat is wetland; open preference not stated"
+      },
+      {
+       "n": 5,
+       "verdict": "unsupported",
+       "why": "F9 only states 'Allesfresser', F7 dominant is PlantSeed not necessarily large plant share phrased this way; overall roughly matches but claims 'meist am Boden' plus mix fine, still fine as partial not unsupported - reconsider"
+      },
+      {
+       "n": 6,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 7,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 8,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 9,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1543,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 690,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.009986,
+     "ms": 7901
+    },
+    "en": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "The Common crane is a large bird of open wetlands, weighing around 5.5 kg.",
+          "cites": [
+           "F6"
+          ]
+         },
+         {
+          "text": "It has long wings of roughly 54 cm and a beak about 11 cm long, giving it a striking silhouette.",
+          "cites": [
+           "F6"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen it is best seen from October to December and again in February, when migrating flocks pass through.",
+          "cites": [
+           "F12"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "As an omnivore, it feeds mainly on seeds and other plant material, supplemented by invertebrates and small vertebrates such as the Grasfrosch and Alpenstrandläufer.",
+          "cites": [
+           "F7",
+           "F9",
+           "F10"
+          ]
+         },
+         {
+          "text": "It can itself fall prey to the Rabenkrähe.",
+          "cites": [
+           "F11"
+          ]
+         },
+         {
+          "text": "In the wild, common cranes can live up to 43 years.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "The species is currently classified as of Least Concern.",
+          "cites": [
+           "F4"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 2,
+       "verdict": "partial",
+       "why": "‘striking silhouette’ is an added descriptive claim not in F6"
+      },
+      {
+       "n": 3,
+       "verdict": "partial",
+       "why": "F12 gives only observation timing, not a claim about migrating flocks passing through"
+      },
+      {
+       "n": 4,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 5,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 6,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 7,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1525,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 1082,
+      "output_tokens_details": {
+       "thinking_tokens": 725
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.01387,
+     "ms": 10041
+    }
+   }
+  },
+  "Lucanus cervus": {
+   "tile": "insect",
+   "names": {
+    "de": "Hirschkäfer",
+    "ja": "ヨーロッパミヤマクワガタ"
+   },
+   "facts": [
+    {
+     "id": "F1",
+     "source": "GBIF",
+     "text": "Scientific name Lucanus cervus; rank species; class Insecta, order Coleoptera; tile insect.",
+     "url": "https://www.gbif.org/species/5743122"
+    },
+    {
+     "id": "F2",
+     "source": "Wikidata",
+     "text": "German name: Hirschkäfer."
+    },
+    {
+     "id": "F3",
+     "source": "IUCN Red List via Wikidata P141",
+     "text": "IUCN status: LC."
+    },
+    {
+     "id": "F4",
+     "source": "GloBI",
+     "text": "eatenBy: Aves, Turmfalke (Falco tinnunculus), Bubulcus ibis, Carabus sibiricus.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lucanus%20cervus"
+    },
+    {
+     "id": "F5",
+     "source": "GloBI",
+     "text": "eats: Rotbuche (Fagus sylvatica), Prunus domestica, Fagus, Vogelkirsche (Prunus avium), Ulmus laevis, Prunus cerasus, Gemeine Esche (Fraxinus excelsior), Quercus, Tilia cordata, Quercus rubra, Betula pubescens, Ulmus pumila and 27 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Lucanus%20cervus"
+    },
+    {
+     "id": "F6",
+     "source": "GBIF occurrences",
+     "text": "Region Mainz-Bingen: 63 observations in ten years; main time \"Jun–Jul\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 0, Apr 0, Mai 19, Jun 100, Jul 51, Aug 4, Sep 0, Okt 5, Nov 0, Dez 0."
+    },
+    {
+     "id": "F7",
+     "source": "GBIF occurrences",
+     "text": "Region Südwestpfalz: 196 observations in ten years; main time \"Mai–Jul\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 4, Apr 0, Mai 47, Jun 100, Jul 56, Aug 9, Sep 6, Okt 5, Nov 0, Dez 0."
+    }
+   ],
+   "drafts": {
+    "de": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "Der Hirschkäfer (Lucanus cervus) ist ein großes Käferinsekt aus der Ordnung der Coleoptera, das man an seinen namensgebenden, geweihartig vergrößerten Mundwerkzeugen erkennt.",
+          "cites": [
+           "F1",
+           "F2"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen wurde die Art in zehn Jahren 63-mal gemeldet, wobei die Hauptflugzeit im Juni und Juli liegt.",
+          "cites": [
+           "F6"
+          ]
+         },
+         {
+          "text": "Nach dem Monatsprofil steigen die Sichtungen ab Mai deutlich an, erreichen im Juni ihren Höhepunkt und klingen bis August wieder ab.",
+          "cites": [
+           "F6"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Als Larve ernährt sich der Hirschkäfer von Holz verschiedener Laubbäume wie Rotbuche, Vogelkirsche und Gemeiner Esche.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Ausgewachsene Tiere und Larven werden ihrerseits von Vögeln wie dem Turmfalken sowie von Laufkäfern gefressen.",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "Die Art gilt weltweit als nicht gefährdet und wird auf der Roten Liste als LC eingestuft.",
+          "cites": [
+           "F3"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "partial",
+       "why": "large size and antler-like mouthparts detail not in facts"
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "unsupported",
+       "why": "facts say eats these plants, not specifically 'wood as larva'"
+      },
+      {
+       "n": 5,
+       "verdict": "partial",
+       "why": "facts don't distinguish adults vs larvae being eaten"
+      },
+      {
+       "n": 6,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1183,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 496,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.007326,
+     "ms": 5731
+    },
+    "en": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "This is a beetle, a member of the insect order Coleoptera, known in German as the Hirschkäfer.",
+          "cites": [
+           "F1",
+           "F2"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen it is seen mainly from June to July, with numbers rising already in May and tapering off through the summer.",
+          "cites": [
+           "F6"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Its larvae feed on wood from trees such as the Rotbuche, the Vogelkirsche and the Gemeine Esche.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Adults and larvae can fall prey to birds such as the Turmfalke.",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "The species is currently assessed as of least concern, so walkers can still hope to spot one on a warm early-summer evening.",
+          "cites": [
+           "F3"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "partial",
+       "why": "F5 only lists eats relationships, not larvae/wood feeding specifics"
+      },
+      {
+       "n": 4,
+       "verdict": "partial",
+       "why": "F4 lists eatenBy but doesn't specify life stages (adults and larvae)"
+      },
+      {
+       "n": 5,
+       "verdict": "unsupported",
+       "why": "Added claim about walkers spotting one on warm evenings not in any fact"
+      }
+     ],
+     "usage": {
+      "input_tokens": 1156,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 876,
+      "output_tokens_details": {
+       "thinking_tokens": 586
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.011072,
+     "ms": 8825
+    }
+   }
+  },
+  "Rana temporaria": {
+   "tile": "amphibian",
+   "names": {
+    "de": "Grasfrosch",
+    "en": "Common frog",
+    "ja": "ヨーロッパアカガエル"
+   },
+   "facts": [
+    {
+     "id": "F1",
+     "source": "GBIF",
+     "text": "Scientific name Rana temporaria; rank species; class Amphibia, order Anura; tile amphibian.",
+     "url": "https://www.gbif.org/species/2426805"
+    },
+    {
+     "id": "F2",
+     "source": "Wikidata",
+     "text": "German name: Grasfrosch."
+    },
+    {
+     "id": "F3",
+     "source": "Wikidata",
+     "text": "English name: Common frog."
+    },
+    {
+     "id": "F4",
+     "source": "IUCN Red List via Wikidata P141",
+     "text": "IUCN status: LC."
+    },
+    {
+     "id": "F5",
+     "source": "AmphiBIO (Oliveira et al. 2017, CC BY 4.0)",
+     "text": "max body size 110 mm; max longevity 27 years; clutch 265–4000 eggs; maturity from 2 years; habitat: terrestrial, aquatic, arboreal; activity: diurnal, nocturnal; diet: arthro; larval development."
+    },
+    {
+     "id": "F6",
+     "source": "Wikidata",
+     "text": "main food: Larve, Tipuloidea.",
+     "url": "https://www.wikidata.org/wiki/Q27465"
+    },
+    {
+     "id": "F7",
+     "source": "GloBI",
+     "text": "eatenBy: Mergus serrator, Rotfuchs (Vulpes vulpes), Pelophylax bedriagae, Plegadis falcinellus, Saatkrähe (Corvus frugilegus), Erinaceus roumanicus, Kranich (Grus grus), Martes foina, Desmana moschata, Crex crex, Falco rusticolus, Hemorrhois hippocrepis and 176 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Rana%20temporaria"
+    },
+    {
+     "id": "F8",
+     "source": "GloBI",
+     "text": "eats: Bellardia pubicornis, Trichoptera, Calliphoridae, Garten-Bänderschnecke (Cepaea hortensis), Bellardia stricta, Limoniidae, Salamandrella keyserlingii, Lumbricidae, Bellardia vulgaris.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Rana%20temporaria"
+    },
+    {
+     "id": "F9",
+     "source": "GloBI",
+     "text": "parasiteOf: Nematoda.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Rana%20temporaria"
+    },
+    {
+     "id": "F10",
+     "source": "GBIF occurrences",
+     "text": "Region Mainz-Bingen: 71 observations in ten years; main time \"Feb–Apr\"; month profile as % of the peak month: Jan 0, Feb 31, Mär 100, Apr 29, Mai 10, Jun 15, Jul 12, Aug 7, Sep 9, Okt 22, Nov 7, Dez 0."
+    },
+    {
+     "id": "F11",
+     "source": "GBIF occurrences",
+     "text": "Region Schagen: 177 observations in ten years; main time \"Mär–Nov\"; month profile as % of the peak month: Jan 5, Feb 0, Mär 100, Apr 64, Mai 49, Jun 45, Jul 48, Aug 63, Sep 70, Okt 37, Nov 27, Dez 0."
+    },
+    {
+     "id": "F12",
+     "source": "GBIF occurrences",
+     "text": "Region Südwestpfalz: 82 observations in ten years; main time \"Mär · Sep–Okt\"; month profile as % of the peak month: Jan 0, Feb 0, Mär 100, Apr 24, Mai 4, Jun 15, Jul 11, Aug 22, Sep 31, Okt 43, Nov 0, Dez 0."
+    }
+   ],
+   "drafts": {
+    "de": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "Der Grasfrosch wird bis etwa 110 mm groß und ist an seiner kräftigen, oft bräunlichen Gestalt zu erkennen.",
+          "cites": [
+           "F2",
+           "F5"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen sieht man ihn hauptsächlich zwischen Februar und April, mit einem deutlichen Höhepunkt im März.",
+          "cites": [
+           "F10"
+          ]
+         },
+         {
+          "text": "Außerhalb dieser Laichzeit wird er im Landkreis nur noch selten gemeldet.",
+          "cites": [
+           "F10"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Er lebt sowohl an Land als auch im Wasser und ist tag- wie nachtaktiv.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Auf seinem Speiseplan stehen vor allem Gliedertiere, etwa Larven von Schnaken sowie verschiedene Fliegen, Köcherfliegen, Regenwürmer und auch die Garten-Bänderschnecke.",
+          "cites": [
+           "F5",
+           "F6",
+           "F8"
+          ]
+         },
+         {
+          "text": "Zu seinen Fressfeinden zählen unter anderem Rotfuchs und Saatkrähe.",
+          "cites": [
+           "F7"
+          ]
+         },
+         {
+          "text": "Er kann von Nematoden befallen werden, was seine Gesundheit belasten kann.",
+          "cites": [
+           "F9"
+          ]
+         },
+         {
+          "text": "Die Fortpflanzung erfolgt durch Laichballen mit 265 bis 4000 Eiern, aus denen sich Kaulquappen entwickeln, bevor die Tiere ab einem Alter von etwa zwei Jahren geschlechtsreif werden.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Ein Grasfrosch kann bis zu 27 Jahre alt werden und gilt nach der Roten Liste als nicht gefährdet.",
+          "cites": [
+           "F5",
+           "F4"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "partial",
+       "why": "'kräftige, oft bräunliche Gestalt' not supported by facts"
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "partial",
+       "why": "low activity outside peak not equivalent to 'selten gemeldet'; overinterprets numbers"
+      },
+      {
+       "n": 4,
+       "verdict": "partial",
+       "why": "omits arboreal habitat, otherwise fine but not full claim issue; minor addition none, but habitat list incomplete not an overclaim so consider supported"
+      },
+      {
+       "n": 5,
+       "verdict": "partial",
+       "why": "'Laichballen' term and mention of Regenwürmer/Bänderschnecke as staple is stretched but Lumbricidae and Cepaea are in F8, so mostly fine; 'vor allem' overgeneralizes"
+      },
+      {
+       "n": 6,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 7,
+       "verdict": "partial",
+       "why": "'was seine Gesundheit belasten kann' is an added inference not in facts"
+      },
+      {
+       "n": 8,
+       "verdict": "partial",
+       "why": "'Laichballen' and 'Kaulquappen' details not explicitly stated, though implied by larval development; slight overspecification"
+      },
+      {
+       "n": 9,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1564,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 657,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.009698,
+     "ms": 7760
+    },
+    "en": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "The common frog, known in German as Grasfrosch, can grow up to about 110 mm long.",
+          "cites": [
+           "F2",
+           "F5"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen it is mostly seen from February to April, with sightings peaking sharply in March and falling off by May.",
+          "cites": [
+           "F10"
+          ]
+         },
+         {
+          "text": "Its habitats include damp ground, water bodies, and even low vegetation, matching its terrestrial, aquatic, and arboreal lifestyle.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "It can be active by both day and night.",
+          "cites": [
+           "F5"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "It feeds mainly on arthropods such as fly larvae and crane flies, but has also been recorded eating caddisflies, blowflies, earthworms, and even a Garten-Bänderschnecke.",
+          "cites": [
+           "F5",
+           "F6",
+           "F8"
+          ]
+         },
+         {
+          "text": "It in turn falls prey to many animals, including the Rotfuchs, the Saatkrähe, and the Kranich.",
+          "cites": [
+           "F7"
+          ]
+         },
+         {
+          "text": "It can also host parasitic roundworms.",
+          "cites": [
+           "F9"
+          ]
+         },
+         {
+          "text": "Females lay large clutches of anywhere from 265 to 4000 eggs, and young frogs reach maturity from about two years of age, developing through an aquatic larval stage.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Individuals can live remarkably long, up to 27 years.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "The species is currently assessed as Least Concern.",
+          "cites": [
+           "F4"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "partial",
+       "why": "'damp ground', 'water bodies', 'low vegetation' are added descriptive interpretations not in fact"
+      },
+      {
+       "n": 4,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 5,
+       "verdict": "partial",
+       "why": "F6 lists main food as Larve, Tipuloidea; caddisflies/blowflies/earthworms/snail come from F8 which is 'eats' list, fine, but 'mainly' framing for arthropods plus specific F6 items combined without distinction is borderline; still acceptable as claims match facts"
+      },
+      {
+       "n": 6,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 7,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 8,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 9,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 10,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1543,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 528,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.008366,
+     "ms": 5840
+    }
+   }
+  },
+  "Alnus glutinosa": {
+   "tile": "plant",
+   "names": {
+    "de": "Schwarz-Erle",
+    "ja": "ヨーロッパハンノキ"
+   },
+   "facts": [
+    {
+     "id": "F1",
+     "source": "GBIF",
+     "text": "Scientific name Alnus glutinosa; rank species; class Magnoliopsida, order Fagales; tile plant.",
+     "url": "https://www.gbif.org/species/2876213"
+    },
+    {
+     "id": "F2",
+     "source": "Wikidata",
+     "text": "German name: Schwarz-Erle."
+    },
+    {
+     "id": "F3",
+     "source": "IUCN Red List via Wikidata P141",
+     "text": "IUCN status: LC."
+    },
+    {
+     "id": "F4",
+     "source": "GIFT (Weigelt et al. 2020)",
+     "text": "height max (m): 25; growth form: tree; lifecycle: perennial; flowering start: Apr; flowering end: Apr; pollination: wind; dispersal: anemochorous; habitat: lakes, rivers, shores, swamps.",
+     "url": "https://gift.uni-goettingen.de"
+    },
+    {
+     "id": "F5",
+     "source": "GloBI",
+     "text": "eatenBy: Compsidolon salicellum, Moschusbock (Aromia moschata), Oxymirus cursor, Epuraea pallescens, Anoplophora chinensis, Angerona prunaria, Sabra harpagula, Halsbandsittich (Psittacula krameri), Saatkrähe (Corvus frugilegus), Brauner Bär (Arctia caja), Neolygus viridis, Otiorhynchus desertus and 174 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Alnus%20glutinosa"
+    },
+    {
+     "id": "F6",
+     "source": "GloBI",
+     "text": "hostOf: Schneespanner (Phigalia pilosaria), Archips xylosteana, Schmetterlings-Tramete (Trametes versicolor), Graugelber Breitflügelspanner (Agriopis marginaria), Rotrandiger Baumschwamm (Fomitopsis pinicola), Gemeiner Schwefelporling (Laetiporus sulphureus), Lindenschwärmer (Mimas tiliae), Geweihförmige Holzkeule (Xylaria hypoxylon), Variable Kätzcheneule (Orthosia incerta), Furchen-Schüsselflechte (Parmelia sulcata), Liguster-Rindeneule (Craniophora ligustri), Buchen-Streckfuß (Calliteara pudibunda) and 2 more.",
+     "url": "https://www.globalbioticinteractions.org/?sourceTaxon=Alnus%20glutinosa"
+    },
+    {
+     "id": "F7",
+     "source": "GBIF occurrences",
+     "text": "Region Mainz-Bingen: 27 observations in ten years; main time \"Ganzes Jahr\"; month profile as % of the peak month: Jan 59, Feb 28, Mär 16, Apr 13, Mai 31, Jun 38, Jul 28, Aug 47, Sep 41, Okt 38, Nov 31, Dez 100."
+    },
+    {
+     "id": "F8",
+     "source": "GBIF occurrences",
+     "text": "Region Schagen: 79 observations in ten years; main time \"Jan–Mär · Mai–Nov\"; month profile as % of the peak month: Jan 41, Feb 92, Mär 84, Apr 6, Mai 41, Jun 92, Jul 39, Aug 100, Sep 90, Okt 65, Nov 37, Dez 0."
+    }
+   ],
+   "drafts": {
+    "de": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "Die Schwarz-Erle ist ein Baum, der bis zu 25 m hoch werden kann und zu den Blütenpflanzen aus der Ordnung der Buchenartigen zählt.",
+          "cites": [
+           "F1",
+           "F4"
+          ]
+         },
+         {
+          "text": "Von April bis April blüht sie unscheinbar und lässt ihre Blüten vom Wind bestäuben, die Früchte werden ebenfalls durch den Wind verbreitet.",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "Man findet sie an Seen, Flüssen, Ufern und in Sümpfen, also überall dort, wo es feucht bis nass ist.",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen lässt sie sich das ganze Jahr über beobachten, mit auffälligen Häufungen im Dezember und Januar sowie einem weiteren Anstieg im August und September.",
+          "cites": [
+           "F7"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "Als Wirtspflanze beherbergt die Schwarz-Erle zahlreiche Organismen, darunter Pilze wie die Schmetterlings-Tramete, den Rotrandigen Baumschwamm und den Gemeinen Schwefelporling sowie Falter wie den Lindenschwärmer und den Buchen-Streckfuß.",
+          "cites": [
+           "F6"
+          ]
+         },
+         {
+          "text": "Auch als Nahrungsquelle spielt sie eine Rolle, etwa für den Moschusbock, den Braunen Bär, den Halsbandsittich und die Saatkrähe.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "Als mehrjährige Pflanze wächst sie über viele Jahre zu einem stattlichen Baum heran.",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "Die Schwarz-Erle gilt nach der Roten Liste der IUCN als nicht gefährdet.",
+          "cites": [
+           "F3"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 2,
+       "verdict": "partial",
+       "why": "'unscheinbar' (inconspicuous) is an added descriptor not in facts"
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "partial",
+       "why": "month profile shows Dec peak and Jan high, but Aug/Sep is not clearly 'another rise' beyond other months like Jun; slightly overstates pattern"
+      },
+      {
+       "n": 5,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 6,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 7,
+       "verdict": "partial",
+       "why": "'stattlichen Baum' (stately/impressive tree) is an added descriptor not in facts"
+      },
+      {
+       "n": 8,
+       "verdict": "supported",
+       "why": ""
+      }
+     ],
+     "usage": {
+      "input_tokens": 1552,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 670,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.009804,
+     "ms": 7567
+    },
+    "en": {
+     "draft": {
+      "paragraphs": [
+       {
+        "sentences": [
+         {
+          "text": "The Schwarz-Erle is a tree that can grow up to 25 m tall, found along lakes, rivers, shores and swamps.",
+          "cites": [
+           "F2",
+           "F4"
+          ]
+         },
+         {
+          "text": "It flowers in April, with wind carrying the pollen and the seeds later dispersed by wind as well.",
+          "cites": [
+           "F4"
+          ]
+         },
+         {
+          "text": "In Mainz-Bingen it can be spotted throughout the year, though sightings peak strongly in December and are also frequent in January and August.",
+          "cites": [
+           "F7"
+          ]
+         }
+        ]
+       },
+       {
+        "sentences": [
+         {
+          "text": "This tree hosts a wide range of life, including caterpillars such as the Lindenschwärmer and Buchen-Streckfuß, fungi like the Schmetterlings-Tramete and Gemeiner Schwefelporling, and lichens such as the Furchen-Schüsselflechte.",
+          "cites": [
+           "F6"
+          ]
+         },
+         {
+          "text": "Its leaves and wood are eaten by various insects and birds, among them the Moschusbock, Brauner Bär and the Saatkrähe.",
+          "cites": [
+           "F5"
+          ]
+         },
+         {
+          "text": "As a perennial, it lives for many years and is currently classified as Least Concern, meaning it faces no particular threat.",
+          "cites": [
+           "F4",
+           "F3"
+          ]
+         }
+        ]
+       }
+      ]
+     },
+     "problems": [],
+     "judge": [
+      {
+       "n": 1,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 2,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 3,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 4,
+       "verdict": "supported",
+       "why": ""
+      },
+      {
+       "n": 5,
+       "verdict": "partial",
+       "why": "Facts don't specify leaves and wood are eaten, only that species eatenBy exist"
+      },
+      {
+       "n": 6,
+       "verdict": "partial",
+       "why": "LC does not mean 'no particular threat', that's an added interpretation"
+      }
+     ],
+     "usage": {
+      "input_tokens": 1524,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0,
+      "cache_creation": {
+       "ephemeral_5m_input_tokens": 0,
+       "ephemeral_1h_input_tokens": 0
+      },
+      "output_tokens": 429,
+      "output_tokens_details": {
+       "thinking_tokens": 0
+      },
+      "service_tier": "standard",
+      "inference_geo": "global"
+     },
+     "cost": 0.007338,
+     "ms": 4200
+    }
+   }
+  }
+ },
+ "cost": {
+  "total": 0.3645359999999999,
+  "rows": [
+   [
+    "Turdus merula",
+    "judge de",
+    1928,
+    0,
+    0,
+    441,
+    "0.83"
+   ],
+   [
+    "Turdus merula",
+    "prose de",
+    1744,
+    0,
+    0,
+    678,
+    "1.03"
+   ],
+   [
+    "Turdus merula",
+    "judge en",
+    1819,
+    0,
+    0,
+    393,
+    "0.76"
+   ],
+   [
+    "Turdus merula",
+    "prose en",
+    1728,
+    0,
+    0,
+    558,
+    "0.90"
+   ],
+   [
+    "Lycaena phlaeas",
+    "judge de",
+    2339,
+    0,
+    0,
+    277,
+    "0.74"
+   ],
+   [
+    "Lycaena phlaeas",
+    "prose de",
+    2274,
+    0,
+    0,
+    556,
+    "1.01"
+   ],
+   [
+    "Lycaena phlaeas",
+    "judge en",
+    2236,
+    0,
+    0,
+    919,
+    "1.37"
+   ],
+   [
+    "Lycaena phlaeas",
+    "prose en",
+    2243,
+    0,
+    0,
+    735,
+    "1.18"
+   ],
+   [
+    "Amanita muscaria",
+    "judge de",
+    1297,
+    0,
+    0,
+    737,
+    "1.00"
+   ],
+   [
+    "Amanita muscaria",
+    "prose de",
+    1379,
+    0,
+    0,
+    918,
+    "1.19"
+   ],
+   [
+    "Amanita muscaria",
+    "judge en",
+    1302,
+    0,
+    0,
+    1016,
+    "1.28"
+   ],
+   [
+    "Amanita muscaria",
+    "prose en",
+    1352,
+    0,
+    0,
+    681,
+    "0.95"
+   ],
+   [
+    "Salamandra salamandra",
+    "judge de",
+    1594,
+    0,
+    0,
+    249,
+    "0.57"
+   ],
+   [
+    "Salamandra salamandra",
+    "prose de",
+    1478,
+    0,
+    0,
+    597,
+    "0.89"
+   ],
+   [
+    "Salamandra salamandra",
+    "judge en",
+    1435,
+    0,
+    0,
+    793,
+    "1.08"
+   ],
+   [
+    "Salamandra salamandra",
+    "prose en",
+    1459,
+    0,
+    0,
+    758,
+    "1.05"
+   ],
+   [
+    "Urtica dioica",
+    "judge de",
+    1535,
+    0,
+    0,
+    1008,
+    "1.31"
+   ],
+   [
+    "Urtica dioica",
+    "prose de",
+    1581,
+    0,
+    0,
+    791,
+    "1.11"
+   ],
+   [
+    "Urtica dioica",
+    "judge en",
+    1549,
+    0,
+    0,
+    882,
+    "1.19"
+   ],
+   [
+    "Urtica dioica",
+    "prose en",
+    1554,
+    0,
+    0,
+    904,
+    "1.21"
+   ],
+   [
+    "Zoropsis spinimana",
+    "judge de",
+    841,
+    0,
+    0,
+    183,
+    "0.35"
+   ],
+   [
+    "Zoropsis spinimana",
+    "prose de",
+    992,
+    0,
+    0,
+    1199,
+    "1.40"
+   ],
+   [
+    "Zoropsis spinimana",
+    "judge en",
+    831,
+    0,
+    0,
+    197,
+    "0.36"
+   ],
+   [
+    "Zoropsis spinimana",
+    "prose en",
+    962,
+    0,
+    0,
+    309,
+    "0.50"
+   ],
+   [
+    "Grus grus",
+    "judge de",
+    1743,
+    0,
+    0,
+    381,
+    "0.73"
+   ],
+   [
+    "Grus grus",
+    "prose de",
+    1543,
+    0,
+    0,
+    690,
+    "1.00"
+   ],
+   [
+    "Grus grus",
+    "judge en",
+    1427,
+    0,
+    0,
+    755,
+    "1.04"
+   ],
+   [
+    "Grus grus",
+    "prose en",
+    1525,
+    0,
+    0,
+    1082,
+    "1.39"
+   ],
+   [
+    "Lucanus cervus",
+    "judge de",
+    1206,
+    0,
+    0,
+    195,
+    "0.44"
+   ],
+   [
+    "Lucanus cervus",
+    "prose de",
+    1183,
+    0,
+    0,
+    496,
+    "0.73"
+   ],
+   [
+    "Lucanus cervus",
+    "judge en",
+    1008,
+    0,
+    0,
+    475,
+    "0.68"
+   ],
+   [
+    "Lucanus cervus",
+    "prose en",
+    1156,
+    0,
+    0,
+    876,
+    "1.11"
+   ],
+   [
+    "Rana temporaria",
+    "judge de",
+    1726,
+    0,
+    0,
+    446,
+    "0.79"
+   ],
+   [
+    "Rana temporaria",
+    "prose de",
+    1564,
+    0,
+    0,
+    657,
+    "0.97"
+   ],
+   [
+    "Rana temporaria",
+    "judge en",
+    1589,
+    0,
+    0,
+    337,
+    "0.65"
+   ],
+   [
+    "Rana temporaria",
+    "prose en",
+    1543,
+    0,
+    0,
+    528,
+    "0.84"
+   ],
+   [
+    "Alnus glutinosa",
+    "judge de",
+    1731,
+    0,
+    0,
+    278,
+    "0.62"
+   ],
+   [
+    "Alnus glutinosa",
+    "prose de",
+    1552,
+    0,
+    0,
+    670,
+    "0.98"
+   ],
+   [
+    "Alnus glutinosa",
+    "judge en",
+    1506,
+    0,
+    0,
+    184,
+    "0.49"
+   ],
+   [
+    "Alnus glutinosa",
+    "prose en",
+    1524,
+    0,
+    0,
+    429,
+    "0.73"
+   ]
+  ]
+ }
+}
