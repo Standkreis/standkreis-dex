@@ -10,7 +10,7 @@
 
 | Piece | Service | Where | Notes |
 | --- | --- | --- | --- |
-| App | **Vercel** (team "Standkreis", Pro), project `standkreis-dex` | functions in `fra1`, Node.js 24 | root directory `app`; build command `npx prisma migrate deploy && npm run build` |
+| App | **Vercel** (team "Standkreis", Pro), project `standkreis-dex` | functions in `fra1`, Node.js 24 | root directory `app`; build command from `app/vercel.json`: `node scripts/deploy/migrate.mjs && npm run build` (overrides the dashboard) |
 | Database | **Neon Postgres** (Free), store `standkreis-atlas` | Frankfurt `eu-central-1` | via the Vercel marketplace; connected to Production and Preview only, so local dev keeps the Docker Postgres on `:5433` |
 | Photos | **Vercel Blob**, private store `standkreis-dex-blob` | `iad1` | connected to all three environments; user photos live at `photos/<assetId>.jpg`, streamed by `/api/photo/<id>` (0011 Track A) |
 | Mail | **Resend** (EU region) | — | for M7b; the domain is not yet added at Resend |
@@ -43,7 +43,7 @@ No values here. Set in Vercel → Settings → Environment Variables unless the 
 | Push to `main` | Production deploy → atlas.standkreis.de |
 | Push to any other branch | Preview deploy on a `*.vercel.app` URL, against the same Neon DB (Preview is connected). Passkeys fail there by design (RP id) |
 
-The build command runs `npx prisma migrate deploy` first: **migrations run only there**, never from the Mac (owner's dev rule: no reset, no push, no dev migrate against production). Then `npm run build`: `prebuild` mints the build id, `next build`, `postbuild` writes the worker manifest.
+The build command runs `scripts/deploy/migrate.mjs` first: it polls `select 1` until Neon's compute is awake (the Free tier suspends after 5 idle minutes and the cold start beat Prisma's 10 s lock timeout three times on 2026-09-06, `P1002`), then `prisma migrate deploy` with up to three attempts. **Migrations run only there**, never from the Mac (owner's dev rule: no reset, no push, no dev migrate against production). Then `npm run build`: `prebuild` mints the build id, `next build`, `postbuild` writes the worker manifest.
 
 ## 🩺 Health, cron, background work
 
